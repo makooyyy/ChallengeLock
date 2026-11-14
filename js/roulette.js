@@ -4,7 +4,8 @@ export const DIFF={easy:{n:[1,1],max:2},mid:{n:[1,2],max:3},hard:{n:[2,3],max:4}
 export const rarity=s=>s<=3?'common':s<=6?'rare':s<=9?'epic':'cursed';
 export const compatible=(a,b)=>a.id!==b.id&&!a.conflicts.some(t=>b.tags.includes(t))&&!b.conflicts.some(t=>a.tags.includes(t));
 export function heroPool(heroes,f){return heroes.filter(h=>h.active!==false&&!f.excluded.includes(h.id)&&(!f.only.length||f.only.includes(h.id)));}
-const ok=(c,hero,o)=>o.cats.includes(c.cat)&&c.difficulty<=DIFF[o.diff].max&&(c.mode!=='team'||o.team)&&(c.heroes==='all'||c.heroes.includes(hero.id));
+export const supportsMode=(c,mode)=>(c.gameModes||['normal']).includes(mode);
+const ok=(c,hero,o)=>supportsMode(c,o.gameMode)&&o.cats.includes(c.cat)&&c.difficulty<=DIFF[o.diff].max&&(c.mode!=='team'||o.team)&&(c.heroes==='all'||c.heroes.includes(hero.id));
 export function resultFor({seed,r=0,diff,hero,conds,player=0,opts},challenges){
   const list=conds.map(id=>challenges.find(c=>c.id===id));
   const sum=list.reduce((a,c)=>a+c.difficulty,0),mult=list.reduce((a,c)=>a*c.mult,1);
@@ -13,10 +14,10 @@ export function resultFor({seed,r=0,diff,hero,conds,player=0,opts},challenges){
 export function restoreResult(x,heroes,challenges){
   if(!validRecord(x)||!heroes.some(h=>h.id===x.hero))throw new Error('Invalid result');
   const cs=x.conds.map(id=>challenges.find(c=>c.id===id));
-  if(cs.some(c=>!c)||cs.some((a,i)=>cs.slice(i+1).some(b=>!compatible(a,b))))throw new Error('Unavailable result');
+  if(cs.some(c=>!c||!supportsMode(c,options(x.opts).gameMode))||cs.some((a,i)=>cs.slice(i+1).some(b=>!compatible(a,b))))throw new Error('Unavailable result');
   return resultFor(x,challenges);
 }
-export const resultKey=x=>JSON.stringify([x.seed,x.diff,x.r,x.hero,x.conds]);
+export const resultKey=x=>JSON.stringify([x.seed,x.diff,x.r,x.hero,x.conds,options(x.opts).gameMode]);
 // Independent count stream keeps direct replay and unlocked reroll identical.
 export function roll({seed,r=0,heroes,challenges,o,locks=[],prev=null,player=0,same=true}){
   o=options(o);

@@ -163,7 +163,15 @@
     "stampArchive": "ЗАПИСАНО В ИСТОРИЮ",
     "earnedReward": "Награда уже на счету",
     "noPenalty": "Без штрафа к очкам",
-    "continuePlaying": "Продолжить"
+    "continuePlaying": "Продолжить",
+    "gameModeTitle": "РЕЖИМ МАТЧА",
+    "gameModeHint": "У каждого режима — свои условия",
+    "gameMode.street": "Уличная стычка",
+    "gameMode.normal": "Обычный",
+    "gameMode.ranked": "Рейтинговый",
+    "gameModeDesc.street": "Раунды, драфт и быстрые бои",
+    "gameModeDesc.normal": "Эксперименты и новые маршруты",
+    "gameModeDesc.ranked": "Командная игра и контроль целей"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -329,6 +337,14 @@
     "stampArchive": "RECORDED IN HISTORY",
     "earnedReward": "Reward added to your score",
     "noPenalty": "No points deducted",
-    "continuePlaying": "Continue"
+    "continuePlaying": "Continue",
+    "gameModeTitle": "MATCH MODE",
+    "gameModeHint": "Each mode has its own challenges",
+    "gameMode.street": "Street Brawl",
+    "gameMode.normal": "Standard",
+    "gameMode.ranked": "Ranked",
+    "gameModeDesc.street": "Rounds, drafts & quick fights",
+    "gameModeDesc.normal": "Experiments & new routes",
+    "gameModeDesc.ranked": "Teamwork & objective control"
   }
 }

@@ -64,8 +64,22 @@ test('data schema accepts catalog and rejects corruption before rendering',()=>{
 });
 test('service worker keeps other apps caches and ignores unrelated requests',async()=>{
  const events={},deleted=[],scope='https://example.test/ChallengeLock/',prefix='challengelock:'+scope+':';
- const context={self:{registration:{scope},addEventListener:(k,f)=>events[k]=f,clients:{claim:async()=>{}}},caches:{keys:async()=>['other-app','dlr-v1',prefix+'v1',prefix+'v5:'+read('heroes')._meta.revision,'challengelock:https://example.test/Other/:v1'],delete:async k=>deleted.push(k)},URL,Promise};
+ const context={self:{registration:{scope},addEventListener:(k,f)=>events[k]=f,clients:{claim:async()=>{}}},caches:{keys:async()=>['other-app','dlr-v1',prefix+'v1',prefix+'v6:'+read('heroes')._meta.revision,'challengelock:https://example.test/Other/:v1'],delete:async k=>deleted.push(k)},URL,Promise};
  vm.runInNewContext(fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8'),context);
  let pending;events.activate({waitUntil:p=>pending=p});await pending;assert.deepEqual(deleted,[prefix+'v1']);
  for(const url of ['https://example.test/Other/index.html','https://other.test/ChallengeLock/index.html',scope+'api'])events.fetch({request:{method:'GET',url},respondWith(){assert.fail('Intercepted unrelated request')}});
+});
+
+test('mode pools stay separate across difficulties, rerolls and shared links',()=>{
+ assert.equal(options({gameMode:'bad'}).gameMode,'normal');
+ for(const gameMode of ['street','normal','ranked'])for(const diff of ['easy','mid','hard','insane'])for(let i=0;i<100;i++){
+  const input={...base,o:{...o,gameMode,diff},seed:'mode-'+i};const x=roll(input);assert(x);
+  for(const id of x.conds)assert((challenges.find(c=>c.id===id).gameModes||['normal']).includes(gameMode));
+  const again=roll({...input,r:1,prev:x,locks:[true,true]});assert(again);assert.equal(again.conds[0],x.conds[0]);
+  const restored=restoreResult(parseHash(hashFor(x)).result,heroes,challenges);assert.equal(restored.opts.gameMode,gameMode);assert.equal(resultKey(restored),resultKey(x));
+ }
+ const street=roll({...base,seed:'wrong-mode',o:{...o,gameMode:'street'}});
+ assert.throws(()=>restoreResult({...street,opts:{...street.opts,gameMode:'ranked'}},heroes,challenges));
+ const legacy=roll({...base,seed:'old'});delete legacy.opts.gameMode;assert.equal(restoreResult(legacy,heroes,challenges).opts.gameMode,'normal');
+ const bad=structuredClone(challenges);bad[0].gameModes=['bad'];assert.throws(()=>validateData({heroes,items,challenges:bad},dict));
 });

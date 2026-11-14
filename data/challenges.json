@@ -1,911 +1,1640 @@
 {
- "_note": "conflicts: список тегов; челлендж не сочетается с теми, у кого есть такой тег.",
- "challenges": [
-  {
-   "id": "ab_no1",
-   "cat": "ab",
-   "difficulty": 2,
-   "name": {
-    "ru": "Без способности №1",
-    "en": "No ability 1"
-   },
-   "desc": {
-    "ru": "Способность 1 под запретом весь матч.",
-    "en": "No ability 1"
-   },
-   "tags": [
-    "abil",
-    "s1"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.2,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "ab_no2",
-   "cat": "ab",
-   "difficulty": 2,
-   "name": {
-    "ru": "Без способности №2",
-    "en": "No ability 2"
-   },
-   "desc": {
-    "ru": "Способность 2 под запретом весь матч.",
-    "en": "No ability 2"
-   },
-   "tags": [
-    "abil",
-    "s2"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.2,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "ab_no3",
-   "cat": "ab",
-   "difficulty": 2,
-   "name": {
-    "ru": "Без способности №3",
-    "en": "No ability 3"
-   },
-   "desc": {
-    "ru": "Способность 3 под запретом весь матч.",
-    "en": "No ability 3"
-   },
-   "tags": [
-    "abil",
-    "s3"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "ab_no_ult",
-   "cat": "ab",
-   "difficulty": 2,
-   "name": {
-    "ru": "Без ультимейта",
-    "en": "No ultimate"
-   },
-   "desc": {
-    "ru": "Ультимейт нельзя использовать.",
-    "en": "No ultimate"
-   },
-   "tags": [
-    "abil",
-    "s4"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.1,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "ab_ult_only",
-   "cat": "ab",
-   "difficulty": 5,
-   "name": {
-    "ru": "Только ультимейт в бою",
-    "en": "Ultimate only in fights"
-   },
-   "desc": {
-    "ru": "В бою — только ульта и оружие, без способностей 1–3.",
-    "en": "Ultimate only in fights"
-   },
-   "tags": [
-    "abil",
-    "ultonly"
-   ],
-   "conflicts": [
-    "abil"
-   ],
-   "heroes": "all",
-   "mult": 1.8,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "ab_rotate",
-   "cat": "ab",
-   "difficulty": 4,
-   "name": {
-    "ru": "Способности строго по порядку",
-    "en": "Abilities in order"
-   },
-   "desc": {
-    "ru": "Применяй способности по кругу: 1→2→3→4.",
-    "en": "Abilities in order"
-   },
-   "tags": [
-    "abil",
-    "order"
-   ],
-   "conflicts": [
-    "abil"
-   ],
-   "heroes": "all",
-   "mult": 1.5,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "it_no_weapon",
-   "cat": "it",
-   "difficulty": 2,
-   "name": {
-    "ru": "Без предметов Weapon",
-    "en": "No Weapon items"
-   },
-   "desc": {
-    "ru": "Ветка Weapon запрещена.",
-    "en": "No Weapon items"
-   },
-   "tags": [
-    "branch",
-    "bw"
-   ],
-   "conflicts": [
-    "bv",
-    "bs"
-   ],
-   "heroes": "all",
-   "mult": 1.2,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "it_no_vit",
-   "cat": "it",
-   "difficulty": 2,
-   "name": {
-    "ru": "Без предметов Vitality",
-    "en": "No Vitality items"
-   },
-   "desc": {
-    "ru": "Ветка Vitality запрещена.",
-    "en": "No Vitality items"
-   },
-   "tags": [
-    "branch",
-    "bv"
-   ],
-   "conflicts": [
-    "bw",
-    "bs"
-   ],
-   "heroes": "all",
-   "mult": 1.2,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "it_no_spirit",
-   "cat": "it",
-   "difficulty": 2,
-   "name": {
-    "ru": "Без предметов Spirit",
-    "en": "No Spirit items"
-   },
-   "desc": {
-    "ru": "Ветка Spirit запрещена.",
-    "en": "No Spirit items"
-   },
-   "tags": [
-    "branch",
-    "bs"
-   ],
-   "conflicts": [
-    "bw",
-    "bv"
-   ],
-   "heroes": "all",
-   "mult": 1.2,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "it_active",
-   "cat": "it",
-   "difficulty": 3,
-   "name": {
-    "ru": "Только активные предметы",
-    "en": "Active items only"
-   },
-   "desc": {
-    "ru": "Покупай только предметы с активацией.",
-    "en": "Active items only"
-   },
-   "tags": [
-    "items",
-    "active"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.4,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "it_no_heal",
-   "cat": "it",
-   "difficulty": 3,
-   "name": {
-    "ru": "Без лечения",
-    "en": "No healing"
-   },
-   "desc": {
-    "ru": "Никаких предметов и эффектов лечения.",
-    "en": "No healing"
-   },
-   "tags": [
-    "items",
-    "noheal"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.4,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "it_cheap",
-   "cat": "it",
-   "difficulty": 3,
-   "name": {
-    "ru": "Только дешёвые предметы",
-    "en": "Cheap items only"
-   },
-   "desc": {
-    "ru": "Покупай только предметы T1 и T2.",
-    "en": "Only buy tier 1 and tier 2 items."
-   },
-   "tags": [
-    "items",
-    "cheap"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.5,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "it_one_branch",
-   "cat": "it",
-   "difficulty": 4,
-   "name": {
-    "ru": "Только одна ветка предметов",
-    "en": "One item branch"
-   },
-   "desc": {
-    "ru": "Выбери ветку и покупай только из неё.",
-    "en": "One item branch"
-   },
-   "tags": [
-    "items",
-    "onebranch"
-   ],
-   "conflicts": [
-    "branch"
-   ],
-   "heroes": "all",
-   "mult": 1.5,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "gp_nomap",
-   "cat": "gp",
-   "difficulty": 3,
-   "name": {
-    "ru": "Без мини-карты",
-    "en": "No minimap"
-   },
-   "desc": {
-    "ru": "Мини-карта закрыта или игнорируется.",
-    "en": "No minimap"
-   },
-   "tags": [
-    "nomap"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "gp_nojump",
-   "cat": "gp",
-   "difficulty": 3,
-   "name": {
-    "ru": "Нельзя прыгать и скользить",
-    "en": "No jump or slide"
-   },
-   "desc": {
-    "ru": "Только бег и ходьба.",
-    "en": "No jump or slide"
-   },
-   "tags": [
-    "nojump"
-   ],
-   "conflicts": [
-    "zip"
-   ],
-   "heroes": "all",
-   "mult": 1.4,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "gp_nohead",
-   "cat": "gp",
-   "difficulty": 3,
-   "name": {
-    "ru": "Нельзя стрелять в голову",
-    "en": "No headshots"
-   },
-   "desc": {
-    "ru": "Целься только в тело.",
-    "en": "No headshots"
-   },
-   "tags": [
-    "nohead"
-   ],
-   "conflicts": [
-    "headshots"
-   ],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "gp_melee",
-   "cat": "gp",
-   "difficulty": 4,
-   "name": {
-    "ru": "Только ближний бой",
-    "en": "Melee only"
-   },
-   "desc": {
-    "ru": "Урон — только ближним боем и способностями.",
-    "en": "Melee only"
-   },
-   "tags": [
-    "melee"
-   ],
-   "conflicts": [
-    "headshots",
-    "nohead"
-   ],
-   "heroes": "all",
-   "mult": 1.6,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "gp_ally",
-   "cat": "gp",
-   "difficulty": 3,
-   "name": {
-    "ru": "Не дальше 20 м от союзника",
-    "en": "Stay within 20 m of ally"
-   },
-   "desc": {
-    "ru": "Держись рядом с союзником.",
-    "en": "Stay within 20 m of ally"
-   },
-   "tags": [
-    "ally"
-   ],
-   "conflicts": [
-    "lane"
-   ],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "gp_nobuy",
-   "cat": "gp",
-   "difficulty": 2,
-   "name": {
-    "ru": "Не покупать до 10-й минуты",
-    "en": "No buying until minute 10"
-   },
-   "desc": {
-    "ru": "Души копятся до 10:00.",
-    "en": "No buying until minute 10"
-   },
-   "tags": [
-    "nobuy"
-   ],
-   "conflicts": [
-    "buyonlydeath"
-   ],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "gp_nozip",
-   "cat": "gp",
-   "difficulty": 2,
-   "name": {
-    "ru": "Без зиплайнов",
-    "en": "No ziplines"
-   },
-   "desc": {
-    "ru": "Не используй зиплайны.",
-    "en": "No ziplines"
-   },
-   "tags": [
-    "nozip"
-   ],
-   "conflicts": [
-    "zip"
-   ],
-   "heroes": "all",
-   "mult": 1.2,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "gp_noads",
-   "cat": "gp",
-   "difficulty": 3,
-   "name": {
-    "ru": "Без прицеливания",
-    "en": "No aiming down sights"
-   },
-   "desc": {
-    "ru": "Стреляй только от бедра.",
-    "en": "No aiming down sights"
-   },
-   "tags": [
-    "noads"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.2,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "go_lasthits",
-   "cat": "go",
-   "difficulty": 2,
-   "name": {
-    "ru": "10 последних ударов",
-    "en": "10 last hits"
-   },
-   "desc": {
-    "ru": "Добей 10 целей.",
-    "en": "10 last hits"
-   },
-   "tags": [
-    "lasthits"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "go_parry",
-   "cat": "go",
-   "difficulty": 3,
-   "name": {
-    "ru": "5 парирований",
-    "en": "5 parries"
-   },
-   "desc": {
-    "ru": "Успешно спарируй 5 раз.",
-    "en": "5 parries"
-   },
-   "tags": [
-    "parry"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "go_walker",
-   "cat": "go",
-   "difficulty": 3,
-   "name": {
-    "ru": "Уничтожить Walker",
-    "en": "Destroy a Walker"
-   },
-   "desc": {
-    "ru": "Участвуй в разрушении Walker.",
-    "en": "Destroy a Walker"
-   },
-   "tags": [
-    "objective"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.2,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "go_guardian",
-   "cat": "go",
-   "difficulty": 2,
-   "name": {
-    "ru": "Уничтожить 2 Guardian",
-    "en": "Destroy 2 Guardians"
-   },
-   "desc": {
-    "ru": "Разрушь двух Guardian.",
-    "en": "Destroy 2 Guardians"
-   },
-   "tags": [
-    "objective"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.1,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "go_zero_death",
-   "cat": "go",
-   "difficulty": 5,
-   "name": {
-    "ru": "Матч с нулём смертей",
-    "en": "Zero deaths"
-   },
-   "desc": {
-    "ru": "Ни одной смерти.",
-    "en": "Zero deaths"
-   },
-   "tags": [
-    "zerodeath"
-   ],
-   "conflicts": [
-    "swapdeath"
-   ],
-   "heroes": "all",
-   "mult": 1.8,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "go_headshots",
-   "cat": "go",
-   "difficulty": 3,
-   "name": {
-    "ru": "10 попаданий в голову",
-    "en": "10 headshots"
-   },
-   "desc": {
-    "ru": "Сделай 10 хедшотов.",
-    "en": "10 headshots"
-   },
-   "tags": [
-    "headshots"
-   ],
-   "conflicts": [
-    "nohead",
-    "melee",
-    "noads"
-   ],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "go_assists",
-   "cat": "go",
-   "difficulty": 2,
-   "name": {
-    "ru": "10 помощей",
-    "en": "10 assists"
-   },
-   "desc": {
-    "ru": "Набери 10 помощей.",
-    "en": "10 assists"
-   },
-   "tags": [
-    "assists"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "go_souls",
-   "cat": "go",
-   "difficulty": 4,
-   "name": {
-    "ru": "Набрать 20 000 душ",
-    "en": "Earn 20,000 souls"
-   },
-   "desc": {
-    "ru": "Цель по душам к концу матча.",
-    "en": "Earn 20,000 souls"
-   },
-   "tags": [
-    "souls"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.4,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "tm_blind",
-   "cat": "tm",
-   "difficulty": 3,
-   "name": {
-    "ru": "Слепой выбор героя",
-    "en": "Blind hero pick"
-   },
-   "desc": {
-    "ru": "Друг выбирает тебе героя.",
-    "en": "Blind hero pick"
-   },
-   "tags": [
-    "team"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "team",
-   "verified": true
-  },
-  {
-   "id": "tm_roles",
-   "cat": "tm",
-   "difficulty": 2,
-   "name": {
-    "ru": "Роли: танк, урон, саппорт",
-    "en": "Roles: tank, dmg, support"
-   },
-   "desc": {
-    "ru": "Каждый берёт свою роль.",
-    "en": "Roles: tank, dmg, support"
-   },
-   "tags": [
-    "team"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.1,
-   "mode": "team",
-   "verified": true
-  },
-  {
-   "id": "tm_shared",
-   "cat": "tm",
-   "difficulty": 4,
-   "name": {
-    "ru": "Один общий билд на всех",
-    "en": "One shared build"
-   },
-   "desc": {
-    "ru": "Все покупают одинаковые предметы.",
-    "en": "One shared build"
-   },
-   "tags": [
-    "team",
-    "sharedbuild"
-   ],
-   "conflicts": [
-    "nobuy"
-   ],
-   "heroes": "all",
-   "mult": 1.5,
-   "mode": "team",
-   "verified": true
-  },
-  {
-   "id": "tm_follow",
-   "cat": "tm",
-   "difficulty": 3,
-   "name": {
-    "ru": "Ходить за лидером",
-    "en": "Follow the leader"
-   },
-   "desc": {
-    "ru": "Один ведёт, остальные следуют.",
-    "en": "Follow the leader"
-   },
-   "tags": [
-    "team",
-    "ally"
-   ],
-   "conflicts": [
-    "lane"
-   ],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "team",
-   "verified": true
-  },
-  {
-   "id": "tm_noping",
-   "cat": "tm",
-   "difficulty": 3,
-   "name": {
-    "ru": "Без пингов и чата",
-    "en": "No pings or chat"
-   },
-   "desc": {
-    "ru": "Только голос или тишина.",
-    "en": "No pings or chat"
-   },
-   "tags": [
-    "team"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.4,
-   "mode": "team",
-   "verified": true
-  },
-  {
-   "id": "ch_swap",
-   "cat": "ch",
-   "difficulty": 4,
-   "name": {
-    "ru": "После смерти — новый герой в следующем матче",
-    "en": "After a death, change hero next match"
-   },
-   "desc": {
-    "ru": "Если погибнешь в этом матче, в следующем выбери другого героя. В текущем матче герой не меняется.",
-    "en": "If you die in this match, choose a different hero for the next match. Keep your current hero until this match ends."
-   },
-   "tags": [
-    "swapdeath"
-   ],
-   "conflicts": [
-    "zerodeath"
-   ],
-   "heroes": "all",
-   "mult": 1.5,
-   "mode": "solo",
-   "verified": false
-  },
-  {
-   "id": "ch_lane",
-   "cat": "ch",
-   "difficulty": 3,
-   "name": {
-    "ru": "Только одна линия",
-    "en": "One lane only"
-   },
-   "desc": {
-    "ru": "Не покидай выбранную линию.",
-    "en": "One lane only"
-   },
-   "tags": [
-    "lane"
-   ],
-   "conflicts": [
-    "ally",
-    "objective"
-   ],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "ch_zip",
-   "cat": "ch",
-   "difficulty": 4,
-   "name": {
-    "ru": "Только зиплайны",
-    "en": "Ziplines only"
-   },
-   "desc": {
-    "ru": "Передвигайся по зиплайнам.",
-    "en": "Ziplines only"
-   },
-   "tags": [
-    "zip"
-   ],
-   "conflicts": [
-    "nozip",
-    "nojump"
-   ],
-   "heroes": "all",
-   "mult": 1.5,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "ch_nobase",
-   "cat": "ch",
-   "difficulty": 3,
-   "name": {
-    "ru": "Не возвращаться на базу",
-    "en": "Never return to base"
-   },
-   "desc": {
-    "ru": "Только возрождение.",
-    "en": "Never return to base"
-   },
-   "tags": [
-    "nobase"
-   ],
-   "conflicts": [],
-   "heroes": "all",
-   "mult": 1.4,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "ch_buydeath",
-   "cat": "ch",
-   "difficulty": 3,
-   "name": {
-    "ru": "Покупки только после смерти",
-    "en": "Buy only after death"
-   },
-   "desc": {
-    "ru": "Покупай предметы лишь после смерти.",
-    "en": "Buy only after death"
-   },
-   "tags": [
-    "buyonlydeath"
-   ],
-   "conflicts": [
-    "nobuy"
-   ],
-   "heroes": "all",
-   "mult": 1.4,
-   "mode": "solo",
-   "verified": true
-  },
-  {
-   "id": "ch_friend_lane",
-   "cat": "ch",
-   "difficulty": 3,
-   "name": {
-    "ru": "Линию выбирает друг",
-    "en": "Friend picks your lane"
-   },
-   "desc": {
-    "ru": "Друг назначает линию.",
-    "en": "Friend picks your lane"
-   },
-   "tags": [
-    "lane"
-   ],
-   "conflicts": [
-    "ally",
-    "objective"
-   ],
-   "heroes": "all",
-   "mult": 1.3,
-   "mode": "solo",
-   "verified": true
-  }
- ]
+  "_note": "conflicts: список тегов; челлендж не сочетается с теми, у кого есть такой тег.",
+  "challenges": [
+    {
+      "id": "ab_no1",
+      "cat": "ab",
+      "difficulty": 2,
+      "name": {
+        "ru": "Без способности №1",
+        "en": "No ability 1"
+      },
+      "desc": {
+        "ru": "Способность 1 под запретом весь матч.",
+        "en": "No ability 1"
+      },
+      "tags": [
+        "abil",
+        "s1"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "ab_no2",
+      "cat": "ab",
+      "difficulty": 2,
+      "name": {
+        "ru": "Без способности №2",
+        "en": "No ability 2"
+      },
+      "desc": {
+        "ru": "Способность 2 под запретом весь матч.",
+        "en": "No ability 2"
+      },
+      "tags": [
+        "abil",
+        "s2"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "ab_no3",
+      "cat": "ab",
+      "difficulty": 2,
+      "name": {
+        "ru": "Без способности №3",
+        "en": "No ability 3"
+      },
+      "desc": {
+        "ru": "Способность 3 под запретом весь матч.",
+        "en": "No ability 3"
+      },
+      "tags": [
+        "abil",
+        "s3"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "ab_no_ult",
+      "cat": "ab",
+      "difficulty": 2,
+      "name": {
+        "ru": "Без ультимейта",
+        "en": "No ultimate"
+      },
+      "desc": {
+        "ru": "Ультимейт нельзя использовать.",
+        "en": "No ultimate"
+      },
+      "tags": [
+        "abil",
+        "s4"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "ab_ult_only",
+      "cat": "ab",
+      "difficulty": 5,
+      "name": {
+        "ru": "Только ультимейт в бою",
+        "en": "Ultimate only in fights"
+      },
+      "desc": {
+        "ru": "В бою — только ульта и оружие, без способностей 1–3.",
+        "en": "Ultimate only in fights"
+      },
+      "tags": [
+        "abil",
+        "ultonly"
+      ],
+      "conflicts": [
+        "abil"
+      ],
+      "heroes": "all",
+      "mult": 1.8,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "ab_rotate",
+      "cat": "ab",
+      "difficulty": 4,
+      "name": {
+        "ru": "Способности строго по порядку",
+        "en": "Abilities in order"
+      },
+      "desc": {
+        "ru": "Применяй способности по кругу: 1→2→3→4.",
+        "en": "Abilities in order"
+      },
+      "tags": [
+        "abil",
+        "order"
+      ],
+      "conflicts": [
+        "abil"
+      ],
+      "heroes": "all",
+      "mult": 1.5,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "it_no_weapon",
+      "cat": "it",
+      "difficulty": 2,
+      "name": {
+        "ru": "Без предметов Weapon",
+        "en": "No Weapon items"
+      },
+      "desc": {
+        "ru": "Ветка Weapon запрещена.",
+        "en": "No Weapon items"
+      },
+      "tags": [
+        "branch",
+        "bw"
+      ],
+      "conflicts": [
+        "bv",
+        "bs"
+      ],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "it_no_vit",
+      "cat": "it",
+      "difficulty": 2,
+      "name": {
+        "ru": "Без предметов Vitality",
+        "en": "No Vitality items"
+      },
+      "desc": {
+        "ru": "Ветка Vitality запрещена.",
+        "en": "No Vitality items"
+      },
+      "tags": [
+        "branch",
+        "bv"
+      ],
+      "conflicts": [
+        "bw",
+        "bs"
+      ],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "it_no_spirit",
+      "cat": "it",
+      "difficulty": 2,
+      "name": {
+        "ru": "Без предметов Spirit",
+        "en": "No Spirit items"
+      },
+      "desc": {
+        "ru": "Ветка Spirit запрещена.",
+        "en": "No Spirit items"
+      },
+      "tags": [
+        "branch",
+        "bs"
+      ],
+      "conflicts": [
+        "bw",
+        "bv"
+      ],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "it_active",
+      "cat": "it",
+      "difficulty": 3,
+      "name": {
+        "ru": "Только активные предметы",
+        "en": "Active items only"
+      },
+      "desc": {
+        "ru": "Покупай только предметы с активацией.",
+        "en": "Active items only"
+      },
+      "tags": [
+        "items",
+        "active"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.4,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "it_no_heal",
+      "cat": "it",
+      "difficulty": 3,
+      "name": {
+        "ru": "Без лечения",
+        "en": "No healing"
+      },
+      "desc": {
+        "ru": "Никаких предметов и эффектов лечения.",
+        "en": "No healing"
+      },
+      "tags": [
+        "items",
+        "noheal"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.4,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "it_cheap",
+      "cat": "it",
+      "difficulty": 3,
+      "name": {
+        "ru": "Только дешёвые предметы",
+        "en": "Cheap items only"
+      },
+      "desc": {
+        "ru": "Покупай только предметы T1 и T2.",
+        "en": "Only buy tier 1 and tier 2 items."
+      },
+      "tags": [
+        "items",
+        "cheap"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.5,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "it_one_branch",
+      "cat": "it",
+      "difficulty": 4,
+      "name": {
+        "ru": "Только одна ветка предметов",
+        "en": "One item branch"
+      },
+      "desc": {
+        "ru": "Выбери ветку и покупай только из неё.",
+        "en": "One item branch"
+      },
+      "tags": [
+        "items",
+        "onebranch"
+      ],
+      "conflicts": [
+        "branch"
+      ],
+      "heroes": "all",
+      "mult": 1.5,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "gp_nomap",
+      "cat": "gp",
+      "difficulty": 3,
+      "name": {
+        "ru": "Без мини-карты",
+        "en": "No minimap"
+      },
+      "desc": {
+        "ru": "Мини-карта закрыта или игнорируется.",
+        "en": "No minimap"
+      },
+      "tags": [
+        "nomap"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "gp_nojump",
+      "cat": "gp",
+      "difficulty": 3,
+      "name": {
+        "ru": "Нельзя прыгать и скользить",
+        "en": "No jump or slide"
+      },
+      "desc": {
+        "ru": "Только бег и ходьба.",
+        "en": "No jump or slide"
+      },
+      "tags": [
+        "nojump"
+      ],
+      "conflicts": [
+        "zip"
+      ],
+      "heroes": "all",
+      "mult": 1.4,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "gp_nohead",
+      "cat": "gp",
+      "difficulty": 3,
+      "name": {
+        "ru": "Нельзя стрелять в голову",
+        "en": "No headshots"
+      },
+      "desc": {
+        "ru": "Целься только в тело.",
+        "en": "No headshots"
+      },
+      "tags": [
+        "nohead"
+      ],
+      "conflicts": [
+        "headshots"
+      ],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "gp_melee",
+      "cat": "gp",
+      "difficulty": 4,
+      "name": {
+        "ru": "Только ближний бой",
+        "en": "Melee only"
+      },
+      "desc": {
+        "ru": "Урон — только ближним боем и способностями.",
+        "en": "Melee only"
+      },
+      "tags": [
+        "melee"
+      ],
+      "conflicts": [
+        "headshots",
+        "nohead"
+      ],
+      "heroes": "all",
+      "mult": 1.6,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "gp_ally",
+      "cat": "gp",
+      "difficulty": 3,
+      "name": {
+        "ru": "Не дальше 20 м от союзника",
+        "en": "Stay within 20 m of ally"
+      },
+      "desc": {
+        "ru": "Держись рядом с союзником.",
+        "en": "Stay within 20 m of ally"
+      },
+      "tags": [
+        "ally"
+      ],
+      "conflicts": [
+        "lane"
+      ],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "gp_nobuy",
+      "cat": "gp",
+      "difficulty": 2,
+      "name": {
+        "ru": "Не покупать до 10-й минуты",
+        "en": "No buying until minute 10"
+      },
+      "desc": {
+        "ru": "Души копятся до 10:00.",
+        "en": "No buying until minute 10"
+      },
+      "tags": [
+        "nobuy"
+      ],
+      "conflicts": [
+        "buyonlydeath"
+      ],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "gp_nozip",
+      "cat": "gp",
+      "difficulty": 2,
+      "name": {
+        "ru": "Без зиплайнов",
+        "en": "No ziplines"
+      },
+      "desc": {
+        "ru": "Не используй зиплайны.",
+        "en": "No ziplines"
+      },
+      "tags": [
+        "nozip"
+      ],
+      "conflicts": [
+        "zip"
+      ],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "gp_noads",
+      "cat": "gp",
+      "difficulty": 3,
+      "name": {
+        "ru": "Без прицеливания",
+        "en": "No aiming down sights"
+      },
+      "desc": {
+        "ru": "Стреляй только от бедра.",
+        "en": "No aiming down sights"
+      },
+      "tags": [
+        "noads"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "go_lasthits",
+      "cat": "go",
+      "difficulty": 2,
+      "name": {
+        "ru": "10 последних ударов",
+        "en": "10 last hits"
+      },
+      "desc": {
+        "ru": "Добей 10 целей.",
+        "en": "10 last hits"
+      },
+      "tags": [
+        "lasthits"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "go_parry",
+      "cat": "go",
+      "difficulty": 3,
+      "name": {
+        "ru": "5 парирований",
+        "en": "5 parries"
+      },
+      "desc": {
+        "ru": "Успешно спарируй 5 раз.",
+        "en": "5 parries"
+      },
+      "tags": [
+        "parry"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "go_walker",
+      "cat": "go",
+      "difficulty": 3,
+      "name": {
+        "ru": "Уничтожить Walker",
+        "en": "Destroy a Walker"
+      },
+      "desc": {
+        "ru": "Участвуй в разрушении Walker.",
+        "en": "Destroy a Walker"
+      },
+      "tags": [
+        "objective"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "go_guardian",
+      "cat": "go",
+      "difficulty": 2,
+      "name": {
+        "ru": "Уничтожить 2 Guardian",
+        "en": "Destroy 2 Guardians"
+      },
+      "desc": {
+        "ru": "Разрушь двух Guardian.",
+        "en": "Destroy 2 Guardians"
+      },
+      "tags": [
+        "objective"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "go_zero_death",
+      "cat": "go",
+      "difficulty": 5,
+      "name": {
+        "ru": "Матч с нулём смертей",
+        "en": "Zero deaths"
+      },
+      "desc": {
+        "ru": "Ни одной смерти.",
+        "en": "Zero deaths"
+      },
+      "tags": [
+        "zerodeath"
+      ],
+      "conflicts": [
+        "swapdeath"
+      ],
+      "heroes": "all",
+      "mult": 1.8,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "go_headshots",
+      "cat": "go",
+      "difficulty": 3,
+      "name": {
+        "ru": "10 попаданий в голову",
+        "en": "10 headshots"
+      },
+      "desc": {
+        "ru": "Сделай 10 хедшотов.",
+        "en": "10 headshots"
+      },
+      "tags": [
+        "headshots"
+      ],
+      "conflicts": [
+        "nohead",
+        "melee",
+        "noads"
+      ],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "go_assists",
+      "cat": "go",
+      "difficulty": 2,
+      "name": {
+        "ru": "10 помощей",
+        "en": "10 assists"
+      },
+      "desc": {
+        "ru": "Набери 10 помощей.",
+        "en": "10 assists"
+      },
+      "tags": [
+        "assists"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "go_souls",
+      "cat": "go",
+      "difficulty": 4,
+      "name": {
+        "ru": "Набрать 20 000 душ",
+        "en": "Earn 20,000 souls"
+      },
+      "desc": {
+        "ru": "Цель по душам к концу матча.",
+        "en": "Earn 20,000 souls"
+      },
+      "tags": [
+        "souls"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.4,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "tm_blind",
+      "cat": "tm",
+      "difficulty": 3,
+      "name": {
+        "ru": "Слепой выбор героя",
+        "en": "Blind hero pick"
+      },
+      "desc": {
+        "ru": "Друг выбирает тебе героя.",
+        "en": "Blind hero pick"
+      },
+      "tags": [
+        "team"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "tm_roles",
+      "cat": "tm",
+      "difficulty": 2,
+      "name": {
+        "ru": "Роли: танк, урон, саппорт",
+        "en": "Roles: tank, dmg, support"
+      },
+      "desc": {
+        "ru": "Каждый берёт свою роль.",
+        "en": "Roles: tank, dmg, support"
+      },
+      "tags": [
+        "team"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "tm_shared",
+      "cat": "tm",
+      "difficulty": 4,
+      "name": {
+        "ru": "Один общий билд на всех",
+        "en": "One shared build"
+      },
+      "desc": {
+        "ru": "Все покупают одинаковые предметы.",
+        "en": "One shared build"
+      },
+      "tags": [
+        "team",
+        "sharedbuild"
+      ],
+      "conflicts": [
+        "nobuy"
+      ],
+      "heroes": "all",
+      "mult": 1.5,
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "tm_follow",
+      "cat": "tm",
+      "difficulty": 3,
+      "name": {
+        "ru": "Ходить за лидером",
+        "en": "Follow the leader"
+      },
+      "desc": {
+        "ru": "Один ведёт, остальные следуют.",
+        "en": "Follow the leader"
+      },
+      "tags": [
+        "team",
+        "ally"
+      ],
+      "conflicts": [
+        "lane"
+      ],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "tm_noping",
+      "cat": "tm",
+      "difficulty": 3,
+      "name": {
+        "ru": "Без пингов и чата",
+        "en": "No pings or chat"
+      },
+      "desc": {
+        "ru": "Только голос или тишина.",
+        "en": "No pings or chat"
+      },
+      "tags": [
+        "team"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.4,
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "ch_swap",
+      "cat": "ch",
+      "difficulty": 4,
+      "name": {
+        "ru": "После смерти — новый герой в следующем матче",
+        "en": "After a death, change hero next match"
+      },
+      "desc": {
+        "ru": "Если погибнешь в этом матче, в следующем выбери другого героя. В текущем матче герой не меняется.",
+        "en": "If you die in this match, choose a different hero for the next match. Keep your current hero until this match ends."
+      },
+      "tags": [
+        "swapdeath"
+      ],
+      "conflicts": [
+        "zerodeath"
+      ],
+      "heroes": "all",
+      "mult": 1.5,
+      "mode": "solo",
+      "verified": false
+    },
+    {
+      "id": "ch_lane",
+      "cat": "ch",
+      "difficulty": 3,
+      "name": {
+        "ru": "Только одна линия",
+        "en": "One lane only"
+      },
+      "desc": {
+        "ru": "Не покидай выбранную линию.",
+        "en": "One lane only"
+      },
+      "tags": [
+        "lane"
+      ],
+      "conflicts": [
+        "ally",
+        "objective"
+      ],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "ch_zip",
+      "cat": "ch",
+      "difficulty": 4,
+      "name": {
+        "ru": "Только зиплайны",
+        "en": "Ziplines only"
+      },
+      "desc": {
+        "ru": "Передвигайся по зиплайнам.",
+        "en": "Ziplines only"
+      },
+      "tags": [
+        "zip"
+      ],
+      "conflicts": [
+        "nozip",
+        "nojump"
+      ],
+      "heroes": "all",
+      "mult": 1.5,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "ch_nobase",
+      "cat": "ch",
+      "difficulty": 3,
+      "name": {
+        "ru": "Не возвращаться на базу",
+        "en": "Never return to base"
+      },
+      "desc": {
+        "ru": "Только возрождение.",
+        "en": "Never return to base"
+      },
+      "tags": [
+        "nobase"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.4,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "ch_buydeath",
+      "cat": "ch",
+      "difficulty": 3,
+      "name": {
+        "ru": "Покупки только после смерти",
+        "en": "Buy only after death"
+      },
+      "desc": {
+        "ru": "Покупай предметы лишь после смерти.",
+        "en": "Buy only after death"
+      },
+      "tags": [
+        "buyonlydeath"
+      ],
+      "conflicts": [
+        "nobuy"
+      ],
+      "heroes": "all",
+      "mult": 1.4,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "ch_friend_lane",
+      "cat": "ch",
+      "difficulty": 3,
+      "name": {
+        "ru": "Линию выбирает друг",
+        "en": "Friend picks your lane"
+      },
+      "desc": {
+        "ru": "Друг назначает линию.",
+        "en": "Friend picks your lane"
+      },
+      "tags": [
+        "lane"
+      ],
+      "conflicts": [
+        "ally",
+        "objective"
+      ],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "street_opening",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Первый контакт",
+        "en": "Opening contact"
+      },
+      "desc": {
+        "ru": "В первом раунде получи хотя бы одно убийство или содействие.",
+        "en": "Get at least one kill or assist in round one."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_rounds",
+      "cat": "go",
+      "difficulty": 2,
+      "name": {
+        "ru": "В каждом раунде",
+        "en": "Every round counts"
+      },
+      "desc": {
+        "ru": "В каждом сыгранном раунде получи хотя бы одно убийство или содействие.",
+        "en": "Get at least one kill or assist in every round played."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_draft",
+      "cat": "it",
+      "difficulty": 1,
+      "name": {
+        "ru": "Три цвета",
+        "en": "Three colors"
+      },
+      "desc": {
+        "ru": "К концу матча собери хотя бы по одному предмету Weapon, Vitality и Spirit через драфт.",
+        "en": "By the end of the match, draft at least one Weapon, Vitality and Spirit item."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_active",
+      "cat": "it",
+      "difficulty": 2,
+      "name": {
+        "ru": "Активная улица",
+        "en": "Active streets"
+      },
+      "desc": {
+        "ru": "Выбери активный предмет, если он предложен на драфте, и успешно примени его в двух разных раундах. Без такого предложения условие не выполнено.",
+        "en": "Draft an active item when offered and successfully use it in two different rounds. No offer means this condition is not completed."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_pair",
+      "cat": "tm",
+      "difficulty": 1,
+      "name": {
+        "ru": "В паре",
+        "en": "Paired up"
+      },
+      "desc": {
+        "ru": "Получи по одному содействию в двух разных раундах.",
+        "en": "Earn at least one assist in two different rounds."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_cover",
+      "cat": "gp",
+      "difficulty": 2,
+      "name": {
+        "ru": "Из-за угла",
+        "en": "Around the corner"
+      },
+      "desc": {
+        "ru": "В двух разных раундах после получения урона от героя уйди за укрытие и вернись в бой, не погибнув между этими действиями.",
+        "en": "In two rounds, take hero damage, retreat behind cover and return to combat without dying between these actions."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_parry",
+      "cat": "gp",
+      "difficulty": 3,
+      "name": {
+        "ru": "Уличный парирующий",
+        "en": "Street parry"
+      },
+      "desc": {
+        "ru": "Успешно парируй две тяжёлые атаки героев за матч.",
+        "en": "Successfully parry two enemy hero heavy melee attacks during the match."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_objective",
+      "cat": "go",
+      "difficulty": 2,
+      "name": {
+        "ru": "После драки — цель",
+        "en": "Fight, then objective"
+      },
+      "desc": {
+        "ru": "В двух разных раундах нанеси урон вражеской постройке после убийства или содействия в этом раунде.",
+        "en": "In two rounds, damage an enemy structure after earning a kill or assist that round."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_survivor",
+      "cat": "ch",
+      "difficulty": 3,
+      "name": {
+        "ru": "Живой победитель",
+        "en": "Surviving victor"
+      },
+      "desc": {
+        "ru": "Выиграй два раунда, не погибнув ни разу в каждом из них.",
+        "en": "Win two rounds without dying in either of those rounds."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_three",
+      "cat": "go",
+      "difficulty": 3,
+      "name": {
+        "ru": "Тройное участие",
+        "en": "Triple involvement"
+      },
+      "desc": {
+        "ru": "Получи суммарно три убийства или содействия в одном раунде.",
+        "en": "Get three combined kills and assists in a single round."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_finish",
+      "cat": "ab",
+      "difficulty": 4,
+      "name": {
+        "ru": "Способность решает",
+        "en": "Ability finisher"
+      },
+      "desc": {
+        "ru": "Получи финальное убийство раунда уроном способности хотя бы один раз за матч.",
+        "en": "Get the final hero kill of a round with ability damage at least once."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.4,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_sweep",
+      "cat": "ch",
+      "difficulty": 5,
+      "name": {
+        "ru": "Чистая серия",
+        "en": "Clean sweep"
+      },
+      "desc": {
+        "ru": "Выиграй матч, получив убийство или содействие в каждом победном раунде и погибнув не более двух раз за весь матч.",
+        "en": "Win the match, earn a kill or assist in every winning round and die no more than twice across the match."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.5,
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "normal_roamer",
+      "cat": "gp",
+      "difficulty": 1,
+      "name": {
+        "ru": "Смена декораций",
+        "en": "Change of scenery"
+      },
+      "desc": {
+        "ru": "Получи убийство или содействие на двух разных линиях за матч.",
+        "en": "Get a kill or assist on two different lanes during the match."
+      },
+      "tags": [],
+      "conflicts": [
+        "lane",
+        "zip"
+      ],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "solo",
+      "gameModes": [
+        "normal"
+      ],
+      "verified": false
+    },
+    {
+      "id": "normal_courier",
+      "cat": "go",
+      "difficulty": 2,
+      "name": {
+        "ru": "Курьер на смене",
+        "en": "Courier shift"
+      },
+      "desc": {
+        "ru": "Успешно доставь урну хотя бы один раз.",
+        "en": "Successfully deliver the urn at least once."
+      },
+      "tags": [],
+      "conflicts": [
+        "lane",
+        "zip"
+      ],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "normal"
+      ],
+      "verified": false
+    },
+    {
+      "id": "normal_collector",
+      "cat": "it",
+      "difficulty": 1,
+      "name": {
+        "ru": "Коллекционер усилений",
+        "en": "Buff collector"
+      },
+      "desc": {
+        "ru": "Подбери два разных временных усиления на карте за матч.",
+        "en": "Collect two different temporary map buffs during the match."
+      },
+      "tags": [],
+      "conflicts": [
+        "lane",
+        "zip"
+      ],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "solo",
+      "gameModes": [
+        "normal"
+      ],
+      "verified": false
+    },
+    {
+      "id": "normal_jungle",
+      "cat": "go",
+      "difficulty": 2,
+      "name": {
+        "ru": "Три остановки",
+        "en": "Three stops"
+      },
+      "desc": {
+        "ru": "Полностью зачисти три разных лагеря нейтральных существ за матч.",
+        "en": "Fully clear three different neutral camps during the match."
+      },
+      "tags": [],
+      "conflicts": [
+        "lane",
+        "zip"
+      ],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "normal"
+      ],
+      "verified": false
+    },
+    {
+      "id": "normal_experiment",
+      "cat": "it",
+      "difficulty": 2,
+      "name": {
+        "ru": "Новый инструмент",
+        "en": "New tool"
+      },
+      "desc": {
+        "ru": "Купи активный предмет, который не покупал в прошлом матче, и успешно примени его три раза.",
+        "en": "Buy an active item you did not buy in your last match and successfully use it three times."
+      },
+      "tags": [],
+      "conflicts": [
+        "items",
+        "branch",
+        "nobuy",
+        "sharedbuild"
+      ],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "normal"
+      ],
+      "verified": false
+    },
+    {
+      "id": "normal_routes",
+      "cat": "gp",
+      "difficulty": 3,
+      "name": {
+        "ru": "Большая прогулка",
+        "en": "Grand tour"
+      },
+      "desc": {
+        "ru": "Нанеси урон вражеским постройкам на трёх разных линиях за матч.",
+        "en": "Damage enemy structures on three different lanes during the match."
+      },
+      "tags": [
+        "objective"
+      ],
+      "conflicts": [
+        "lane",
+        "zip"
+      ],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "gameModes": [
+        "normal"
+      ],
+      "verified": false
+    },
+    {
+      "id": "normal_teamplay",
+      "cat": "tm",
+      "difficulty": 2,
+      "name": {
+        "ru": "Новый напарник",
+        "en": "New partner"
+      },
+      "desc": {
+        "ru": "Получи содействия вместе как минимум с тремя разными союзниками за матч.",
+        "en": "Earn assists alongside at least three different teammates during the match."
+      },
+      "tags": [],
+      "conflicts": [
+        "lane",
+        "zip"
+      ],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "normal"
+      ],
+      "verified": false
+    },
+    {
+      "id": "normal_parry",
+      "cat": "gp",
+      "difficulty": 3,
+      "name": {
+        "ru": "Урок самообороны",
+        "en": "Self-defense lesson"
+      },
+      "desc": {
+        "ru": "Успешно парируй тяжёлую атаку героя и затем получи убийство или содействие против него в течение 15 секунд.",
+        "en": "Parry a hero heavy melee attack, then get a kill or assist against that hero within 15 seconds."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "gameModes": [
+        "normal"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_calls",
+      "cat": "tm",
+      "difficulty": 1,
+      "name": {
+        "ru": "Полезный сигнал",
+        "en": "Useful callouts"
+      },
+      "desc": {
+        "ru": "Перед тремя разными командными атаками отметь цель пингом. Не повторяй пинги без необходимости.",
+        "en": "Ping the target before three separate team engagements. Avoid unnecessary repeated pings."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_assist",
+      "cat": "tm",
+      "difficulty": 1,
+      "name": {
+        "ru": "Связующее звено",
+        "en": "Team connector"
+      },
+      "desc": {
+        "ru": "Получи не менее пяти содействий за матч.",
+        "en": "Earn at least five assists during the match."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_denies",
+      "cat": "gp",
+      "difficulty": 2,
+      "name": {
+        "ru": "Контроль линии",
+        "en": "Lane control"
+      },
+      "desc": {
+        "ru": "Подстрели не менее десяти вражеских сфер душ за матч (denies).",
+        "en": "Deny at least ten enemy soul orbs during the match."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_objective",
+      "cat": "go",
+      "difficulty": 2,
+      "name": {
+        "ru": "Закрепить преимущество",
+        "en": "Convert the advantage"
+      },
+      "desc": {
+        "ru": "После двух разных выигранных командных боёв помоги нанести урон вражеской постройке в течение 45 секунд.",
+        "en": "After two separate won team fights, help damage an enemy structure within 45 seconds."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_item",
+      "cat": "it",
+      "difficulty": 1,
+      "name": {
+        "ru": "Ответ на угрозу",
+        "en": "Counter the threat"
+      },
+      "desc": {
+        "ru": "Купи предмет против конкретной угрозы соперника и успешно используй его эффект хотя бы три раза.",
+        "en": "Buy an item to counter a specific enemy threat and successfully use its effect at least three times."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.1,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_defend",
+      "cat": "go",
+      "difficulty": 2,
+      "name": {
+        "ru": "Защитник линии",
+        "en": "Lane defender"
+      },
+      "desc": {
+        "ru": "Отбей две разные волны вражеских солдат у союзной постройки до её разрушения.",
+        "en": "Clear two separate enemy trooper waves at an allied structure before it falls."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_together",
+      "cat": "tm",
+      "difficulty": 2,
+      "name": {
+        "ru": "Вместе к цели",
+        "en": "Objective together"
+      },
+      "desc": {
+        "ru": "Участвуй в уничтожении двух вражеских построек, находясь рядом хотя бы с одним союзником.",
+        "en": "Help destroy two enemy structures with at least one teammate nearby."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.2,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_urn",
+      "cat": "go",
+      "difficulty": 3,
+      "name": {
+        "ru": "Сопровождение",
+        "en": "Escort duty"
+      },
+      "desc": {
+        "ru": "Помоги союзнику доставить урну: находись рядом с ним на финальном подходе и переживи доставку.",
+        "en": "Help a teammate deliver the urn: stay nearby on the final approach and survive the delivery."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_parry",
+      "cat": "gp",
+      "difficulty": 3,
+      "name": {
+        "ru": "Хладнокровие",
+        "en": "Composure"
+      },
+      "desc": {
+        "ru": "Успешно парируй две тяжёлые атаки героев и переживи оба боя.",
+        "en": "Parry two hero heavy melee attacks and survive both fights."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_pressure",
+      "cat": "go",
+      "difficulty": 3,
+      "name": {
+        "ru": "Давление по карте",
+        "en": "Map pressure"
+      },
+      "desc": {
+        "ru": "Помоги уничтожить вражеские постройки на двух разных линиях.",
+        "en": "Help destroy enemy structures on two different lanes."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.3,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_impact",
+      "cat": "tm",
+      "difficulty": 4,
+      "name": {
+        "ru": "В центре событий",
+        "en": "At the heart of it"
+      },
+      "desc": {
+        "ru": "Заверши матч с суммой убийств и содействий не менее 20.",
+        "en": "Finish the match with at least 20 combined kills and assists."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.4,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_win",
+      "cat": "ch",
+      "difficulty": 5,
+      "name": {
+        "ru": "Победа с вкладом",
+        "en": "Win with impact"
+      },
+      "desc": {
+        "ru": "Выиграй матч с не менее чем десятью содействиями и участием в уничтожении двух вражеских построек.",
+        "en": "Win with at least ten assists and help destroy two enemy structures."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mult": 1.5,
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    }
+  ]
 }

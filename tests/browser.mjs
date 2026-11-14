@@ -94,6 +94,20 @@ try{
   }
  }
  }
+
+ // Mode selection resets only the active view and survives reload and sharing.
+ await page.click('[data-tab="roulette"]');
+ for(const mode of ['street','ranked','normal']){
+  await page.click('[data-game-mode="'+mode+'"]');
+  assert.equal(await page.locator('[data-game-mode="'+mode+'"]').getAttribute('aria-pressed'),'true');
+  if(mode!=='normal'){assert.equal(await page.locator('#contract h2').count(),1);assert.equal((await state()).cur,null)}
+  await page.click('#spin');await page.waitForSelector('#contract h2');
+  const result=(await state()).cur;assert.equal(result.opts.gameMode,mode);
+  assert(await page.evaluate(async()=>{const {RT}=await import('/js/state.js');return RT.cur.conds.every(id=>(RT.data.challenges.find(c=>c.id===id).gameModes||['normal']).includes(RT.cur.opts.gameMode))}));
+  await receiver.goto(page.url());await receiver.waitForSelector('#contract h2');assert.equal(await receiver.evaluate(async()=>(await import('/js/state.js')).S.gameMode),mode);
+  await page.reload();await page.waitForSelector('#spin');assert.equal(await page.locator('[data-game-mode="'+mode+'"]').getAttribute('aria-pressed'),'true');
+ }
+ for(const theme of ['light','dark']){if(await page.locator('html').getAttribute('data-theme')!==theme)await page.click('#theme');for(const language of ['ru','en']){if(await page.locator('html').getAttribute('lang')!==language)await page.click('#lang');await page.setViewportSize({width:320,height:844});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))}}
  assert.deepEqual(errors,[]);
  console.log('PASS browser: deep links, history, locks, clean-session replay, duplicate completion, hash changes, failed-roll transaction, empty builds/bans, corrupt storage, malformed links, language, mobile, offline PWA, cache isolation; no page errors.');
 }finally{await browser?.close();await new Promise(r=>server.close(r))}

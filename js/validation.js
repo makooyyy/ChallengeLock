@@ -1,11 +1,12 @@
 export const CATS=['ab','it','gp','go','tm','ch'];
+export const GAME_MODES=['street','normal','ranked'];
 export const DIFFICULTIES=['easy','mid','hard','insane'];
 const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 export const strings=x=>Array.isArray(x)?[...new Set(x.filter(v=>typeof v==='string'&&v.length<128))]:[];
 export const count=(x,fallback=0)=>Number.isSafeInteger(x)&&x>=0?x:fallback;
 export function options(x={}){
   if(!object(x))x={};
-  return {diff:DIFFICULTIES.includes(x.diff)?x.diff:'mid',cats:Array.isArray(x.cats)?strings(x.cats).filter(c=>CATS.includes(c)):[...CATS],team:x.team===true,excluded:strings(x.excluded),only:strings(x.only)};
+  return {gameMode:GAME_MODES.includes(x.gameMode)?x.gameMode:'normal',diff:DIFFICULTIES.includes(x.diff)?x.diff:'mid',cats:Array.isArray(x.cats)?strings(x.cats).filter(c=>CATS.includes(c)):[...CATS],team:x.team===true,excluded:strings(x.excluded),only:strings(x.only)};
 }
 export function validRecord(x){return object(x)&&typeof x.seed==='string'&&x.seed.length>0&&x.seed.length<=256&&DIFFICULTIES.includes(x.diff)&&Number.isSafeInteger(x.r)&&x.r>=0&&x.r<=1000000&&typeof x.hero==='string'&&Array.isArray(x.conds)&&x.conds.length>=1&&x.conds.length<=3&&strings(x.conds).length===x.conds.length;}
 export function normalizeState(x,def){
@@ -60,7 +61,7 @@ export function validateData(data,dict){
     }
   }
   const heroIds=new Set(data.heroes.map(h=>h.id));
-  for(const c of data.challenges)if(!CATS.includes(c.cat)||!localized(c.name)||!localized(c.desc)||!Number.isInteger(c.difficulty)||c.difficulty<1||c.difficulty>5||!Number.isFinite(c.mult)||c.mult<=0||!['solo','team'].includes(c.mode)||!Array.isArray(c.tags)||strings(c.tags).length!==c.tags.length||!Array.isArray(c.conflicts)||strings(c.conflicts).length!==c.conflicts.length||!(c.heroes==='all'||Array.isArray(c.heroes)&&c.heroes.every(id=>heroIds.has(id))))fail('challenge '+c.id);
+  for(const c of data.challenges)if(c.gameModes!==undefined&&(!Array.isArray(c.gameModes)||!c.gameModes.length||c.gameModes.some(m=>!GAME_MODES.includes(m)))||!CATS.includes(c.cat)||!localized(c.name)||!localized(c.desc)||!Number.isInteger(c.difficulty)||c.difficulty<1||c.difficulty>5||!Number.isFinite(c.mult)||c.mult<=0||!['solo','team'].includes(c.mode)||!Array.isArray(c.tags)||strings(c.tags).length!==c.tags.length||!Array.isArray(c.conflicts)||strings(c.conflicts).length!==c.conflicts.length||!(c.heroes==='all'||Array.isArray(c.heroes)&&c.heroes.every(id=>heroIds.has(id))))fail('challenge '+c.id);
   if(!object(dict)||!object(dict.ru)||!object(dict.en))fail('translations');
   for(const lang of ['ru','en']){
     if(!Array.isArray(dict[lang].ranks)||dict[lang].ranks.length!==6||!dict[lang].ranks.every(v=>typeof v==='string'))fail('ranks');
