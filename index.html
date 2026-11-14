@@ -3,37 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Deadlock Challenge Roulette — генератор челленджей</title>
-<meta name="description" content="Фан-генератор случайных челленджей, билдов и запретов для Deadlock. Работает офлайн, делись результатом по ссылке.">
-<meta name="theme-color" content="#070a12">
-<meta property="og:title" content="Deadlock Challenge Roulette">
-<meta property="og:description" content="Крути рулетку: случайный герой + условия. Делись seed с друзьями.">
+<title>ChallengeLock — новый вызов для Deadlock</title>
+<meta name="description" content="Смени правила игры. Случайные герои, челленджи и билды для Deadlock. Сохраняй любимые контракты и играй с друзьями.">
+<meta name="theme-color" content="#172c2a">
+<meta property="og:title" content="ChallengeLock — смени правила игры">
+<meta property="og:description" content="Один герой. Новые условия. Твой следующий вызов в Deadlock.">
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600&family=Manrope:wght@500;700&family=Oswald:wght@600;700&display=swap&subset=cyrillic">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div id="boot" class="boot" aria-busy="true"><div class="sk"></div><div class="sk s2"></div><div class="sk s3"></div></div>
+<a class="skip-link" href="#main" data-i18n="skipContent">К содержимому</a>
+<div id="boot" class="boot" aria-busy="true" aria-label="Загрузка / Loading"><div class="sk"></div><div class="sk s2"></div><div class="sk s3"></div></div>
 <div class="d" id="app" hidden>
   <nav class="rail" aria-label="Режимы / Modes">
-    <div class="logo" aria-hidden="true"><b class="os">D</b></div>
-    <button class="nb on" data-tab="roulette"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v4"/></svg><span data-i18n="tab.roulette">Рулетка</span></button>
-    <button class="nb" data-tab="build"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg><span data-i18n="tab.build">Билд</span></button>
-    <button class="nb" data-tab="ban"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M6 6l12 12"/></svg><span data-i18n="tab.ban">Запрет</span></button>
-    <button class="nb" data-tab="custom"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h14"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg><span data-i18n="tab.custom">Набор</span></button>
-    <button class="nb" data-tab="history"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg><span data-i18n="tab.history">История</span></button>
+    <div class="brand"><div class="logo" aria-hidden="true">C</div><span>ChallengeLock</span></div>
+    <div class="nav-caption mo" data-i18n="navigation">ИГРОВАЯ КОМНАТА</div>
+    <button class="nb on" data-tab="roulette"><span data-icon="dice"></span><span data-i18n="tab.roulette">Рулетка</span></button>
+    <button class="nb" data-tab="build"><span data-icon="layers"></span><span data-i18n="tab.build">Билд</span></button>
+    <button class="nb" data-tab="ban"><span data-icon="ban"></span><span data-i18n="tab.ban">Запрет</span></button>
+    <button class="nb" data-tab="custom"><span data-icon="settings"></span><span data-i18n="tab.custom">Настройки</span></button>
+    <button class="nb" data-tab="history"><span data-icon="history"></span><span data-i18n="tab.history">История</span></button>
+    <div class="rail-bottom"><b><span class="online-dot"></span>DEADLOCK</b><span data-i18n="sidebarNote">Каждый матч — по-новому.</span></div>
   </nav>
-  <main class="pad">
-    <header class="fx" style="justify-content:space-between;align-items:center"><div class="mo">Deadlock · Challenge Roulette</div><div class="fx" style="gap:8px"><div class="chip" id="rank"></div><button class="chip" id="lang" aria-label="Language">EN</button></div></header>
-    <section class="panel" id="p-roulette"></section><section class="panel" id="p-build" hidden></section><section class="panel" id="p-ban" hidden></section><section class="panel" id="p-custom" hidden></section><section class="panel" id="p-history" hidden></section>
-    <footer class="fx" style="justify-content:space-between;border-top:1px solid #1c2438;padding-top:14px"><span class="mo">Common · Rare · Epic · Cursed</span><span class="mo" style="text-transform:none" id="foot"></span></footer>
+  <main class="pad" id="main" tabindex="-1">
+    <header class="app-header"><div class="context-name"><b>ChallengeLock</b><span>/</span><span data-i18n="headerContext">Твоя игра. Новые правила.</span></div><div class="header-actions"><div class="rank-chip" id="rank"></div><button class="lang-button" id="lang" aria-label="Switch language / Сменить язык">EN</button></div></header>
+    <section class="panel" id="p-roulette"></section>
+    <section class="panel" id="p-build" hidden></section>
+    <section class="panel" id="p-ban" hidden></section>
+    <section class="panel" id="p-custom" hidden></section>
+    <section class="panel" id="p-history" hidden></section>
+    <footer class="foot"><span id="foot"></span></footer>
   </main>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
-<noscript><p style="padding:20px;color:#e9edf7">Нужен JavaScript / JavaScript required.</p></noscript>
+<noscript><p style="padding:30px">Для ChallengeLock нужен JavaScript / JavaScript is required.</p></noscript>
 <script type="module">import {boot} from './js/ui.js';boot();</script>
 </body>
 </html>

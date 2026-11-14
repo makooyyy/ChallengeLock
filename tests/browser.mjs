@@ -22,7 +22,7 @@ let browser;
 try{
  browser=await chromium.launch({headless:true,...(process.env.BROWSER_CHANNEL?{channel:process.env.BROWSER_CHANNEL}:{})});
  const context=await browser.newContext({reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
- page.on('pageerror',e=>errors.push(e.message));
+ page.on('pageerror',e=>{errors.push(e.message);console.error(e.stack)});
  await page.goto(origin+'/#seed=hello&d=mid&r=0');
  await page.waitForSelector('#contract h2');
  assert(await page.locator('#spin').isVisible());
@@ -70,6 +70,26 @@ try{
  await context.setOffline(true);await page.reload();await page.waitForSelector('#spin');await page.click('#spin');await page.waitForSelector('#contract h2');
  assert(await page.evaluate(async()=>(await caches.keys()).includes('unrelated-test-cache')));
  await context.setOffline(false);
+ // Search must preserve selected heroes even when other cards are hidden.
+ await page.click('[data-tab="custom"]');await page.fill('#hero-search','abrams');
+ assert.equal(await page.locator('.hc:visible').count(),1);
+ await page.check('[data-h="abrams"]');await page.fill('#hero-search','haze');await page.check('[data-h="haze"]');
+ assert.deepEqual(await page.evaluate(async()=>(await import('/js/state.js')).S.sel.sort()),['abrams','haze']);
+ await page.fill('#hero-search','nothing-matches-this');assert(await page.locator('#hero-search-empty').isVisible());
+ await page.click('#hreset');await page.fill('#hero-search','');assert.equal(await page.locator('.hc:visible').count(),42);
+ await page.click('[data-tab="roulette"]');await page.locator('.board-options summary').click();
+ await page.uncheck('#fsame');assert(await page.locator('#fpl').isEnabled());await page.check('#fsame');assert(await page.locator('#fpl').isDisabled());
+ for(const language of ['ru','en']){
+ if(await page.locator('html').getAttribute('lang')!==language)await page.click('#lang');
+ for(const width of [320,390,768,1440]){
+  await page.setViewportSize({width,height:900});
+  for(const tab of ['roulette','build','ban','custom','history']){
+   await page.click('[data-tab="'+tab+'"]');
+   assert(await page.locator('#p-'+tab+' h1').isVisible());
+   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Overflow: '+language+' '+tab+' at '+width);
+  }
+ }
+ }
  assert.deepEqual(errors,[]);
  console.log('PASS browser: deep links, history, locks, clean-session replay, duplicate completion, hash changes, failed-roll transaction, empty builds/bans, corrupt storage, malformed links, language, mobile, offline PWA, cache isolation; no page errors.');
 }finally{await browser?.close();await new Promise(r=>server.close(r))}

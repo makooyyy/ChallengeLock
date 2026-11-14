@@ -1,4 +1,5 @@
 // UI: tabs, reels animation, contract, timer, builds, bans, filters, history.
+import {icon} from './icons.js';
 import {S,RT,persist as saveState,ALL_CATS,RANKS,rankIdx} from './state.js';
 import {t,loc,setDict,setLang} from './i18n.js';
 import {roll,rollBan,DIFF,restoreResult,resultKey,heroPool} from './roulette.js';
@@ -10,8 +11,8 @@ import {parseHash,linkFor,setHash,copy,drawCard} from './share.js';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const RC={common:'#98a3bd',rare:'#4aa3ff',epic:'#b06bff',cursed:'#ff4d82'},RP={common:'#5b6478',rare:'#1f6fd1',epic:'#7a3fd0',cursed:'#e0245e'};
-const BC={weapon:'#ffb02e',vitality:'#4ad3b5',spirit:'#8fa0ff'},CELL=84,ROM=['I','II','III'];
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,mob=()=>matchMedia('(max-width:780px)').matches;
+const BC={weapon:'#a2762e',vitality:'#538563',spirit:'#8271aa'},ROM=['I','II','III'];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const H=id=>RT.data.heroes.find(h=>h.id===id),C=id=>RT.data.challenges.find(c=>c.id===id),I=id=>RT.data.items.find(i=>i.id===id);
 const mmss=ms=>{const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
 const DIFFS=Object.keys(DIFF);
@@ -21,15 +22,25 @@ let tt;function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on
 function persist(){if(!saveState())toast(t('storageError'))}
 let ac;function beep(f,d=.1){if(!S.sound)return;try{ac??=new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type='square';g.gain.value=.04;g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
 const dia=h=>`<div class="dia" style="--c:${h.color}"><span>${esc(h.name[0])}</span>${h.icon?`<img class="pic" src="${esc(h.icon)}" alt="" loading="lazy">`:''}</div>`;
-const heroCell=(h,m)=>`<div class="cell${m?' mid':''}">${dia(h)}<b>${esc(h.name)}</b></div>`;
-const condCell=(c,m)=>`<div class="cell${m?' mid':''}"><div><b>${esc(loc(c.name))}</b><small>${t('cat.'+c.cat)}</small></div></div>`;
-const cellHTML=(i,x,m)=>!x?`<div class="cell${m?' mid':''}"><div><b>—</b></div></div>`:i===0?heroCell(x,m):condCell(x,m);
-const seg=(arr,cur,attr)=>`<div class="seg" role="group">${arr.map(([v,l])=>`<button data-${attr}="${v}" class="${v==cur?'on':''}" aria-pressed="${v==cur}">${l}</button>`).join('')}</div>`;
+const seg=(arr,cur,attr)=>`<div class="seg" role="group" aria-label="${t(attr==='diff'?'difficulty':'heroFilter')}">${arr.map(([v,l])=>`<button data-${attr}="${v}" class="${v==cur?'on':''}" aria-pressed="${v==cur}">${l}</button>`).join('')}</div>`;
+const rarityBadge=x=>`<span class="rarity" style="--rar:${RP[x.rarity]}">${icon('spark',11)} ${t('rar.'+x.rarity)}</span>`;
+const intro=(title,description,action='')=>`<div class="page-intro"><div><div class="eyebrow">DEADLOCK / CHALLENGELOCK</div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;
+const emptyPanel=(glyph,title,description)=>`<div class="empty-panel">${icon(glyph)}<h2>${title}</h2><p>${description}</p></div>`;
+const activeHeroes=()=>RT.data.heroes.filter(h=>h.active!==false);
+function setBusy(busy){
+  const board=$('.mach');if(board)board.setAttribute('aria-busy',String(busy));
+  $$('#spin,#daily,[data-diff],[data-lock]').forEach(b=>b.disabled=busy||(b.dataset.lock!==undefined&&(!RT.cur||(+b.dataset.lock>0&&!RT.cur.conds[+b.dataset.lock-1]))));
+  const reroll=$('#reroll');if(reroll)reroll.disabled=busy||!RT.cur||RT.rerolls<=0;
+  $$('#done,#failb,#tgl').forEach(b=>b.disabled=busy||RT.finished);
+  const label=$('#spin-label');if(label)label.textContent=t(busy?'rolling':'spin');
+}
+
 const resText=x=>`🎯 Deadlock Challenge — ${H(x.hero).name} [${x.rarity.toUpperCase()}]\n${x.conds.map(id=>'• '+loc(C(id).name)).join('\n')}\n${x.sum}×${x.mult}=${x.points} ${t('pts')}\n${linkFor(x)}`;
 
 /* ---------- header / shell ---------- */
-function paintHeader(){const i=rankIdx(S.stats.points);$('#rank').innerHTML=`<span class="mo">${t('rank')}</span><b style="color:#ffb02e">${t('ranks')[i]}</b><span>${S.stats.points}${RANKS[i+1]?' / '+RANKS[i+1]:''}</span>`;$('#lang').textContent=S.lang==='ru'?'EN':'RU'}
-function applyStatic(){$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));$('#foot').textContent=t('footer');paintCatalog();paintHeader()}
+function paintHeader(){const i=rankIdx(S.stats.points);$('#rank').innerHTML=`<span class="rank-icon">${icon('trophy',18)}</span><div class="rank-copy"><b>${t('ranks')[i]}</b><span>${S.stats.points} ${t('pts')}${RANKS[i+1]?' / '+RANKS[i+1]:''}</span></div>`;$('#lang').textContent=S.lang==='ru'?'EN':'RU'}
+
+function applyStatic(){$$('[data-icon]').forEach(e=>e.innerHTML=icon(e.dataset.icon));$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));$('#foot').textContent=t('footer');paintCatalog();paintHeader()}
 function paintCatalog(){
   const el=$('#data-notice');if(!el)return;
   const meta=RT.data.catalog?.heroes;
@@ -42,39 +53,47 @@ function show(tab){RT.tab=tab;$$('.nb').forEach(b=>{const on=b.dataset.tab===tab
 /* ---------- ROULETTE ---------- */
 function viewRoulette(){
   const p=$('#p-roulette');
-  p.innerHTML=`<div><div class="mo" style="color:#8fa0ff">${t('tab.roulette')}</div><h1 class="os">${t('h1a')} <span class="out">${t('h1b')}</span></h1></div>
-  <div class="row"><section class="mach" aria-label="${t('tab.roulette')}"><div class="rg">${[0,1,2,3].map(i=>`<div class="reel" data-i="${i}"><div class="rl mo">${i?t('cond')+' '+ROM[i-1]:t('hero')}</div><div class="vp"><div class="strip"></div></div><button class="lk" data-lock="${i}" aria-pressed="false" aria-label="${t('lock')} ${i?ROM[i-1]:t('hero')}">🔒 <span>${t('lock')}</span></button></div>`).join('')}<div class="pay"></div></div>
-  <div class="fx dk"><div class="sw"><button class="spin" id="spin"><span class="si"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v4"/></svg></span><span class="st">${t('spin')}<small>SPACE</small></span></button></div>
-  <div class="fx" style="align-items:center">${seg(DIFFS.map(d=>[d,t('diff.'+d)]),S.diff,'diff')}<button id="reroll">${t('reroll')} (<span id="rr">${RT.rerolls}</span>)</button><button id="daily">${t('daily')}</button></div></div>
-  <div class="fx opts"><label class="chk"><input type="checkbox" id="snd" ${S.sound?'checked':''}> ${t('soundOn')}</label><label class="chk"><input type="checkbox" id="fsame" ${S.friend.same?'checked':''}> ${t('sameHero')}</label><label class="chk">${t('player')}<input type="number" id="fpl" min="1" max="9" value="${S.friend.player}" class="num"></label><span class="mo">${t('keys')}</span></div></section>
-  <section class="paper" id="contract" aria-live="polite"></section></div>`;
-  paintReels(RT.cur,false);paintContract();
+  p.innerHTML=intro(t('rouletteTitle'),t('rouletteIntro'),`<button id="daily" class="daily-button">${icon('calendar',16)}${t('daily')}</button>`)+`
+  <div class="roulette-layout"><section class="mach" aria-label="${t('tab.roulette')}" aria-busy="false">
+    <div class="board-toolbar"><div class="toolbar-label"><b>${t('difficulty')}</b><small>${t('difficultyHint')}</small></div>${seg(DIFFS.map(d=>[d,t('diff.'+d)]),S.diff,'diff')}</div>
+    <div class="reel-stage"><div class="reel hero-reel" data-i="0"><div class="reel-title"><span>01 / ${t('hero')}</span>${icon('shield',13)}</div><div class="strip"></div><button class="lk" data-lock="0" aria-label="${t('lock')} — ${t('hero')}"></button></div>
+    <div class="conditions">${[1,2,3].map(i=>`<div class="reel condition-reel" data-i="${i}"><div class="condition-top"><div class="reel-title"><span class="condition-number">0${i+1}</span><span>${t('cond')} ${ROM[i-1]}</span></div><button class="lk" data-lock="${i}" aria-label="${t('lock')} — ${t('cond')} ${ROM[i-1]}"></button></div><div class="strip"></div></div>`).join('')}</div></div>
+    <div class="filter-summary"><span>${icon('shield',12)}${heroPool(RT.data.heroes,S).length} ${t('heroesCount')}</span><span class="sep">/</span><span>${S.cats.length} ${t('categoriesCount')}</span><button data-tab="custom">${t('configure')}${icon('arrow',12)}</button></div>
+    <div class="board-actions"><button class="spin" id="spin">${icon('shuffle')}<span id="spin-label">${t('spin')}</span><kbd>SPACE</kbd></button><button class="reroll-button" id="reroll">${icon('refresh',17)}${t('reroll')}<small id="rr">${RT.rerolls}</small></button></div>
+    <details class="board-options"><summary><span>${icon('settings',14)}${t('extraSettings')}</span>${icon('chevron',14)}</summary><div class="options-content"><label class="chk"><input type="checkbox" id="snd" ${S.sound?'checked':''}>${t('soundOn')}</label><label class="chk"><input type="checkbox" id="fsame" ${S.friend.same?'checked':''}>${t('sameHero')}</label><label class="chk">${t('player')}<input type="number" id="fpl" min="1" max="9" value="${S.friend.player}" class="num" ${S.friend.same?'disabled':''}></label><p class="keyboard-hint">${t('keys')}</p></div></details>
+  </section><section class="paper" id="contract" aria-live="polite"></section></div>`;
+  paintReels(RT.cur,false);paintContract();setBusy(RT.busy);
 }
-function paintReels(res,anim){
-  const ps=[];
+function paintReels(res,animate){
+  const promises=[];
   for(let i=0;i<4;i++){
-    const st=$(`.reel[data-i="${i}"] .strip`);if(!st)continue;
-    const win=res?(i===0?H(res.hero):C(res.conds[i-1])):null,pool=i===0?RT.data.heroes:RT.data.challenges;
-    const spin=anim&&!reduce&&!RT.locks[i]&&win,L=spin?16+i*4:1;
-    let h='';for(let k=0;k<L;k++)h+=cellHTML(i,pick(Math.random,pool),false);
-    h+=cellHTML(i,win,true)+cellHTML(i,pick(Math.random,pool),false);st.innerHTML=h;
-    const off=(mob()?L:L-1)*CELL;st.style.transform=`translateY(-${off}px)`;
-    const lock=$(`.reel[data-i="${i}"] .lk`);lock.classList.toggle('on',RT.locks[i]);lock.setAttribute('aria-pressed',String(RT.locks[i]));lock.disabled=!res||(i>0&&!res.conds[i-1]);
-    if(spin)ps.push(st.animate([{transform:'translateY(0)'},{transform:`translateY(-${off}px)`}],{duration:1300+i*380,easing:'cubic-bezier(.12,.72,.12,1)'}).finished);
+    const el=$(`.reel[data-i="${i}"] .strip`);if(!el)continue;
+    const entry=res?(i===0?H(res.hero):C(res.conds[i-1])):null;
+    el.closest('.reel').hidden=!!res&&i>0&&!entry;
+    if(i===0){
+      el.innerHTML=entry?`<div class="hero-display" style="--hero-color:${entry.color}"><div class="hero-avatar"><span>${esc(entry.name[0])}</span><img class="pic" src="${esc(entry.icon)}" alt=""></div><div><h3>${esc(entry.name)}</h3><p>${t('yourHero')}</p></div></div>`:
+      `<div class="hero-empty"><div class="portrait-stack">${['abrams','ivy','haze'].map(id=>H(id)).filter(Boolean).map(h=>`<img src="${esc(h.icon)}" alt="">`).join('')}</div><div><b>${t('whoNext')}</b><small>${activeHeroes().length} ${t('heroesReady')}</small></div></div>`;
+    }else el.innerHTML=entry?`<div class="condition-result"><h3>${esc(loc(entry.name))}</h3><p>${esc(loc(entry.desc))}</p></div>`:`<div class="condition-empty">${res?t('unusedCondition'):t('conditionPlaceholder')}</div>`;
+    const lock=$(`.reel[data-i="${i}"] .lk`);lock.innerHTML=icon(RT.locks[i]?'lock':'unlock',12)+`<span>${t(RT.locks[i]?'locked':'lock')}</span>`;lock.title=t('lockHelp');lock.classList.toggle('on',RT.locks[i]);lock.setAttribute('aria-pressed',String(RT.locks[i]));lock.disabled=!entry||RT.busy;
+    if(animate&&!reduce&&entry&&!RT.locks[i])promises.push(el.animate([{opacity:.1,transform:'translateY(9px)'},{opacity:1,transform:'translateY(0)'}],{duration:360+i*80,easing:'ease-out'}).finished);
   }
-  return Promise.all(ps);
+  return Promise.all(promises);
 }
 function paintContract(){
   const el=$('#contract');if(!el)return;const x=RT.cur;
-  if(!x){el.innerHTML=`<div class="mo" style="color:#4a5370">${t('empty')}</div>`;return}
-  const h=H(x.hero),col=RP[x.rarity],fav=S.favs.some(f=>resultKey(f)===resultKey(x));
-  el.innerHTML=`<div class="mo" style="color:#4a5370">seed ${esc(x.seed)} · r${x.r}</div><h2 class="os" style="font-size:30px;margin:6px 0 10px">${esc(h.name)}</h2><span class="stamp" style="color:${col};border-color:${col}">${t('rar.'+x.rarity)}</span>
-  ${x.conds.map((id,i)=>{const c=C(id);return `<div class="cl"><i></i><div style="flex:1">${ROM[i]}. ${esc(loc(c.name))}<small>${esc(loc(c.desc))}</small></div><span>x${c.mult}</span></div>`}).join('')}
-  <div class="fx" style="justify-content:space-between;align-items:baseline;margin:14px 0"><span class="mo" style="color:#4a5370">${t('reward')}</span><b class="os" style="font-size:26px">${x.sum} × ${x.mult} = ${x.points} ${t('pts')}</b></div>
-  <div class="fx" style="gap:8px"><button class="pb" id="done" ${RT.finished?'disabled':''}>${t('done')}</button><button class="pb o" id="failb" ${RT.finished?'disabled':''}>${t('fail')}</button></div>
-  <div class="fx" style="justify-content:space-between;margin-top:14px;align-items:center"><b id="tm" class="mono-t">${mmss(RT.timer.ms)}</b><div class="fx" style="gap:6px"><button class="pb o sm" id="tgl">${RT.timer.run?t('pause'):t('start')}</button><button class="pb o sm" id="fav" aria-pressed="${fav}">${fav?'★':'☆'}</button></div></div>
-  <div class="fx" style="gap:6px;margin-top:10px"><button class="pb o sm" id="cl">${t('copyLink')}</button><button class="pb o sm" id="ct">${t('copyText')}</button><button class="pb o sm" id="cp">${t('png')}</button></div>`;
+  if(!x){el.innerHTML=`<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${icon('shield',16)}</div><div class="contract-empty"><div class="contract-illustration">${icon('lock',28)}</div><h2>${t('emptyTitle')}</h2><p>${t('empty')}</p><div class="steps"><b>1</b>${t('stepSpin')}<span>→</span><b>2</b>${t('stepPlay')}<span>→</span><b>3</b>${t('stepEarn')}</div></div>`;return}
+  const h=H(x.hero),fav=S.favs.some(f=>resultKey(f)===resultKey(x));
+  el.innerHTML=`<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${rarityBadge(x)}</div>
+  <div class="contract-hero">${dia(h)}<div><h2>${esc(h.name)}</h2><p>${t('diff.'+x.diff)} · ${x.conds.length} ${t('conditionsCount')}</p></div><button class="icon-button" id="fav" aria-label="${t('fav')}" title="${t('fav')}" aria-pressed="${fav}">${icon('star',18)}</button></div>
+  <div class="reward-box"><div><div class="eyebrow">${t('reward')}</div><div class="reward-value">+${x.points} <small>${t('pts')}</small></div></div>${icon('trophy',36)}</div>
+  <p class="contract-note">${t('contractHint')}</p>
+  ${RT.finished?`<div class="completion-status ${x.outcome==='fail'?'failed':''}">${icon(x.outcome==='done'?'check':'close',17)}${t(x.outcome==='done'?'completedStatus':'failedStatus')}</div>`:''}
+  <div class="result-actions"><button class="pb" id="done" ${RT.finished?'disabled':''}>${icon('check',16)}${t('done')}</button><button class="pb o" id="failb" ${RT.finished?'disabled':''}>${icon('close',15)}${t('fail')}</button></div>
+  <div class="timer-row"><div class="timer-readout">${icon('clock',17)}<b id="tm" class="mono-t">${mmss(RT.timer.ms)}</b></div><button class="timer-toggle" id="tgl" ${RT.finished?'disabled':''}>${icon(RT.timer.run?'clock':'play',12)}${RT.timer.run?t('pause'):t('start')}</button></div>
+  <div class="share-actions"><button id="cl">${icon('link',14)}${t('copyLink')}</button><button id="ct">${icon('copy',14)}${t('copyText')}</button><button id="cp">${icon('download',14)}${t('png')}</button></div>
+  <div class="contract-seed">SEED / ${esc(x.seed)} · R${x.r}</div>`;
 }
+
 function particles(col){const m=$('.mach');if(!m||reduce)return;for(let i=0;i<26;i++){const s=document.createElement('i');s.className='pt';s.style.cssText=`--x:${(Math.random()-.5)*500}px;--y:${-Math.random()*260}px;background:${col};left:50%;top:50%`;m.append(s);setTimeout(()=>s.remove(),1000)}}
 async function doRoll(reroll,opt={}){
   if(RT.busy)return;
@@ -93,9 +112,9 @@ async function doRoll(reroll,opt={}){
   S.history.unshift(res);S.history=S.history.slice(0,50);
   RT.cur=res;RT.finished=!!res.outcome;RT.timer={ms:0,run:false,t0:0};
   persist();setHash(res);show('roulette');
-  RT.busy=true;beep(330);
+  RT.busy=true;setBusy(true);beep(330);
   try{await paintReels(res,!opt.result)}catch(e){}
-  RT.busy=false;beep(res.rarity==='cursed'?160:660,.18);
+  RT.busy=false;setBusy(false);beep(res.rarity==='cursed'?160:660,.18);
   if(res.rarity==='epic'||res.rarity==='cursed'){particles(RC[res.rarity]);const m=$('.mach');if(!reduce&&m){m.classList.add('shake');setTimeout(()=>m.classList.remove('shake'),450)}}
   if(RT.pendingHash){const next=RT.pendingHash;RT.pendingHash=null;fromHash(next)}
 }
@@ -110,38 +129,40 @@ async function png(){const x=RT.cur;if(!x)return;const cv=document.createElement
 /* ---------- BUILD ---------- */
 function viewBuild(){
   const b=RT.build,p=$('#p-build');
-  p.innerHTML=`<div><div class="mo" style="color:#8fa0ff">${t('tab.build')}</div><h1 class="os">${t('tab.build')}</h1></div>
-  <div class="fx" style="align-items:center"><label class="chk">${t('budget')} <select id="bud">${[2500,5000,8000,16000,32000].map(v=>`<option ${v==(RT.budget||5000)?'selected':''}>${v}</option>`).join('')}</select></label><button class="spin small" id="rb">${t('build')}</button>${b?`<button id="cb">${t('copyText')}</button>`:''}</div>
-  ${b?`<div class="card"><div class="fx" style="align-items:center">${dia(H(b.hero))}<h2 class="os">${esc(H(b.hero).name)}</h2><span class="mo">${t('spent')}: ${b.spent}/${b.budget}</span></div><div class="mo" style="margin:14px 0 6px">${t('order')}</div><ol class="ol">${b.items.map(id=>{const i=I(id);return `<li><i style="background:${BC[i.branch]}"></i><b>${esc(i.name)}</b><span class="mo">${i.branch} · T${i.tier}</span><span>${i.cost}</span></li>`}).join('')}</ol></div>`:`<div class="mo">${t('empty')}</div>`}`;
+  p.innerHTML=intro(t('buildTitle'),t('buildIntro'))+`<div class="control-bar"><label>${t('budget')}<select id="bud">${[2500,5000,8000,16000,32000].map(v=>`<option value="${v}" ${v===(RT.budget||5000)?'selected':''}>${v.toLocaleString(S.lang)}</option>`).join('')}</select></label><div class="fx"><button class="spin small" id="rb">${icon('shuffle',17)}${t('build')}</button>${b?`<button id="cb">${icon('copy',16)}${t('copyText')}</button>`:''}</div></div>`;
+  if(!b){p.innerHTML+=emptyPanel('layers',t('buildEmptyTitle'),t('buildEmpty'));return}
+  p.innerHTML+=`<div class="build-hero">${dia(H(b.hero))}<div><div class="eyebrow">${t('yourHero')}</div><h2>${esc(H(b.hero).name)}</h2><p>${b.items.length} ${t('itemsCount')}</p></div><div class="budget-summary"><b>${b.spent.toLocaleString(S.lang)}</b> / ${b.budget.toLocaleString(S.lang)}<div class="budget-meter"><span style="width:${b.spent/b.budget*100}%"></span></div></div></div>
+  <div><div class="section-heading"><h2>${t('order')}</h2><span class="muted mo">${t('remaining')}: ${b.budget-b.spent}</span></div><ol class="item-grid">${b.items.map(id=>{const i=I(id);return `<li class="item-card" style="--branch:${BC[i.branch]}"><div class="item-art">${icon('layers')}${i.icon?`<img class="asset-img" src="${esc(i.icon)}" alt="" loading="lazy">`:''}</div><div class="item-info"><small>${t('branch.'+i.branch)} · T${i.tier}</small><h3>${esc(i.name)}</h3><div class="item-price"><b>${i.cost.toLocaleString(S.lang)}</b><small>${i.isActive?t('activeItem'):t('passiveItem')}</small></div></div></li>`}).join('')}</ol></div>`;
 }
-/* ---------- BAN ---------- */
 function viewBan(){
   const b=RT.ban,p=$('#p-ban');
-  p.innerHTML=`<div><div class="mo" style="color:#8fa0ff">${t('tab.ban')}</div><h1 class="os">${t('tab.ban')}</h1></div>
-  <div class="fx"><button class="spin small" data-ban="ability">${t('banAbility')}</button><button class="spin small" data-ban="item">${t('banItem')}</button></div>
-  ${b?`<div class="card"><div class="fx" style="align-items:center">${dia(H(b.hero))}<h2 class="os">${esc(H(b.hero).name)}</h2></div><p class="big">⛔ ${b.slot?t('slot')+b.slot:esc(I(b.item).name)}</p><button id="cb2">${t('copyText')}</button></div>`:`<div class="mo">${t('empty')}</div>`}`;
+  p.innerHTML=intro(t('banTitle'),t('banIntro'))+`<div class="control-bar"><span class="muted">${t('banChoose')}</span><div class="fx"><button class="spin small" data-ban="ability">${icon('spark',17)}${t('banAbility')}</button><button data-ban="item">${icon('layers',17)}${t('banItem')}</button></div></div>`;
+  p.innerHTML+=b?`<div class="card ban-result"><div class="ban-label">${icon('ban',16)}${t('banResult')}</div>${dia(H(b.hero))}<h2>${esc(H(b.hero).name)}</h2><h3>${b.slot?t('slot')+b.slot:esc(I(b.item).name)}</h3><p class="muted">${t('banHint')}</p><button id="cb2">${icon('copy',16)}${t('copyText')}</button></div>`:emptyPanel('ban',t('banEmptyTitle'),t('banEmpty'));
 }
-/* ---------- CUSTOM ---------- */
 function applyHeroSel(){S.excluded=S.heroMode==='exclude'?S.sel.slice():[];S.only=S.heroMode==='only'?S.sel.slice():[];persist()}
+function updateHeroSearch(){
+  const query=(RT.heroSearch||'').toLowerCase().trim();let count=0;
+  $$('.hc').forEach(el=>{el.hidden=!el.dataset.search.includes(query);if(!el.hidden)count++});
+  const countEl=$('#hero-count'),available=heroPool(RT.data.heroes,S).length;
+  if(countEl){countEl.textContent=t('available')+': '+available+' / '+activeHeroes().length;countEl.classList.toggle('warning',available===0)}
+  const empty=$('#hero-search-empty');if(empty)empty.hidden=count>0;
+}
 function viewCustom(){
   const p=$('#p-custom');
-  p.innerHTML=`<div><div class="mo" style="color:#8fa0ff">${t('tab.custom')}</div><h1 class="os">${t('tab.custom')}</h1></div>
-  <div class="card"><div class="mo">${t('cats')}</div><div class="fx" style="margin-top:10px">${ALL_CATS.map(c=>`<label class="chk"><input type="checkbox" data-cat="${c}" ${S.cats.includes(c)?'checked':''}> ${t('cat.'+c)}</label>`).join('')}<label class="chk"><input type="checkbox" id="team" ${S.team?'checked':''}> ${t('cat.tm')}: team</label></div></div>
-  <div class="card"><div class="fx" style="justify-content:space-between;align-items:center"><div class="mo">${t('heroFilter')}</div>${seg([['exclude',t('exclude')],['only',t('onlyHeroes')]],S.heroMode,'hm')}<button id="hreset">${t('reset')}</button></div>
-  <div class="hg">${RT.data.heroes.filter(h=>h.active!==false).map(h=>`<label class="hc"><input type="checkbox" data-h="${h.id}" ${S.sel.includes(h.id)?'checked':''}>${dia(h)}<span>${esc(h.name)}</span></label>`).join('')}</div></div>`;
+  p.innerHTML=intro(t('customTitle'),t('customIntro'))+`<div class="card"><div class="section-heading"><div><h2>${t('cats')}</h2><p>${t('categoriesHint')}</p></div>${icon('settings',20)}</div><div class="cat-grid">${ALL_CATS.map(c=>`<label class="cat-choice"><input type="checkbox" data-cat="${c}" ${S.cats.includes(c)?'checked':''}>${t('cat.'+c)}</label>`).join('')}</div><div class="team-row"><label class="chk"><input type="checkbox" id="team" ${S.team?'checked':''}>${t('teamMode')}</label><p>${t('teamHint')}</p></div></div>
+  <div class="card"><div class="section-heading"><div><h2>${t('heroFilter')}</h2><p>${t('heroFilterHint')}</p></div>${seg([['exclude',t('exclude')],['only',t('onlyHeroes')]],S.heroMode,'hm')}</div><div class="hero-tools"><label class="search-wrap">${icon('search',16)}<input class="search-input" id="hero-search" type="search" placeholder="${t('searchHeroes')}" aria-label="${t('searchHeroes')}" value="${esc(RT.heroSearch||'')}"></label><span class="hero-count" id="hero-count" aria-live="polite"></span><button id="hreset">${t('reset')}</button></div>
+  <div class="hg">${activeHeroes().map(h=>`<label class="hc" data-search="${esc((h.name+' '+h.id).toLowerCase())}"><input type="checkbox" data-h="${h.id}" ${S.sel.includes(h.id)?'checked':''}>${dia(h)}<span>${esc(h.name)}</span></label>`).join('')}</div><p class="search-empty" id="hero-search-empty" hidden>${t('noSearchResults')}</p></div>`;
+  updateHeroSearch();
 }
-/* ---------- HISTORY ---------- */
 function viewHistory(){
-  const p=$('#p-history'),row=x=>`<li><a href="${linkFor(x)}"><b>${esc(H(x.hero)?.name||x.hero)}</b> <span style="color:${RC[x.rarity]}">${t('rar.'+x.rarity)}</span><small>${x.conds.map(id=>esc(loc(C(id)?.name||id))).join(' · ')}</small></a><span class="mo">${x.outcome==='done'?'✔ +'+x.points:x.outcome==='fail'?'✘':t('pending')}</span></li>`;
-  p.innerHTML=`<div><div class="mo" style="color:#8fa0ff">${t('tab.history')}</div><h1 class="os">${t('stats')}</h1></div>
-  <div class="fx stat"><div class="card"><span class="mo">${t('won')}</span><b class="os">${S.stats.done}</b></div><div class="card"><span class="mo">${t('lost')}</span><b class="os">${S.stats.fail}</b></div><div class="card"><span class="mo">${t('total')}</span><b class="os">${S.stats.points}</b></div></div>
-  <div class="card"><div class="mo">${t('favs')}</div><ul class="hl">${S.favs.map(row).join('')||`<li class="mo">${t('noHist')}</li>`}</ul></div>
-  <div class="card"><div class="mo">${t('hist')}</div><ul class="hl">${S.history.map(row).join('')||`<li class="mo">${t('noHist')}</li>`}</ul></div>`;
+  const p=$('#p-history'),row=x=>`<li><a href="${linkFor(x)}">${H(x.hero)?dia(H(x.hero)):''}<div class="history-copy"><div class="fx" style="gap:6px"><b>${esc(H(x.hero)?.name||x.hero)}</b>${rarityBadge(x)}</div><small>${x.conds.map(id=>esc(loc(C(id)?.name||id))).join(' · ')}</small></div></a><span class="history-status ${x.outcome==='fail'?'failed':''}">${x.outcome==='done'?'✓ +'+x.points:x.outcome==='fail'?'×':t('pending')}</span></li>`;
+  p.innerHTML=intro(t('historyTitle'),t('historyIntro'))+`<div class="stat">${[['won',S.stats.done,'check'],['lost',S.stats.fail,'close'],['total',S.stats.points,'trophy']].map(([label,value,glyph])=>`<div class="card"><div><span>${t(label)}</span><b>${value}</b></div>${icon(glyph,30)}</div>`).join('')}</div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history',18)}</div><ul class="hl">${S.history.map(row).join('')||`<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star',18)}</div><ul class="hl">${S.favs.map(row).join('')||`<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
 }
 
 /* ---------- events ---------- */
 function bind(){
   document.addEventListener('click',async e=>{
+    if(e.target.closest('.skip-link')){e.preventDefault();$('#main').focus();return}
     const a=e.target.closest('.hl a');if(a){e.preventDefault();const h=parseHash(new URL(a.href).hash);if(h)return fromHash(h)}
     const b=e.target.closest('button');if(!b)return;const d=b.dataset;
     if(d.tab)return show(d.tab);
@@ -151,9 +172,9 @@ function bind(){
     if(b.id==='reroll')return doRoll(true);
     if(b.id==='daily')return doRoll(false,{seed:dailySeed()});
     if(d.diff){S.diff=d.diff;RT.locks=[false,false,false,false];paintReels(RT.cur,false);persist();return $$('[data-diff]').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)})}
-    if(d.lock!==undefined){const i=+d.lock;if(!RT.cur||(i>0&&!RT.cur.conds[i-1]))return;RT.locks[i]=!RT.locks[i];b.classList.toggle('on',RT.locks[i]);return b.setAttribute('aria-pressed',RT.locks[i])}
+    if(d.lock!==undefined){const i=+d.lock;if(!RT.cur||(i>0&&!RT.cur.conds[i-1]))return;RT.locks[i]=!RT.locks[i];paintReels(RT.cur,false);return}
     if(b.id==='done')return finish('done');if(b.id==='failb')return finish('fail');
-    if(b.id==='tgl'){const T=RT.timer;T.run=!T.run;if(T.run)T.t0=Date.now()-T.ms;return paintContract()}
+    if(b.id==='tgl'){if(RT.finished)return;const T=RT.timer;T.run=!T.run;if(T.run)T.t0=Date.now()-T.ms;return paintContract()}
     if(b.id==='fav'){const x=RT.cur,k=f=>resultKey(f)===resultKey(x);S.favs=S.favs.some(k)?S.favs.filter(f=>!k(f)):[{...x},...S.favs].slice(0,50);persist();return paintContract()}
     if(b.id==='cl')return toast(await copy(linkFor(RT.cur))?t('copied'):t('error'));
     if(b.id==='ct')return toast(await copy(resText(RT.cur))?t('copied'):t('error'));
@@ -168,18 +189,19 @@ function bind(){
   document.addEventListener('change',e=>{const i=e.target;
     if(i.dataset.cat){S.cats=$$('[data-cat]').filter(x=>x.checked).map(x=>x.dataset.cat);if(!S.cats.length){S.cats=[i.dataset.cat];i.checked=true}persist()}
     else if(i.id==='team'){S.team=i.checked;persist()}
-    else if(i.dataset.h){S.sel=$$('[data-h]').filter(x=>x.checked).map(x=>x.dataset.h);applyHeroSel()}
+    else if(i.dataset.h){S.sel=$$('[data-h]').filter(x=>x.checked).map(x=>x.dataset.h);applyHeroSel();updateHeroSearch()}
     else if(i.id==='snd'){S.sound=i.checked;persist()}
-    else if(i.id==='fsame'){S.friend.same=i.checked;persist()}
+    else if(i.id==='fsame'){S.friend.same=i.checked;const player=$('#fpl');if(player)player.disabled=S.friend.same;persist()}
     else if(i.id==='fpl'){S.friend.player=Math.max(1,Math.min(9,+i.value||1));persist()}});
+  document.addEventListener('input',e=>{if(e.target.id==='hero-search'){RT.heroSearch=e.target.value;updateHeroSearch()}});
   document.addEventListener('keydown',e=>{
-    if(RT.tab!=='roulette'||e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input,select,textarea'))return;
+    if(RT.tab!=='roulette'||e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input,select,textarea,summary,[contenteditable="true"]'))return;
     if(e.code==='Space'&&!e.target.closest('button,a')){e.preventDefault();doRoll(false)}
     else if(e.code==='KeyR')doRoll(true);
     else if(e.code==='KeyL'){const b=$('[data-lock="0"]');if(b)b.click()}});
   addEventListener('hashchange',()=>{const h=parseHash();if(h)fromHash(h)});
-  document.addEventListener('error',e=>{if(e.target.matches?.('img.pic'))e.target.remove()},true);
-  matchMedia('(max-width:780px)').addEventListener('change',()=>{if(RT.tab==='roulette')paintReels(RT.cur,false)});
+  document.addEventListener('error',e=>{if(e.target.matches?.('img.pic,img.asset-img'))e.target.remove()},true);
+
 }
 function fromHash(h){
   if(RT.busy){RT.pendingHash=h;return}

@@ -1,0 +1,27 @@
+const paths={
+  shuffle:'M18 3h3v3M3 18l6-6M15 6l6-3M18 21h3v-3M3 6l6 6 6 6 6 3',
+  dice:'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM8 8h.01M16 8h.01M12 12h.01M8 16h.01M16 16h.01',
+  refresh:'M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-2l2 3M4 16l2 3a7 7 0 0 0 12-2',
+  lock:'M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5ZM12 14v3',
+  unlock:'M7 10V7a5 5 0 0 1 9-3M5 10h14v11H5ZM12 14v3',
+  arrow:'M4 12h16M14 6l6 6-6 6',
+  check:'m5 12 4 4L19 6',
+  close:'m6 6 12 12M18 6 6 18',
+  star:'m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9Z',
+  clock:'M12 8v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
+  link:'m10 13 4-2M9 16l-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0M15 8l1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0',
+  copy:'M8 8h13v13H8ZM16 4V2H2v14h2',
+  download:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',
+  settings:'M4 7h16M4 17h16M8 4v6M16 14v6',
+  search:'M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z',
+  shield:'m12 3 9 4v5c0 5-9 9-9 9S3 17 3 12V7Z',
+  ban:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM6 6l12 12',
+  layers:'m12 2 10 6-10 6L2 8Zm-10 11 10 6 10-6M2 18l10 6 10-6',
+  history:'M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2',
+  calendar:'M4 5h16v16H4ZM8 2v6M16 2v6M4 11h16',
+  spark:'m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z',
+  chevron:'m6 9 6 6 6-6',
+  play:'m8 4 12 8-12 8Z',
+  trophy:'M8 3h8v8a4 4 0 0 1-8 0ZM8 5H3v3a5 5 0 0 0 5 5M16 5h5v3a5 5 0 0 1-5 5M12 15v5M7 21h10'
+};
+export const icon=(name,size=20)=>`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${paths[name]||paths.spark}"/></svg>`;

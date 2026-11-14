@@ -1,7 +1,7 @@
 // A release caches code and data together. Bump VERSION for every deployment.
 const CATALOG_VERSION='7df33ce9dbedca22';
-const PREFIX='challengelock:'+self.registration.scope+':',VERSION=PREFIX+'v3:'+CATALOG_VERSION;
-const FILES=['./','index.html','css/style.css','js/ui.js','js/state.js','js/rng.js','js/roulette.js','js/builds.js','js/storage.js','js/share.js','js/i18n.js','js/validation.js','data/heroes.json','data/items.json','data/challenges.json','data/i18n.json','manifest.json','assets/icon.svg'];
+const PREFIX='challengelock:'+self.registration.scope+':',VERSION=PREFIX+'v4:'+CATALOG_VERSION;
+const FILES=['./','index.html','css/style.css','js/ui.js','js/icons.js','js/state.js','js/rng.js','js/roulette.js','js/builds.js','js/storage.js','js/share.js','js/i18n.js','js/validation.js','data/heroes.json','data/items.json','data/challenges.json','data/i18n.json','manifest.json','assets/icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(VERSION).then(c=>c.addAll(FILES))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(PREFIX)&&k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{

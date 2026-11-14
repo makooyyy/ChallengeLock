@@ -1,1 +1,17 @@
-{"name":"Deadlock Challenge Roulette","short_name":"DL Roulette","start_url":"./","display":"standalone","background_color":"#070a12","theme_color":"#070a12","lang":"ru","icons":[{"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "name": "ChallengeLock — Deadlock Challenges",
+  "short_name": "ChallengeLock",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f2ec",
+  "theme_color": "#172c2a",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

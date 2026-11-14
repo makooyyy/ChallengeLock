@@ -8,7 +8,12 @@
 Локально: `python3 -m http.server` (ES modules и fetch не работают с `file://`).
 
 ## Структура
-`index.html`, `css/style.css`, `js/{rng,state,storage,i18n,roulette,builds,share,validation,ui}.js`, `data/{heroes,items,challenges,i18n}.json`, `assets/`, `manifest.json`, `sw.js`, `tests/`.
+`index.html`, `css/style.css`, `js/{rng,state,storage,i18n,roulette,builds,share,validation,icons,ui}.js`, `data/{heroes,items,challenges,i18n}.json`, `assets/`, `manifest.json`, `sw.js`, `scripts/`, `tests/`.
+
+## Интерфейс
+Светлый фон, тёмная игровая панель и янтарные основные действия. Герой и условия показаны отдельными карточками; пустые условия после броска скрываются. Контракт содержит награду, результат, таймер, избранное и экспорт. На телефоне навигация закреплена снизу, а кнопка генерации находится над результатом.
+
+Настройки героев поддерживают поиск и сохраняют выбор скрытых поиском карточек. Дополнительные параметры звука и совместной игры раскрываются отдельно. В билдах показаны изображения, ветки, уровни, цены и активируемость предметов. Учитываются `prefers-reduced-motion`, фокус клавиатуры, состояния кнопок и RU/EN. Браузерные тесты проверяют все пять вкладок на ширинах 320, 390, 768 и 1440 px.
 
 ## Данные и точность
 Каталог получен из [Deadlock API](https://deadlock-api.com/), версия клиента **6861**: **42 доступных героя и 156 предметов T1–T4**. Оба файла загружаются для одной зафиксированной версии через `/v1/assets/heroes` и `/v1/assets/items` на `https://api.deadlock-api.com`. Документация: https://api.deadlock-api.com/docs; схема: https://api.deadlock-api.com/openapi.json.
