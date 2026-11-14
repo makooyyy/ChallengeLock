@@ -1,157 +1,2585 @@
 {
- "_note": "Только T1/T2 (500/1250 душ). Добавьте T3/T4 из API — см. README.",
- "items": [
-  {
-   "id": "basic-magazine",
-   "name": "Basic Magazine",
-   "branch": "weapon",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
+  "_meta": {
+    "schemaVersion": 1,
+    "clientVersion": 6861,
+    "retrievedAt": "2026-11-14T13:40:29.803Z",
+    "revision": "7df33ce9dbedca22",
+    "provider": "Deadlock API",
+    "providerUrl": "https://deadlock-api.com/",
+    "verification": "Matched to the provider snapshot; not independently verified by Valve.",
+    "source": "https://api.deadlock-api.com/v1/assets/items?client_version=6861&language=english",
+    "sha256": "ed77a501256bee9cdd862948ea736e89afad62392461bc3a978dc9d0bbc7a4f4",
+    "selection": "type=upgrade, shopable, not disabled, normal tiers 1–4; T5 excluded"
   },
-  {
-   "id": "close-quarters",
-   "name": "Close Quarters",
-   "branch": "weapon",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "headshot-booster",
-   "name": "Headshot Booster",
-   "branch": "weapon",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "high-velocity-mag",
-   "name": "High-Velocity Mag",
-   "branch": "weapon",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "monster-rounds",
-   "name": "Monster Rounds",
-   "branch": "weapon",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "extra-health",
-   "name": "Extra Health",
-   "branch": "vitality",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "extra-regen",
-   "name": "Extra Regen",
-   "branch": "vitality",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "extra-stamina",
-   "name": "Extra Stamina",
-   "branch": "vitality",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "melee-lifesteal",
-   "name": "Melee Lifesteal",
-   "branch": "vitality",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "sprint-boots",
-   "name": "Sprint Boots",
-   "branch": "vitality",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "extra-spirit",
-   "name": "Extra Spirit",
-   "branch": "spirit",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "mystic-burst",
-   "name": "Mystic Burst",
-   "branch": "spirit",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "mystic-regen",
-   "name": "Mystic Regen",
-   "branch": "spirit",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "rapid-recharge",
-   "name": "Rapid Recharge",
-   "branch": "spirit",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "infuser",
-   "name": "Infuser",
-   "branch": "spirit",
-   "tier": 1,
-   "cost": 500,
-   "verified": false
-  },
-  {
-   "id": "titanic-magazine",
-   "name": "Titanic Magazine",
-   "branch": "weapon",
-   "tier": 2,
-   "cost": 1250,
-   "verified": false
-  },
-  {
-   "id": "active-reload",
-   "name": "Active Reload",
-   "branch": "weapon",
-   "tier": 2,
-   "cost": 1250,
-   "verified": false
-  },
-  {
-   "id": "healing-rite",
-   "name": "Healing Rite",
-   "branch": "vitality",
-   "tier": 2,
-   "cost": 1250,
-   "verified": false
-  },
-  {
-   "id": "mystic-vulnerability",
-   "name": "Mystic Vulnerability",
-   "branch": "spirit",
-   "tier": 2,
-   "cost": 1250,
-   "verified": false
-  }
- ]
+  "items": [
+    {
+      "id": "active-reload",
+      "apiId": 381961617,
+      "className": "upgrade_active_reload",
+      "name": "Active Reload",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/active_reload.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "alchemical-fire",
+      "apiId": 1932939246,
+      "className": "upgrade_thermal_detonator",
+      "name": "Alchemical Fire",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/alchemical_fire.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "arcane-surge",
+      "apiId": 1150006784,
+      "className": "upgrade_arcane_surge",
+      "name": "Arcane Surge",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge.webp",
+      "isActive": false,
+      "components": [
+        "extra-stamina"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "arctic-blast",
+      "apiId": 3812615317,
+      "className": "upgrade_arctic_blast",
+      "name": "Arctic Blast",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arctic_blast.webp",
+      "isActive": true,
+      "components": [
+        "cold-front"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "armor-piercer",
+      "apiId": 673001892,
+      "className": "upgrade_aprounds",
+      "name": "Armor Piercer",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/armor_piercing_rounds.webp",
+      "isActive": false,
+      "components": [
+        "high-velocity-mag"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "ballistic-enchantment",
+      "apiId": 3294954488,
+      "className": "upgrade_bulletshredimbue",
+      "name": "Ballistic Enchantment",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/alchemical_seal.webp",
+      "isActive": false,
+      "components": [
+        "mystic-expansion"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "basic-magazine",
+      "apiId": 1548066885,
+      "className": "upgrade_clip_size",
+      "name": "Extended Magazine",
+      "branch": "weapon",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/basic_magazine.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "escalating-resilience",
+        "titanic-magazine"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "battle-vest",
+      "apiId": 1235347618,
+      "className": "upgrade_regenerating_bullet_shield",
+      "name": "Battle Vest",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/battle_vest.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "berserker",
+      "apiId": 1414319208,
+      "className": "upgrade_berserker",
+      "name": "Berserker",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/berserker.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "blood-tribute",
+      "apiId": 989206714,
+      "className": "upgrade_blood_tribute",
+      "name": "Blood Tribute",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/blood_tribute.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "boundless-spirit",
+      "apiId": 2519598785,
+      "className": "upgrade_boundless_spirit",
+      "name": "Boundless Spirit",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/boundless_spirit.webp",
+      "isActive": false,
+      "components": [
+        "improved-spirit"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "bullet-lifesteal",
+      "apiId": 499683006,
+      "className": "upgrade_vampire",
+      "name": "Bullet Lifesteal",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/bullet_lifesteal.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "leech",
+        "fury-trance",
+        "vampiric-burst"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "bullet-resilience",
+      "apiId": 3140772621,
+      "className": "upgrade_improved_bullet_armor",
+      "name": "Bullet Resilience",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/bullet_resilience.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "bullet-resist-shredder",
+      "apiId": 2971868509,
+      "className": "upgrade_bullet_resist_shredder",
+      "name": "Bullet Resist Shredder",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/bullet_resist_shredder.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "burst-fire",
+      "apiId": 2739107182,
+      "className": "upgrade_burst_fire",
+      "name": "Burst Fire",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/burst_fire.webp",
+      "isActive": false,
+      "components": [
+        "rapid-rounds"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "capacitor",
+      "apiId": 710436191,
+      "className": "upgrade_capacitor",
+      "name": "Capacitor",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/capacitor.webp",
+      "isActive": true,
+      "components": [
+        "tesla-bullets"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "cheat-death",
+      "apiId": 3361811174,
+      "className": "upgrade_cheat_death",
+      "name": "Cheat Death",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/cheat_death.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "close-quarters",
+      "apiId": 1342610602,
+      "className": "upgrade_close_range",
+      "name": "Close Quarters",
+      "branch": "weapon",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/close_quarters.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "point-blank"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "cold-front",
+      "apiId": 1976391348,
+      "className": "upgrade_cold_front",
+      "name": "Cold Front",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/cold_front.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [
+        "arctic-blast"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "colossus",
+      "apiId": 2407781327,
+      "className": "upgrade_colossus",
+      "name": "Colossus",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/colossus.webp",
+      "isActive": true,
+      "components": [
+        "extra-health"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "compress-cooldown",
+      "apiId": 380806748,
+      "className": "upgrade_magic_tempo",
+      "name": "Compress Cooldown",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/improved_cooldown.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "superior-cooldown"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "counterspell",
+      "apiId": 1414025773,
+      "className": "upgrade_counterspell",
+      "name": "Counterspell",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/counterspell.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "crippling-headshot",
+      "apiId": 3884003354,
+      "className": "upgrade_banshee_slugs",
+      "name": "Crippling Headshot",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/crippling_headshot.webp",
+      "isActive": false,
+      "components": [
+        "weakening-headshot"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "crushing-fists",
+      "apiId": 800008313,
+      "className": "upgrade_crushing_fists",
+      "name": "Crushing Fists",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/crushing_fists.webp",
+      "isActive": false,
+      "components": [
+        "melee-charge"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "cultist-sacrifice",
+      "apiId": 709540378,
+      "className": "upgrade_non_player_bonus_sacrifice",
+      "name": "Cultist Sacrifice",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/cultist_sacrifice.webp",
+      "isActive": true,
+      "components": [
+        "monster-rounds"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "cursed-relic",
+      "apiId": 2617435668,
+      "className": "upgrade_glitch",
+      "name": "Cursed Relic",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/curse.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "debuff-reducer",
+      "apiId": 1047818222,
+      "className": "upgrade_debuff_reducer",
+      "name": "Debuff Reducer",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/debuff_reducer.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "unstoppable",
+        "spellbreaker"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "decay",
+      "apiId": 3144988365,
+      "className": "upgrade_rupture",
+      "name": "Decay",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/decay.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "disarming-hex",
+      "apiId": 2061878743,
+      "className": "upgrade_greater_withering_whip",
+      "name": "Disarming Hex",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/disarming_hex.webp",
+      "isActive": true,
+      "components": [
+        "rusted-barrel"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "dispel-magic",
+      "apiId": 3731635960,
+      "className": "upgrade_reduce_debuff_duration",
+      "name": "Dispel Magic",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/debuff_remover.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "divine-barrier",
+      "apiId": 1662311306,
+      "className": "upgrade_divine_barrier",
+      "name": "Divine Barrier",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/divine_barrier.webp",
+      "isActive": true,
+      "components": [
+        "guardian-ward"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "diviner-s-kevlar",
+      "apiId": 2820116164,
+      "className": "upgrade_diviners_kevlar",
+      "name": "Diviner's Kevlar",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/diviners_kevlar.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "duration-extender",
+      "apiId": 2951612397,
+      "className": "upgrade_arcane_extension",
+      "name": "Duration Extender",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/duration_extender.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "superior-duration"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "echo-shard",
+      "apiId": 630839635,
+      "className": "upgrade_ability_power_shard",
+      "name": "Echo Shard",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/echo_shard.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "enchanter-s-emblem",
+      "apiId": 3970837787,
+      "className": "upgrade_magic_shield",
+      "name": "Enchanter's Emblem",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/enchanters_emblem.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "enduring-speed",
+      "apiId": 2447176615,
+      "className": "upgrade_cardio_calibrator",
+      "name": "Enduring Speed",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/enduring_speed.webp",
+      "isActive": false,
+      "components": [
+        "sprint-boots"
+      ],
+      "buildsInto": [
+        "juggernaut"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "escalating-exposure",
+      "apiId": 3005970438,
+      "className": "upgrade_escalating_exposure",
+      "name": "Escalating Exposure",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/escalating_exposure.webp",
+      "isActive": false,
+      "components": [
+        "mystic-vulnerability"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "escalating-resilience",
+      "apiId": 2463960640,
+      "className": "upgrade_reinforcing_casings",
+      "name": "Escalating Resilience",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/escalating_resilience.webp",
+      "isActive": false,
+      "components": [
+        "basic-magazine"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "ethereal-shift",
+      "apiId": 2533252781,
+      "className": "upgrade_self_bubble",
+      "name": "Ethereal Shift",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/ethereal_shift.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "express-shot",
+      "apiId": 690458959,
+      "className": "upgrade_express_shot",
+      "name": "Express Shot",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/express_shot.webp",
+      "isActive": false,
+      "components": [
+        "high-velocity-mag"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "extra-charge",
+      "apiId": 3776945997,
+      "className": "upgrade_extra_charge",
+      "name": "Extra Charge",
+      "branch": "spirit",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/extra_charge.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "rapid-recharge"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "extra-health",
+      "apiId": 3633614685,
+      "className": "upgrade_health",
+      "name": "Extra Health",
+      "branch": "vitality",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/extra_health.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "fortitude",
+        "colossus"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "extra-regen",
+      "apiId": 2829638276,
+      "className": "upgrade_endurance",
+      "name": "Extra Regen",
+      "branch": "vitality",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/extra_regen.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "extra-spirit",
+      "apiId": 968099481,
+      "className": "upgrade_improved_spirit",
+      "name": "Extra Spirit",
+      "branch": "spirit",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/extra_spirit.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "improved-spirit",
+        "surge-of-power"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "extra-stamina",
+      "apiId": 4139877411,
+      "className": "upgrade_improved_stamina",
+      "name": "Extra Stamina",
+      "branch": "vitality",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/extra_stamina.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "stamina-mastery",
+        "kinetic-dash",
+        "arcane-surge"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "fleetfoot",
+      "apiId": 3403085434,
+      "className": "upgrade_fleetfoot_boots",
+      "name": "Fleetfoot",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/fleetfoot.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "focus-lens",
+      "apiId": 2142980412,
+      "className": "upgrade_focus_lens",
+      "name": "Focus Lens",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/focus_lens.webp",
+      "isActive": true,
+      "components": [
+        "spirit-sap"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "fortitude",
+      "apiId": 3585132399,
+      "className": "upgrade_chonky",
+      "name": "Fortitude",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/fortitude.webp",
+      "isActive": false,
+      "components": [
+        "extra-health"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "frenzy",
+      "apiId": 339443430,
+      "className": "upgrade_fervor",
+      "name": "Frenzy",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/frenzy.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "fury-trance",
+      "apiId": 1409190604,
+      "className": "upgrade_fury_trance",
+      "name": "Fury Trance",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/fury_trance.webp",
+      "isActive": true,
+      "components": [
+        "bullet-lifesteal"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "glass-cannon",
+      "apiId": 365620721,
+      "className": "upgrade_glass_cannon",
+      "name": "Glass Cannon",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/glass_cannon.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "golden-goose-egg",
+      "apiId": 2462046703,
+      "className": "upgrade_goose_egg",
+      "name": "Golden Goose Egg",
+      "branch": "spirit",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/goose_egg.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "greater-expansion",
+      "apiId": 1193964439,
+      "className": "upgrade_tech_range",
+      "name": "Greater Expansion",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/greater_expansion.webp",
+      "isActive": false,
+      "components": [
+        "mystic-expansion"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "grit",
+      "apiId": 1672893796,
+      "className": "upgrade_grit",
+      "name": "Grit",
+      "branch": "vitality",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/grit.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [
+        "weapon-shielding",
+        "spirit-shielding",
+        "guardian-ward",
+        "reactive-barrier"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "guardian-ward",
+      "apiId": 857669956,
+      "className": "upgrade_guardian_ward",
+      "name": "Guardian Ward",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/guardian_ward.webp",
+      "isActive": true,
+      "components": [
+        "grit"
+      ],
+      "buildsInto": [
+        "divine-barrier"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "headhunter",
+      "apiId": 4053935515,
+      "className": "upgrade_headhunter",
+      "name": "Headhunter",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/headhunter.webp",
+      "isActive": false,
+      "components": [
+        "headshot-booster"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "headshot-booster",
+      "apiId": 2010028405,
+      "className": "upgrade_headshot_booster",
+      "name": "Headshot Booster",
+      "branch": "weapon",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/headshot_booster.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "headhunter"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "healbane",
+      "apiId": 2603935618,
+      "className": "upgrade_healbane",
+      "name": "Healbane",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/healbane.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "healing-booster",
+      "apiId": 2566692615,
+      "className": "upgrade_healing_booster",
+      "name": "Healing Booster",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/healing_booster.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "healing-tempo"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "healing-nova",
+      "apiId": 2956256701,
+      "className": "upgrade_health_nova",
+      "name": "Healing Nova",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/healing_nova.webp",
+      "isActive": true,
+      "components": [
+        "healing-rite"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "healing-rite",
+      "apiId": 1710079648,
+      "className": "upgrade_health_stimpak",
+      "name": "Healing Rite",
+      "branch": "vitality",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/healing_rite.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [
+        "rescue-beam",
+        "healing-nova"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "healing-tempo",
+      "apiId": 1427630806,
+      "className": "upgrade_healbuff",
+      "name": "Healing Tempo",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/healing_tempo.webp",
+      "isActive": false,
+      "components": [
+        "healing-booster"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "heroic-aura",
+      "apiId": 2108215830,
+      "className": "upgrade_dps_aura",
+      "name": "Heroic Aura",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/heroic_aura.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "high-velocity-mag",
+      "apiId": 3077079169,
+      "className": "upgrade_high_velocity_mag",
+      "name": "High-Velocity Rounds",
+      "branch": "weapon",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/high_velocity_rounds.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "opening-rounds",
+        "sharpshooter",
+        "armor-piercer",
+        "express-shot"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "hollow-point",
+      "apiId": 2678489038,
+      "className": "upgrade_hollow_point_rounds",
+      "name": "Hollow Point",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/hollow_point.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "hunter-s-aura",
+      "apiId": 2481177645,
+      "className": "upgrade_bullet_armor_reduction_aura",
+      "name": "Hunter's Aura",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/hunters_aura.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "improved-spirit",
+      "apiId": 7409189,
+      "className": "upgrade_soaring_spirit",
+      "name": "Improved Spirit",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/improved_spirit.webp",
+      "isActive": false,
+      "components": [
+        "extra-spirit"
+      ],
+      "buildsInto": [
+        "boundless-spirit"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "indomitable",
+      "apiId": 951866250,
+      "className": "upgrade_auto_cleanse",
+      "name": "Indomitable",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/indomitable.webp",
+      "isActive": false,
+      "components": [
+        "reactive-barrier"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "infuser",
+      "apiId": 1797283378,
+      "className": "upgrade_infuser",
+      "name": "Infuser",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/infuser.webp",
+      "isActive": true,
+      "components": [
+        "spirit-lifesteal"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "inhibitor",
+      "apiId": 2037039379,
+      "className": "upgrade_inhibitor",
+      "name": "Inhibitor",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/inhibitor.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "intensifying-magazine",
+      "apiId": 2407033488,
+      "className": "upgrade_intensifying_clip",
+      "name": "Intensifying Magazine",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/intensifying_magazine.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "juggernaut",
+      "apiId": 1250307611,
+      "className": "upgrade_juggernaut",
+      "name": "Juggernaut",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/juggernaut.webp",
+      "isActive": false,
+      "components": [
+        "enduring-speed"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "kinetic-dash",
+      "apiId": 3977876567,
+      "className": "upgrade_kinetic_sash",
+      "name": "Kinetic Dash",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/kinetic_dash.webp",
+      "isActive": false,
+      "components": [
+        "extra-stamina"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "knockdown",
+      "apiId": 1254091416,
+      "className": "upgrade_target_stun",
+      "name": "Knockdown",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/knockdown.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "leech",
+      "apiId": 865846625,
+      "className": "upgrade_damage_recycler",
+      "name": "Leech",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/leech.webp",
+      "isActive": false,
+      "components": [
+        "bullet-lifesteal",
+        "spirit-lifesteal"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "lifestrike",
+      "apiId": 1252627263,
+      "className": "upgrade_boxing_glove",
+      "name": "Lifestrike",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/lifestrike.webp",
+      "isActive": false,
+      "components": [
+        "melee-lifesteal"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "lightning-scroll",
+      "apiId": 493591231,
+      "className": "upgrade_ultimate_burst",
+      "name": "Lightning Scroll",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/lightning_scroll.webp",
+      "isActive": false,
+      "components": [
+        "mystic-slow"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "long-range",
+      "apiId": 3331811235,
+      "className": "upgrade_long_range",
+      "name": "Long Range",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/long_range.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "sharpshooter"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "lucky-shot",
+      "apiId": 1396247347,
+      "className": "upgrade_critshot",
+      "name": "Lucky Shot",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/lucky_shot.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "magic-carpet",
+      "apiId": 2800629741,
+      "className": "upgrade_magic_carpet",
+      "name": "Magic Carpet",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/magic_carpet.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "majestic-leap",
+      "apiId": 600033864,
+      "className": "upgrade_rocket_booster",
+      "name": "Majestic Leap",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/majestic_leap.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "melee-charge",
+      "apiId": 26002154,
+      "className": "upgrade_melee_charge",
+      "name": "Melee Charge",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/melee_charge.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "crushing-fists"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "melee-lifesteal",
+      "apiId": 1437614329,
+      "className": "upgrade_lifestrike_gauntlets",
+      "name": "Melee Lifesteal",
+      "branch": "vitality",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/melee_lifesteal.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "lifestrike"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "mercurial-magnum",
+      "apiId": 3919289022,
+      "className": "upgrade_ethereal_bullets",
+      "name": "Mercurial Magnum",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mercurial_magnum.webp",
+      "isActive": false,
+      "components": [
+        "quicksilver-reload"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "metal-skin",
+      "apiId": 1378931225,
+      "className": "upgrade_metal_skin",
+      "name": "Metal Skin",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/metal_skin.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "monster-rounds",
+      "apiId": 1009965641,
+      "className": "upgrade_non_player_bonus",
+      "name": "Monster Rounds",
+      "branch": "weapon",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/monster_rounds.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "cultist-sacrifice"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "mystic-burst",
+      "apiId": 1998374645,
+      "className": "upgrade_magic_burst",
+      "name": "Mystic Burst",
+      "branch": "spirit",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_burst.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "tankbuster"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "mystic-expansion",
+      "apiId": 754480263,
+      "className": "upgrade_magic_reach",
+      "name": "Mystic Expansion",
+      "branch": "spirit",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_reach.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "greater-expansion",
+        "ballistic-enchantment"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "mystic-regen",
+      "apiId": 1439347412,
+      "className": "upgrade_mystic_regeneration",
+      "name": "Mystic Regeneration",
+      "branch": "spirit",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_regen.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "radiant-regeneration"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "mystic-reverb",
+      "apiId": 3577481646,
+      "className": "upgrade_mystic_reverb",
+      "name": "Mystic Reverb",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_reverb.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "mystic-shot",
+      "apiId": 395867183,
+      "className": "upgrade_crackshot",
+      "name": "Mystic Shot",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/mystic_shot.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "mystic-slow",
+      "apiId": 1102081447,
+      "className": "upgrade_magic_slow",
+      "name": "Mystic Slow",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_slow.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "lightning-scroll"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "mystic-vulnerability",
+      "apiId": 2081037738,
+      "className": "upgrade_magic_vulnerability",
+      "name": "Mystic Vulnerability",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_vulnerability.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "escalating-exposure"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "opening-rounds",
+      "apiId": 2064029594,
+      "className": "upgrade_pristine_emblem",
+      "name": "Opening Rounds",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/opening_rounds.webp",
+      "isActive": false,
+      "components": [
+        "high-velocity-mag"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "phantom-strike",
+      "apiId": 1371725689,
+      "className": "upgrade_phantom_strike",
+      "name": "Phantom Strike",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/phantom_strike.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "plated-armor",
+      "apiId": 3491236900,
+      "className": "upgrade_deflecting_armor",
+      "name": "Plated Armor",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/plated_armor.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "point-blank",
+      "apiId": 2095565695,
+      "className": "upgrade_close_quarter_combat",
+      "name": "Point Blank",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/point_blank.webp",
+      "isActive": false,
+      "components": [
+        "close-quarters"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "quicksilver-reload",
+      "apiId": 84321454,
+      "className": "upgrade_quick_silver",
+      "name": "Quicksilver Reload",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/quicksilver_reload.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "mercurial-magnum"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "radiant-regeneration",
+      "apiId": 2947183272,
+      "className": "upgrade_resonant_healing",
+      "name": "Radiant Regeneration",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/radiant_regeneration.webp",
+      "isActive": false,
+      "components": [
+        "mystic-regen"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "rapid-recharge",
+      "apiId": 787198704,
+      "className": "upgrade_rapid_recharge",
+      "name": "Rapid Recharge",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/rapid_recharge.webp",
+      "isActive": false,
+      "components": [
+        "extra-charge"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "rapid-rounds",
+      "apiId": 668299740,
+      "className": "upgrade_rapid_rounds",
+      "name": "Rapid Rounds",
+      "branch": "weapon",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/rapid_rounds.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "burst-fire",
+        "swift-striker"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "reactive-barrier",
+      "apiId": 1644605047,
+      "className": "upgrade_vex_barrier",
+      "name": "Reactive Barrier",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/reactive_barrier.webp",
+      "isActive": false,
+      "components": [
+        "grit"
+      ],
+      "buildsInto": [
+        "indomitable"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "rebuttal",
+      "apiId": 4204808176,
+      "className": "upgrade_melee_rebuttal",
+      "name": "Rebuttal",
+      "branch": "vitality",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/rebuttal.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "recharging-rush",
+      "apiId": 1763073141,
+      "className": "upgrade_rechargingbullets",
+      "name": "Recharging Rush",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/recharging_rounds.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "refresher",
+      "apiId": 677738769,
+      "className": "upgrade_ability_refresher",
+      "name": "Refresher",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/refresher.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "rescue-beam",
+      "apiId": 1804594021,
+      "className": "upgrade_rescue_beam",
+      "name": "Rescue Beam",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/rescue_beam.webp",
+      "isActive": true,
+      "components": [
+        "healing-rite"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "restorative-locket",
+      "apiId": 2059712766,
+      "className": "upgrade_restorative_locket",
+      "name": "Restorative Locket",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/restorative_locket.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "restorative-shot",
+      "apiId": 3862866912,
+      "className": "upgrade_medic_bullets",
+      "name": "Restorative Shot",
+      "branch": "weapon",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/restorative_shot.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "return-fire",
+      "apiId": 3361075077,
+      "className": "upgrade_return_fire",
+      "name": "Return Fire",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/return_fire.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "ricochet",
+      "apiId": 2480592370,
+      "className": "upgrade_ricochet",
+      "name": "Ricochet",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/ricochet.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "rusted-barrel",
+      "apiId": 2922054143,
+      "className": "upgrade_withering_whip",
+      "name": "Rusted Barrel",
+      "branch": "spirit",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/rusted_barrel.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [
+        "disarming-hex"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "scourge",
+      "apiId": 2417568017,
+      "className": "upgrade_discord",
+      "name": "Scourge",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/scourge.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "shadow-weave",
+      "apiId": 1798666702,
+      "className": "upgrade_cloaking_device_active",
+      "name": "Shadow Weave",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/shadow_weave.webp",
+      "isActive": true,
+      "components": [
+        "sprint-boots"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "sharpshooter",
+      "apiId": 2152872419,
+      "className": "upgrade_sharpshooter",
+      "name": "Sharpshooter",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/sharp_shooter.webp",
+      "isActive": false,
+      "components": [
+        "long-range",
+        "high-velocity-mag"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "silence-wave",
+      "apiId": 619484391,
+      "className": "upgrade_targeted_silence",
+      "name": "Silence Wave",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/silence_glyph.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "silencer",
+      "apiId": 1113837674,
+      "className": "upgrade_proc_silence",
+      "name": "Silencer",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/silencer.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "siphon-bullets",
+      "apiId": 1282141666,
+      "className": "upgrade_siphon_bullets",
+      "name": "Siphon Bullets",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/siphon_bullets.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "slowing-bullets",
+      "apiId": 393974127,
+      "className": "upgrade_slowing_bullets",
+      "name": "Slowing Bullets",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/slowing_bullets.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "weighted-shots"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "slowing-hex",
+      "apiId": 1813726886,
+      "className": "upgrade_containment",
+      "name": "Slowing Hex",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/slowing_hex.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [
+        "vortex-web"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spellbreaker",
+      "apiId": 1955841979,
+      "className": "upgrade_spellbreaker",
+      "name": "Spellbreaker",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/spellbreaker.webp",
+      "isActive": false,
+      "components": [
+        "debuff-reducer"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spellslinger",
+      "apiId": 2221211450,
+      "className": "upgrade_enchanted_holsters",
+      "name": "Spellslinger",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/spell_slinger.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spirit-burn",
+      "apiId": 343572757,
+      "className": "upgrade_spirit_burn",
+      "name": "Spirit Burn",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/spirit_burn.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spirit-lifesteal",
+      "apiId": 876563814,
+      "className": "upgrade_health_stealing_magic",
+      "name": "Spirit Lifesteal",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/spirit_lifesteal.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "leech",
+        "spiritual-overflow",
+        "infuser"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spirit-rend",
+      "apiId": 4075861416,
+      "className": "upgrade_spellslinger_headshots",
+      "name": "Spirit Rend",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/spellslinger_headshots.webp",
+      "isActive": false,
+      "components": [
+        "spirit-shredder"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spirit-resilience",
+      "apiId": 2163598980,
+      "className": "upgrade_tech_purge",
+      "name": "Spirit Resilience",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/spirit_resilience.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spirit-sap",
+      "apiId": 1219329868,
+      "className": "upgrade_spirit_sap",
+      "name": "Spirit Sap",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/spirit_sap.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [
+        "focus-lens"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spirit-shielding",
+      "apiId": 112198670,
+      "className": "upgrade_spirit_bubble",
+      "name": "Spirit Shielding",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/spirit_shielding.webp",
+      "isActive": false,
+      "components": [
+        "grit"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spirit-shredder",
+      "apiId": 1144549437,
+      "className": "upgrade_tech_defense_shredders",
+      "name": "Spirit Shredder",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/spirit_shredder_bullets.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "spirit-rend"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spirit-snatch",
+      "apiId": 3190916303,
+      "className": "upgrade_spirit_snatch",
+      "name": "Spirit Snatch",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/spirit_snatch.webp",
+      "isActive": false,
+      "components": [
+        "spirit-strike"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spirit-strike",
+      "apiId": 465043967,
+      "className": "upgrade_acolytes_glove",
+      "name": "Spirit Strike",
+      "branch": "spirit",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/spirit_strike.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "spirit-snatch"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "spiritual-overflow",
+      "apiId": 2226497419,
+      "className": "upgrade_tech_overflow",
+      "name": "Spiritual Overflow",
+      "branch": "weapon",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/spiritual_overflow.webp",
+      "isActive": false,
+      "components": [
+        "spirit-lifesteal"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "split-shot",
+      "apiId": 3647584222,
+      "className": "upgrade_split_shot",
+      "name": "Split Shot",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/split_shot.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "sprint-boots",
+      "apiId": 3399065363,
+      "className": "upgrade_sprint_booster",
+      "name": "Sprint Boots",
+      "branch": "vitality",
+      "tier": 1,
+      "cost": 800,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/sprint_boots.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "trophy-collector",
+        "enduring-speed",
+        "shadow-weave"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "stalker",
+      "apiId": 98582110,
+      "className": "upgrade_weapon_backstabber",
+      "name": "Stalker",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/backstabber.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "stamina-mastery",
+      "apiId": 334300056,
+      "className": "upgrade_superior_stamina",
+      "name": "Stamina Mastery",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/stamina_mastery.webp",
+      "isActive": false,
+      "components": [
+        "extra-stamina"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "superior-cooldown",
+      "apiId": 3261353684,
+      "className": "upgrade_cooldown_reduction",
+      "name": "Superior Cooldown",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/superior_cooldown.webp",
+      "isActive": false,
+      "components": [
+        "compress-cooldown"
+      ],
+      "buildsInto": [
+        "transcendent-cooldown"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "superior-duration",
+      "apiId": 2717651715,
+      "className": "upgrade_imbued_duration_extender",
+      "name": "Superior Duration",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/superior_duration.webp",
+      "isActive": false,
+      "components": [
+        "duration-extender"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "suppressor",
+      "apiId": 1925087134,
+      "className": "upgrade_suppressor",
+      "name": "Suppressor",
+      "branch": "spirit",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/suppressor.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "surge-of-power",
+      "apiId": 1292979587,
+      "className": "upgrade_magic_storm",
+      "name": "Surge of Power",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/surge_of_power.webp",
+      "isActive": false,
+      "components": [
+        "extra-spirit"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "swift-striker",
+      "apiId": 4104549924,
+      "className": "upgrade_blitz_bullets",
+      "name": "Swift Striker",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/swift_striker.webp",
+      "isActive": false,
+      "components": [
+        "rapid-rounds"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "tankbuster",
+      "apiId": 2121044373,
+      "className": "upgrade_magic_shock",
+      "name": "Tankbuster",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/tankbuster.webp",
+      "isActive": false,
+      "components": [
+        "mystic-burst"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "tesla-bullets",
+      "apiId": 811521119,
+      "className": "upgrade_chain_lightning",
+      "name": "Tesla Bullets",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/tesla_bullets.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "capacitor"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "titanic-magazine",
+      "apiId": 2356412290,
+      "className": "upgrade_titan_round",
+      "name": "Titanic Magazine",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/titanic_magazine.webp",
+      "isActive": false,
+      "components": [
+        "basic-magazine"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "torment-pulse",
+      "apiId": 395944548,
+      "className": "upgrade_tech_damage_pulse",
+      "name": "Torment Pulse",
+      "branch": "spirit",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/torment_pulse.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "toxic-bullets",
+      "apiId": 3696726732,
+      "className": "upgrade_toxic_bullets",
+      "name": "Toxic Bullets",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/toxic_bullets.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "transcendent-cooldown",
+      "apiId": 915014646,
+      "className": "upgrade_transcendent_cooldown",
+      "name": "Transcendent Cooldown",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/transcendent_cooldown.webp",
+      "isActive": false,
+      "components": [
+        "superior-cooldown"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "trophy-collector",
+      "apiId": 3074274290,
+      "className": "upgrade_trophy_collector",
+      "name": "Trophy Collector",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/trophy_collector.webp",
+      "isActive": false,
+      "components": [
+        "sprint-boots"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "unstoppable",
+      "apiId": 3357231760,
+      "className": "upgrade_unstoppable",
+      "name": "Unstoppable",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/unstoppable.webp",
+      "isActive": true,
+      "components": [
+        "debuff-reducer"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "vampiric-burst",
+      "apiId": 1055679805,
+      "className": "upgrade_surging_power",
+      "name": "Vampiric Burst",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/vampiric_burst.webp",
+      "isActive": true,
+      "components": [
+        "bullet-lifesteal"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "veil-walker",
+      "apiId": 865958998,
+      "className": "upgrade_veil_walker",
+      "name": "Veil Walker",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/veil_walker.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "vortex-web",
+      "apiId": 1152158042,
+      "className": "upgrade_aoe_root",
+      "name": "Vortex Web",
+      "branch": "spirit",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/vortex_web.webp",
+      "isActive": true,
+      "components": [
+        "slowing-hex"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "warp-stone",
+      "apiId": 3270001687,
+      "className": "upgrade_warp_stone",
+      "name": "Warp Stone",
+      "branch": "vitality",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/warp_stone.webp",
+      "isActive": true,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "weakening-headshot",
+      "apiId": 1770441818,
+      "className": "upgrade_headshot_booster2",
+      "name": "Weakening Headshot",
+      "branch": "weapon",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/weakening_headshot.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [
+        "crippling-headshot"
+      ],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "weapon-shielding",
+      "apiId": 805079544,
+      "className": "upgrade_weapon_shielding",
+      "name": "Weapon Shielding",
+      "branch": "vitality",
+      "tier": 2,
+      "cost": 1600,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/weapon_shielding.webp",
+      "isActive": false,
+      "components": [
+        "grit"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "weighted-shots",
+      "apiId": 3791587546,
+      "className": "upgrade_weighted_shots",
+      "name": "Weighted Shots",
+      "branch": "weapon",
+      "tier": 3,
+      "cost": 3200,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/weighted_shots.webp",
+      "isActive": false,
+      "components": [
+        "slowing-bullets"
+      ],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "witchmail",
+      "apiId": 3028234315,
+      "className": "upgrade_absorbing_armor",
+      "name": "Witchmail",
+      "branch": "vitality",
+      "tier": 4,
+      "cost": 6400,
+      "icon": "https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/witchmail.webp",
+      "isActive": false,
+      "components": [],
+      "buildsInto": [],
+      "active": true,
+      "verified": true
+    }
+  ]
 }

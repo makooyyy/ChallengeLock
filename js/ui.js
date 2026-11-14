@@ -29,7 +29,13 @@ const resText=x=>`🎯 Deadlock Challenge — ${H(x.hero).name} [${x.rarity.toUp
 
 /* ---------- header / shell ---------- */
 function paintHeader(){const i=rankIdx(S.stats.points);$('#rank').innerHTML=`<span class="mo">${t('rank')}</span><b style="color:#ffb02e">${t('ranks')[i]}</b><span>${S.stats.points}${RANKS[i+1]?' / '+RANKS[i+1]:''}</span>`;$('#lang').textContent=S.lang==='ru'?'EN':'RU'}
-function applyStatic(){$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));$('#foot').textContent=t('footer');if($('#data-notice'))$('#data-notice').textContent=t('unverifiedData');paintHeader()}
+function applyStatic(){$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));$('#foot').textContent=t('footer');paintCatalog();paintHeader()}
+function paintCatalog(){
+  const el=$('#data-notice');if(!el)return;
+  const meta=RT.data.catalog?.heroes;
+  el.textContent=meta?t('catalogVerified')+' · '+meta.retrievedAt.slice(0,10)+' · '+t('clientVersion')+' '+meta.clientVersion:t('unverifiedData');
+  if(meta){const a=document.createElement('a');a.href='https://deadlock-api.com/';a.textContent=' · Deadlock API';a.target='_blank';a.rel='noopener noreferrer';el.append(a)}
+}
 function show(tab){RT.tab=tab;$$('.nb').forEach(b=>{const on=b.dataset.tab===tab;b.classList.toggle('on',on);b.setAttribute('aria-current',on?'page':'false')});
   $$('.panel').forEach(p=>p.hidden=p.id!=='p-'+tab);({roulette:viewRoulette,build:viewBuild,ban:viewBan,custom:viewCustom,history:viewHistory})[tab]()}
 
@@ -105,7 +111,7 @@ async function png(){const x=RT.cur;if(!x)return;const cv=document.createElement
 function viewBuild(){
   const b=RT.build,p=$('#p-build');
   p.innerHTML=`<div><div class="mo" style="color:#8fa0ff">${t('tab.build')}</div><h1 class="os">${t('tab.build')}</h1></div>
-  <div class="fx" style="align-items:center"><label class="chk">${t('budget')} <select id="bud">${[2500,5000,8000].map(v=>`<option ${v==(RT.budget||5000)?'selected':''}>${v}</option>`).join('')}</select></label><button class="spin small" id="rb">${t('build')}</button>${b?`<button id="cb">${t('copyText')}</button>`:''}</div>
+  <div class="fx" style="align-items:center"><label class="chk">${t('budget')} <select id="bud">${[2500,5000,8000,16000,32000].map(v=>`<option ${v==(RT.budget||5000)?'selected':''}>${v}</option>`).join('')}</select></label><button class="spin small" id="rb">${t('build')}</button>${b?`<button id="cb">${t('copyText')}</button>`:''}</div>
   ${b?`<div class="card"><div class="fx" style="align-items:center">${dia(H(b.hero))}<h2 class="os">${esc(H(b.hero).name)}</h2><span class="mo">${t('spent')}: ${b.spent}/${b.budget}</span></div><div class="mo" style="margin:14px 0 6px">${t('order')}</div><ol class="ol">${b.items.map(id=>{const i=I(id);return `<li><i style="background:${BC[i.branch]}"></i><b>${esc(i.name)}</b><span class="mo">${i.branch} · T${i.tier}</span><span>${i.cost}</span></li>`}).join('')}</ol></div>`:`<div class="mo">${t('empty')}</div>`}`;
 }
 /* ---------- BAN ---------- */
@@ -122,7 +128,7 @@ function viewCustom(){
   p.innerHTML=`<div><div class="mo" style="color:#8fa0ff">${t('tab.custom')}</div><h1 class="os">${t('tab.custom')}</h1></div>
   <div class="card"><div class="mo">${t('cats')}</div><div class="fx" style="margin-top:10px">${ALL_CATS.map(c=>`<label class="chk"><input type="checkbox" data-cat="${c}" ${S.cats.includes(c)?'checked':''}> ${t('cat.'+c)}</label>`).join('')}<label class="chk"><input type="checkbox" id="team" ${S.team?'checked':''}> ${t('cat.tm')}: team</label></div></div>
   <div class="card"><div class="fx" style="justify-content:space-between;align-items:center"><div class="mo">${t('heroFilter')}</div>${seg([['exclude',t('exclude')],['only',t('onlyHeroes')]],S.heroMode,'hm')}<button id="hreset">${t('reset')}</button></div>
-  <div class="hg">${RT.data.heroes.map(h=>`<label class="hc"><input type="checkbox" data-h="${h.id}" ${S.sel.includes(h.id)?'checked':''}>${dia(h)}<span>${esc(h.name)}</span></label>`).join('')}</div></div>`;
+  <div class="hg">${RT.data.heroes.filter(h=>h.active!==false).map(h=>`<label class="hc"><input type="checkbox" data-h="${h.id}" ${S.sel.includes(h.id)?'checked':''}>${dia(h)}<span>${esc(h.name)}</span></label>`).join('')}</div></div>`;
 }
 /* ---------- HISTORY ---------- */
 function viewHistory(){
@@ -190,13 +196,13 @@ export async function boot(){
   try{
     const j=u=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);return r.json()});
     const [h,i,c,l]=await Promise.all([j('data/heroes.json'),j('data/items.json'),j('data/challenges.json'),j('data/i18n.json')]);
-    RT.data=validateData({heroes:h.heroes,items:i.items,challenges:c.challenges},l);setDict(l,S.lang);setLang(S.lang);
+    RT.data=validateData({heroes:h.heroes,items:i.items,challenges:c.challenges,catalog:{heroes:h._meta,items:i._meta}},l);setDict(l,S.lang);setLang(S.lang);
     for(const key of ['history','favs'])S[key]=S[key].flatMap(x=>{try{return [{...restoreResult(x,h.heroes,c.challenges),outcome:x.outcome}]}catch{return []}});
   }catch(e){console.error(e);$('#boot').innerHTML=`<div class="err" role="alert">Не удалось загрузить данные / Failed to load data</div>`;return}
   S.sel??=[];S.heroMode??='exclude';$('#boot').remove();$('#app').hidden=false;
   bind();applyStatic();
   const h=parseHash();h?await fromHash(h):show('roulette');
-  const notice=document.createElement('p');notice.id='data-notice';notice.hidden=RT.data.heroes.every(h=>h.verified)&&RT.data.items.every(i=>i.verified);notice.className='mo';notice.textContent=t('unverifiedData');$('#foot').before(notice);
+  const notice=document.createElement('p');notice.id='data-notice';notice.className='mo';$('#foot').before(notice);paintCatalog();
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 

@@ -26,6 +26,9 @@ try{
  await page.goto(origin+'/#seed=hello&d=mid&r=0');
  await page.waitForSelector('#contract h2');
  assert(await page.locator('#spin').isVisible());
+ assert(await page.locator('#data-notice').isVisible());
+ assert((await page.locator('#data-notice').textContent()).includes('Каталог сверён с API'));
+ assert.equal(await page.locator('#data-notice a').getAttribute('href'),'https://deadlock-api.com/');
  const state=()=>page.evaluate(async()=>{const {S,RT}=await import('/js/state.js');return {cur:RT.cur,rerolls:RT.rerolls,stats:S.stats,friend:S.friend,diff:S.diff,busy:RT.busy}});
  const initial=(await state()).cur;
  await page.click('[data-tab="history"]');await page.click('.hl a');assert(await page.locator('#spin').isVisible());

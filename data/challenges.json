@@ -265,8 +265,8 @@
     "en": "Cheap items only"
    },
    "desc": {
-    "ru": "Только предметы до 1250 душ.",
-    "en": "Cheap items only"
+    "ru": "Покупай только предметы T1 и T2.",
+    "en": "Only buy tier 1 and tier 2 items."
    },
    "tags": [
     "items",

@@ -81,7 +81,9 @@
     "noConditions": "Нет совместимых условий. Измените категории, сложность или снимите замки.",
     "invalidLink": "Ссылка повреждена или содержит недоступный результат.",
     "unverifiedData": "Демо-каталог: герои и предметы не сверены с текущим патчем игры.",
-    "storageError": "Не удалось сохранить изменения в браузере. Проверьте доступ к локальному хранилищу."
+    "storageError": "Не удалось сохранить изменения в браузере. Проверьте доступ к локальному хранилищу.",
+    "catalogVerified": "Каталог сверён с API",
+    "clientVersion": "Версия клиента"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -165,6 +167,8 @@
     "noConditions": "No compatible challenges. Change categories, difficulty or unlock reels.",
     "invalidLink": "Invalid link or unavailable result.",
     "unverifiedData": "Demo catalog: heroes and items have not been verified against the current game patch.",
-    "storageError": "Changes could not be saved in this browser. Check local storage availability."
+    "storageError": "Changes could not be saved in this browser. Check local storage availability.",
+    "catalogVerified": "Catalog matched to API",
+    "clientVersion": "Client version"
   }
 }

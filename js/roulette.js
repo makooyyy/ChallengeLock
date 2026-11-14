@@ -3,7 +3,7 @@ import {options,validRecord} from './validation.js';
 export const DIFF={easy:{n:[1,1],max:2},mid:{n:[1,2],max:3},hard:{n:[2,3],max:4},insane:{n:[3,3],max:5}};
 export const rarity=s=>s<=3?'common':s<=6?'rare':s<=9?'epic':'cursed';
 export const compatible=(a,b)=>a.id!==b.id&&!a.conflicts.some(t=>b.tags.includes(t))&&!b.conflicts.some(t=>a.tags.includes(t));
-export function heroPool(heroes,f){return heroes.filter(h=>!f.excluded.includes(h.id)&&(!f.only.length||f.only.includes(h.id)));}
+export function heroPool(heroes,f){return heroes.filter(h=>h.active!==false&&!f.excluded.includes(h.id)&&(!f.only.length||f.only.includes(h.id)));}
 const ok=(c,hero,o)=>o.cats.includes(c.cat)&&c.difficulty<=DIFF[o.diff].max&&(c.mode!=='team'||o.team)&&(c.heroes==='all'||c.heroes.includes(hero.id));
 export function resultFor({seed,r=0,diff,hero,conds,player=0,opts},challenges){
   const list=conds.map(id=>challenges.find(c=>c.id===id));
@@ -35,6 +35,7 @@ export function roll({seed,r=0,heroes,challenges,o,locks=[],prev=null,player=0,s
   return resultFor({seed,r,diff:o.diff,hero:hero.id,conds:list.map(c=>c.id),player:same?0:player,opts:o},challenges);
 }
 export function rollBan(seed,heroes,items,o,type){
+  items=items.filter(i=>i.active!==false);
   const r=makeRng(seed+':ban'),hero=pick(r,heroPool(heroes,o));if(!hero||type==='item'&&!items.length)return null;
   return type==='item'?{hero:hero.id,item:pick(r,items).id}:{hero:hero.id,slot:int(r,1,hero.abilities)};
 }
