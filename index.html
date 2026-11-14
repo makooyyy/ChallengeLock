@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deadlock Challenge Roulette — генератор челленджей</title>
+<meta name="description" content="Фан-генератор случайных челленджей, билдов и запретов для Deadlock. Работает офлайн, делись результатом по ссылке.">
+<meta name="theme-color" content="#070a12">
+<meta property="og:title" content="Deadlock Challenge Roulette">
+<meta property="og:description" content="Крути рулетку: случайный герой + условия. Делись seed с друзьями.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600&family=Manrope:wght@500;700&family=Oswald:wght@600;700&display=swap&subset=cyrillic">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="boot" class="boot" aria-busy="true"><div class="sk"></div><div class="sk s2"></div><div class="sk s3"></div></div>
+<div class="d" id="app" hidden>
+  <nav class="rail" aria-label="Режимы / Modes">
+    <div class="logo" aria-hidden="true"><b class="os">D</b></div>
+    <button class="nb on" data-tab="roulette"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v4"/></svg><span data-i18n="tab.roulette">Рулетка</span></button>
+    <button class="nb" data-tab="build"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg><span data-i18n="tab.build">Билд</span></button>
+    <button class="nb" data-tab="ban"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M6 6l12 12"/></svg><span data-i18n="tab.ban">Запрет</span></button>
+    <button class="nb" data-tab="custom"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h14"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg><span data-i18n="tab.custom">Набор</span></button>
+    <button class="nb" data-tab="history"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg><span data-i18n="tab.history">История</span></button>
+  </nav>
+  <main class="pad">
+    <header class="fx" style="justify-content:space-between;align-items:center"><div class="mo">Deadlock · Challenge Roulette</div><div class="fx" style="gap:8px"><div class="chip" id="rank"></div><button class="chip" id="lang" aria-label="Language">EN</button></div></header>
+    <section class="panel" id="p-roulette"></section><section class="panel" id="p-build" hidden></section><section class="panel" id="p-ban" hidden></section><section class="panel" id="p-custom" hidden></section><section class="panel" id="p-history" hidden></section>
+    <footer class="fx" style="justify-content:space-between;border-top:1px solid #1c2438;padding-top:14px"><span class="mo">Common · Rare · Epic · Cursed</span><span class="mo" style="text-transform:none" id="foot"></span></footer>
+  </main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<noscript><p style="padding:20px;color:#e9edf7">Нужен JavaScript / JavaScript required.</p></noscript>
+<script type="module">import {boot} from './js/ui.js';boot();</script>
+</body>
+</html>

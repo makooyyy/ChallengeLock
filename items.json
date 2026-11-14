@@ -1,0 +1,157 @@
+{
+ "_note": "Только T1/T2 (500/1250 душ). Добавьте T3/T4 из API — см. README.",
+ "items": [
+  {
+   "id": "basic-magazine",
+   "name": "Basic Magazine",
+   "branch": "weapon",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "close-quarters",
+   "name": "Close Quarters",
+   "branch": "weapon",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "headshot-booster",
+   "name": "Headshot Booster",
+   "branch": "weapon",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "high-velocity-mag",
+   "name": "High-Velocity Mag",
+   "branch": "weapon",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "monster-rounds",
+   "name": "Monster Rounds",
+   "branch": "weapon",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "extra-health",
+   "name": "Extra Health",
+   "branch": "vitality",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "extra-regen",
+   "name": "Extra Regen",
+   "branch": "vitality",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "extra-stamina",
+   "name": "Extra Stamina",
+   "branch": "vitality",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "melee-lifesteal",
+   "name": "Melee Lifesteal",
+   "branch": "vitality",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "sprint-boots",
+   "name": "Sprint Boots",
+   "branch": "vitality",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "extra-spirit",
+   "name": "Extra Spirit",
+   "branch": "spirit",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "mystic-burst",
+   "name": "Mystic Burst",
+   "branch": "spirit",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "mystic-regen",
+   "name": "Mystic Regen",
+   "branch": "spirit",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "rapid-recharge",
+   "name": "Rapid Recharge",
+   "branch": "spirit",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "infuser",
+   "name": "Infuser",
+   "branch": "spirit",
+   "tier": 1,
+   "cost": 500,
+   "verified": false
+  },
+  {
+   "id": "titanic-magazine",
+   "name": "Titanic Magazine",
+   "branch": "weapon",
+   "tier": 2,
+   "cost": 1250,
+   "verified": false
+  },
+  {
+   "id": "active-reload",
+   "name": "Active Reload",
+   "branch": "weapon",
+   "tier": 2,
+   "cost": 1250,
+   "verified": false
+  },
+  {
+   "id": "healing-rite",
+   "name": "Healing Rite",
+   "branch": "vitality",
+   "tier": 2,
+   "cost": 1250,
+   "verified": false
+  },
+  {
+   "id": "mystic-vulnerability",
+   "name": "Mystic Vulnerability",
+   "branch": "spirit",
+   "tier": 2,
+   "cost": 1250,
+   "verified": false
+  }
+ ]
+}

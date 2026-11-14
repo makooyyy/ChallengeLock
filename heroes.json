@@ -1,0 +1,229 @@
+{
+ "_note": "verified:false = не сверено с assets.deadlock-api.com. icon: URL портрета (опционально).",
+ "heroes": [
+  {
+   "id": "abrams",
+   "name": "Abrams",
+   "color": "#ffb02e",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "bebop",
+   "name": "Bebop",
+   "color": "#8fa0ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "calico",
+   "name": "Calico",
+   "color": "#4ad3b5",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "dynamo",
+   "name": "Dynamo",
+   "color": "#c9a8ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "grey-talon",
+   "name": "Grey Talon",
+   "color": "#ff7a59",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "haze",
+   "name": "Haze",
+   "color": "#5fd0ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "holliday",
+   "name": "Holliday",
+   "color": "#e0c35a",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "infernus",
+   "name": "Infernus",
+   "color": "#ffb02e",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "ivy",
+   "name": "Ivy",
+   "color": "#8fa0ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "kelvin",
+   "name": "Kelvin",
+   "color": "#4ad3b5",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "lady-geist",
+   "name": "Lady Geist",
+   "color": "#c9a8ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "lash",
+   "name": "Lash",
+   "color": "#ff7a59",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "mcginnis",
+   "name": "McGinnis",
+   "color": "#5fd0ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "mirage",
+   "name": "Mirage",
+   "color": "#e0c35a",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "mo-krill",
+   "name": "Mo & Krill",
+   "color": "#ffb02e",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "paige",
+   "name": "Paige",
+   "color": "#8fa0ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "paradox",
+   "name": "Paradox",
+   "color": "#4ad3b5",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "pocket",
+   "name": "Pocket",
+   "color": "#c9a8ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "seven",
+   "name": "Seven",
+   "color": "#ff7a59",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "shiv",
+   "name": "Shiv",
+   "color": "#5fd0ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "sinclair",
+   "name": "Sinclair",
+   "color": "#e0c35a",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "victor",
+   "name": "Victor",
+   "color": "#ffb02e",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "vindicta",
+   "name": "Vindicta",
+   "color": "#8fa0ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "viscous",
+   "name": "Viscous",
+   "color": "#4ad3b5",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "vyper",
+   "name": "Vyper",
+   "color": "#c9a8ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "warden",
+   "name": "Warden",
+   "color": "#ff7a59",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "wraith",
+   "name": "Wraith",
+   "color": "#5fd0ff",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  },
+  {
+   "id": "yamato",
+   "name": "Yamato",
+   "color": "#e0c35a",
+   "abilities": 4,
+   "icon": "",
+   "verified": false
+  }
+ ]
+}
