@@ -1,0 +1,9 @@
+// Single mutable state object, persisted via storage.js.
+import {load,save} from './storage.js';
+const CATS=['ab','it','gp','go','tm','ch'];
+export const S=load({lang:'ru',diff:'mid',cats:CATS,team:false,excluded:[],only:[],sound:true,history:[],stats:{done:0,fail:0,points:0},favs:[],friend:{same:true,player:1}});
+export const RT={tab:'roulette',data:null,cur:null,locks:[false,false,false,false],rerolls:2,maxRerolls:2,seed:null,r:0,timer:{ms:0,run:false,t0:0},finished:false,busy:false,build:null,ban:null};
+export const persist=()=>save(S);
+export const ALL_CATS=CATS;
+export const RANKS=[0,50,150,350,700,1200];
+export const rankIdx=p=>RANKS.reduce((a,v,i)=>p>=v?i:a,0);
