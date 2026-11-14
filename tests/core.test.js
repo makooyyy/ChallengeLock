@@ -52,6 +52,7 @@ test('invalid links fail without throwing; old links get predictable defaults',(
 test('corrupt saved state is normalized deeply',()=>{
  const def={...o,sound:true};
  const s=normalizeState({lang:'bad',diff:'bad',stats:{done:2,points:'oops'},friend:{player:Infinity},history:[null,{}],favs:'oops',excluded:null,sel:34},def);
+ assert.equal(normalizeState({theme:'invalid'},def).theme,'system');assert.equal(normalizeState({theme:'dark'},def).theme,'dark');
  assert.deepEqual(s.stats,{done:2,fail:0,points:0});assert.deepEqual(s.friend,{same:true,player:1});assert.deepEqual(s.history,[]);assert.deepEqual(s.favs,[]);assert.deepEqual(s.excluded,[]);assert.equal(s.diff,'mid');
  for(const input of [null,[],42,'oops'])assert.equal(normalizeState(input,def).lang,'ru');
 });
@@ -63,7 +64,7 @@ test('data schema accepts catalog and rejects corruption before rendering',()=>{
 });
 test('service worker keeps other apps caches and ignores unrelated requests',async()=>{
  const events={},deleted=[],scope='https://example.test/ChallengeLock/',prefix='challengelock:'+scope+':';
- const context={self:{registration:{scope},addEventListener:(k,f)=>events[k]=f,clients:{claim:async()=>{}}},caches:{keys:async()=>['other-app','dlr-v1',prefix+'v1',prefix+'v4:'+read('heroes')._meta.revision,'challengelock:https://example.test/Other/:v1'],delete:async k=>deleted.push(k)},URL,Promise};
+ const context={self:{registration:{scope},addEventListener:(k,f)=>events[k]=f,clients:{claim:async()=>{}}},caches:{keys:async()=>['other-app','dlr-v1',prefix+'v1',prefix+'v5:'+read('heroes')._meta.revision,'challengelock:https://example.test/Other/:v1'],delete:async k=>deleted.push(k)},URL,Promise};
  vm.runInNewContext(fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8'),context);
  let pending;events.activate({waitUntil:p=>pending=p});await pending;assert.deepEqual(deleted,[prefix+'v1']);
  for(const url of ['https://example.test/Other/index.html','https://other.test/ChallengeLock/index.html',scope+'api'])events.fetch({request:{method:'GET',url},respondWith(){assert.fail('Intercepted unrelated request')}});

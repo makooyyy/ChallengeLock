@@ -14,7 +14,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap">
+<script>try{const t=JSON.parse(localStorage.getItem('dlr.v1')||'{}')?.theme;document.documentElement.dataset.theme=['light','dark'].includes(t)?t:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}catch{document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}</script>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/enhancements.css">
 </head>
 <body>
 <a class="skip-link" href="#main" data-i18n="skipContent">К содержимому</a>
@@ -31,7 +33,7 @@
     <div class="rail-bottom"><b><span class="online-dot"></span>DEADLOCK</b><span data-i18n="sidebarNote">Каждый матч — по-новому.</span></div>
   </nav>
   <main class="pad" id="main" tabindex="-1">
-    <header class="app-header"><div class="context-name"><b>ChallengeLock</b><span>/</span><span data-i18n="headerContext">Твоя игра. Новые правила.</span></div><div class="header-actions"><div class="rank-chip" id="rank"></div><button class="lang-button" id="lang" aria-label="Switch language / Сменить язык">EN</button></div></header>
+    <header class="app-header"><div class="context-name"><b>ChallengeLock</b><span>/</span><span data-i18n="headerContext">Твоя игра. Новые правила.</span></div><div class="header-actions"><div class="rank-chip" id="rank"></div><button class="theme-button" id="theme" aria-label="Тёмная тема"></button><button class="lang-button" id="lang" aria-label="Switch language / Сменить язык">EN</button></div></header>
     <section class="panel" id="p-roulette"></section>
     <section class="panel" id="p-build" hidden></section>
     <section class="panel" id="p-ban" hidden></section>

@@ -12,6 +12,7 @@ export function normalizeState(x,def){
   if(!object(x))x={};
   const out={...def,...options({...def,...x})};
   out.lang=x.lang==='en'?'en':'ru';out.sound=typeof x.sound==='boolean'?x.sound:def.sound;
+  out.theme=['light','dark','system'].includes(x.theme)?x.theme:'system';
   out.stats=Object.fromEntries(['done','fail','points'].map(k=>[k,count(x.stats?.[k])]));
   out.friend={same:x.friend?.same!==false,player:Number.isInteger(x.friend?.player)?Math.max(1,Math.min(9,x.friend.player)):1};
   for(const k of ['history','favs'])out[k]=(Array.isArray(x[k])?x[k]:[]).filter(validRecord).slice(0,50).map(r=>({...r,points:count(r.points),outcome:['done','fail'].includes(r.outcome)?r.outcome:null}));

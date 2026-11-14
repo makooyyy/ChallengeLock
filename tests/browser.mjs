@@ -41,10 +41,14 @@ try{
  const received=await receiver.evaluate(async()=>(await import('/js/state.js')).RT.cur);
  assert.equal(received.hero,rerolled.cur.hero);assert.deepEqual(received.conds,rerolled.cur.conds);assert.deepEqual(received.opts,rerolled.cur.opts);
  await page.click('#done');const points=(await state()).stats.points;
+ assert(await page.locator('#completion-dialog').isVisible());assert.equal(await page.locator('#completion-dialog').getAttribute('data-outcome'),'done');assert.equal(await page.locator('.completion-rules li').count(),rerolled.cur.conds.length);
+ await page.keyboard.press('r');assert.deepEqual((await state()).cur.conds,rerolled.cur.conds);await page.keyboard.press('Escape');assert(await page.locator('#completion-dialog').isHidden());
+ await page.click('#theme');assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');await page.reload();await page.waitForSelector('#spin');assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
  await page.click('[data-tab="history"]');await page.click('.hl a');assert(await page.locator('#done').isDisabled());assert.equal((await state()).stats.points,points);
  await page.evaluate(()=>location.hash='#seed=change&d=easy&r=0&p=2');await page.waitForFunction(async()=>(await import('/js/state.js')).S.diff==='easy');
  await page.evaluate(()=>location.hash='#seed=change&d=hard&r=0&p=3');await page.waitForFunction(async()=>(await import('/js/state.js')).S.friend.player===3);
  assert.equal((await state()).diff,'hard');
+ const beforeFailure=(await state()).stats;await page.click('#failb');assert.equal(await page.locator('#completion-dialog').getAttribute('data-outcome'),'fail');assert.equal((await state()).stats.points,beforeFailure.points);assert.equal((await state()).stats.fail,beforeFailure.fail+1);await page.locator('.completion-close').click();
  await page.evaluate(()=>location.hash='#seed=change&d=hard&r=0');await page.waitForFunction(async()=>(await import('/js/state.js')).S.friend.same);
  await page.click('[data-tab="build"]');await page.click('#rb');
  const priorBuild=await page.evaluate(async()=>(await import('/js/state.js')).RT.build);
@@ -93,3 +97,4 @@ try{
  assert.deepEqual(errors,[]);
  console.log('PASS browser: deep links, history, locks, clean-session replay, duplicate completion, hash changes, failed-roll transaction, empty builds/bans, corrupt storage, malformed links, language, mobile, offline PWA, cache isolation; no page errors.');
 }finally{await browser?.close();await new Promise(r=>server.close(r))}
+

@@ -1,5 +1,7 @@
 // UI: tabs, reels animation, contract, timer, builds, bans, filters, history.
 import {icon} from './icons.js';
+import {applyTheme,toggleTheme} from './theme.js';
+import {showCelebration,closeCelebration,celebrationOpen} from './celebration.js';
 import {S,RT,persist as saveState,ALL_CATS,RANKS,rankIdx} from './state.js';
 import {t,loc,setDict,setLang} from './i18n.js';
 import {roll,rollBan,DIFF,restoreResult,resultKey,heroPool} from './roulette.js';
@@ -40,7 +42,7 @@ const resText=x=>`🎯 Deadlock Challenge — ${H(x.hero).name} [${x.rarity.toUp
 /* ---------- header / shell ---------- */
 function paintHeader(){const i=rankIdx(S.stats.points);$('#rank').innerHTML=`<span class="rank-icon">${icon('trophy',18)}</span><div class="rank-copy"><b>${t('ranks')[i]}</b><span>${S.stats.points} ${t('pts')}${RANKS[i+1]?' / '+RANKS[i+1]:''}</span></div>`;$('#lang').textContent=S.lang==='ru'?'EN':'RU'}
 
-function applyStatic(){$$('[data-icon]').forEach(e=>e.innerHTML=icon(e.dataset.icon));$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));$('#foot').textContent=t('footer');paintCatalog();paintHeader()}
+function applyStatic(){$$('[data-icon]').forEach(e=>e.innerHTML=icon(e.dataset.icon));$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));$('#foot').textContent=t('footer');paintCatalog();paintHeader();applyTheme()}
 function paintCatalog(){
   const el=$('#data-notice');if(!el)return;
   const meta=RT.data.catalog?.heroes;
@@ -119,7 +121,7 @@ async function doRoll(reroll,opt={}){
   if(RT.pendingHash){const next=RT.pendingHash;RT.pendingHash=null;fromHash(next)}
 }
 function finish(o){const x=RT.cur;if(!x||RT.finished)return;RT.finished=true;RT.timer.run=false;x.outcome=o;for(const f of S.favs)if(resultKey(f)===resultKey(x))f.outcome=o;
-  if(o==='done'){S.stats.done++;S.stats.points+=x.points}else S.stats.fail++;persist();paintContract();paintHeader();beep(o==='done'?880:140,.2)}
+  if(o==='done'){S.stats.done++;S.stats.points+=x.points}else S.stats.fail++;persist();paintContract();paintHeader();beep(o==='done'?880:140,.2);showCelebration(x,H(x.hero),RT.data.challenges)}
 setInterval(()=>{const T=RT.timer;if(T.run){T.ms=Date.now()-T.t0;const e=$('#tm');if(e)e.textContent=mmss(T.ms)}},250);
 async function png(){const x=RT.cur;if(!x)return;const cv=document.createElement('canvas');
   try{await document.fonts.ready}catch(e){}
@@ -167,6 +169,7 @@ function bind(){
     const b=e.target.closest('button');if(!b)return;const d=b.dataset;
     if(d.tab)return show(d.tab);
     if(RT.busy)return;
+    if(b.id==='theme'){toggleTheme();persist();return}
     if(b.id==='lang'){S.lang=S.lang==='ru'?'en':'ru';setLang(S.lang);persist();applyStatic();return show(RT.tab)}
     if(b.id==='spin')return doRoll(false);
     if(b.id==='reroll')return doRoll(true);
@@ -195,6 +198,7 @@ function bind(){
     else if(i.id==='fpl'){S.friend.player=Math.max(1,Math.min(9,+i.value||1));persist()}});
   document.addEventListener('input',e=>{if(e.target.id==='hero-search'){RT.heroSearch=e.target.value;updateHeroSearch()}});
   document.addEventListener('keydown',e=>{
+    if(celebrationOpen())return;
     if(RT.tab!=='roulette'||e.ctrlKey||e.metaKey||e.altKey||e.target.closest('input,select,textarea,summary,[contenteditable="true"]'))return;
     if(e.code==='Space'&&!e.target.closest('button,a')){e.preventDefault();doRoll(false)}
     else if(e.code==='KeyR')doRoll(true);
@@ -204,6 +208,7 @@ function bind(){
 
 }
 function fromHash(h){
+  closeCelebration();
   if(RT.busy){RT.pendingHash=h;return}
   if(h.error){show('roulette');return toast(t('invalidLink'))}
   if(h.result){try{restoreResult(h.result,RT.data.heroes,RT.data.challenges)}catch{show('roulette');return toast(t('invalidLink'))}}
@@ -215,6 +220,7 @@ function fromHash(h){
 
 /* ---------- boot ---------- */
 export async function boot(){
+  applyTheme();
   try{
     const j=u=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);return r.json()});
     const [h,i,c,l]=await Promise.all([j('data/heroes.json'),j('data/items.json'),j('data/challenges.json'),j('data/i18n.json')]);
