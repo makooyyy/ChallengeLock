@@ -1,9 +1,10 @@
 // UI: tabs, reels animation, contract, timer, builds, bans, filters, history.
-import {S,RT,persist,ALL_CATS,RANKS,rankIdx} from './state.js';
+import {S,RT,persist as saveState,ALL_CATS,RANKS,rankIdx} from './state.js';
 import {t,loc,setDict,setLang} from './i18n.js';
-import {roll,rollBan,DIFF} from './roulette.js';
+import {roll,rollBan,DIFF,restoreResult,resultKey,heroPool} from './roulette.js';
 import {makeBuild,BRANCHES} from './builds.js';
 import {newSeed,dailySeed,pick} from './rng.js';
+import {validateData,options} from './validation.js';
 import {parseHash,linkFor,setHash,copy,drawCard} from './share.js';
 
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -17,17 +18,18 @@ const DIFFS=Object.keys(DIFF);
 
 /* ---------- helpers ---------- */
 let tt;function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),1800)}
+function persist(){if(!saveState())toast(t('storageError'))}
 let ac;function beep(f,d=.1){if(!S.sound)return;try{ac??=new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type='square';g.gain.value=.04;g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
 const dia=h=>`<div class="dia" style="--c:${h.color}"><span>${esc(h.name[0])}</span>${h.icon?`<img class="pic" src="${esc(h.icon)}" alt="" loading="lazy">`:''}</div>`;
 const heroCell=(h,m)=>`<div class="cell${m?' mid':''}">${dia(h)}<b>${esc(h.name)}</b></div>`;
 const condCell=(c,m)=>`<div class="cell${m?' mid':''}"><div><b>${esc(loc(c.name))}</b><small>${t('cat.'+c.cat)}</small></div></div>`;
 const cellHTML=(i,x,m)=>!x?`<div class="cell${m?' mid':''}"><div><b>—</b></div></div>`:i===0?heroCell(x,m):condCell(x,m);
 const seg=(arr,cur,attr)=>`<div class="seg" role="group">${arr.map(([v,l])=>`<button data-${attr}="${v}" class="${v==cur?'on':''}" aria-pressed="${v==cur}">${l}</button>`).join('')}</div>`;
-const resText=x=>`🎯 Deadlock Challenge — ${H(x.hero).name} [${x.rarity.toUpperCase()}]\n${x.conds.map(id=>'• '+loc(C(id).name)).join('\n')}\n${x.sum}×${x.mult}=${x.points} ${t('pts')}\n${linkFor(x,S.friend.same?0:S.friend.player)}`;
+const resText=x=>`🎯 Deadlock Challenge — ${H(x.hero).name} [${x.rarity.toUpperCase()}]\n${x.conds.map(id=>'• '+loc(C(id).name)).join('\n')}\n${x.sum}×${x.mult}=${x.points} ${t('pts')}\n${linkFor(x)}`;
 
 /* ---------- header / shell ---------- */
 function paintHeader(){const i=rankIdx(S.stats.points);$('#rank').innerHTML=`<span class="mo">${t('rank')}</span><b style="color:#ffb02e">${t('ranks')[i]}</b><span>${S.stats.points}${RANKS[i+1]?' / '+RANKS[i+1]:''}</span>`;$('#lang').textContent=S.lang==='ru'?'EN':'RU'}
-function applyStatic(){$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));$('#foot').textContent=t('footer');paintHeader()}
+function applyStatic(){$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));$('#foot').textContent=t('footer');if($('#data-notice'))$('#data-notice').textContent=t('unverifiedData');paintHeader()}
 function show(tab){RT.tab=tab;$$('.nb').forEach(b=>{const on=b.dataset.tab===tab;b.classList.toggle('on',on);b.setAttribute('aria-current',on?'page':'false')});
   $$('.panel').forEach(p=>p.hidden=p.id!=='p-'+tab);({roulette:viewRoulette,build:viewBuild,ban:viewBan,custom:viewCustom,history:viewHistory})[tab]()}
 
@@ -51,7 +53,7 @@ function paintReels(res,anim){
     let h='';for(let k=0;k<L;k++)h+=cellHTML(i,pick(Math.random,pool),false);
     h+=cellHTML(i,win,true)+cellHTML(i,pick(Math.random,pool),false);st.innerHTML=h;
     const off=(mob()?L:L-1)*CELL;st.style.transform=`translateY(-${off}px)`;
-    $(`.reel[data-i="${i}"] .lk`).classList.toggle('on',RT.locks[i]);
+    const lock=$(`.reel[data-i="${i}"] .lk`);lock.classList.toggle('on',RT.locks[i]);lock.setAttribute('aria-pressed',String(RT.locks[i]));lock.disabled=!res||(i>0&&!res.conds[i-1]);
     if(spin)ps.push(st.animate([{transform:'translateY(0)'},{transform:`translateY(-${off}px)`}],{duration:1300+i*380,easing:'cubic-bezier(.12,.72,.12,1)'}).finished);
   }
   return Promise.all(ps);
@@ -59,7 +61,7 @@ function paintReels(res,anim){
 function paintContract(){
   const el=$('#contract');if(!el)return;const x=RT.cur;
   if(!x){el.innerHTML=`<div class="mo" style="color:#4a5370">${t('empty')}</div>`;return}
-  const h=H(x.hero),col=RP[x.rarity],fav=S.favs.some(f=>f.seed===x.seed&&f.r===x.r&&f.diff===x.diff);
+  const h=H(x.hero),col=RP[x.rarity],fav=S.favs.some(f=>resultKey(f)===resultKey(x));
   el.innerHTML=`<div class="mo" style="color:#4a5370">seed ${esc(x.seed)} · r${x.r}</div><h2 class="os" style="font-size:30px;margin:6px 0 10px">${esc(h.name)}</h2><span class="stamp" style="color:${col};border-color:${col}">${t('rar.'+x.rarity)}</span>
   ${x.conds.map((id,i)=>{const c=C(id);return `<div class="cl"><i></i><div style="flex:1">${ROM[i]}. ${esc(loc(c.name))}<small>${esc(loc(c.desc))}</small></div><span>x${c.mult}</span></div>`}).join('')}
   <div class="fx" style="justify-content:space-between;align-items:baseline;margin:14px 0"><span class="mo" style="color:#4a5370">${t('reward')}</span><b class="os" style="font-size:26px">${x.sum} × ${x.mult} = ${x.points} ${t('pts')}</b></div>
@@ -69,20 +71,29 @@ function paintContract(){
 }
 function particles(col){const m=$('.mach');if(!m||reduce)return;for(let i=0;i<26;i++){const s=document.createElement('i');s.className='pt';s.style.cssText=`--x:${(Math.random()-.5)*500}px;--y:${-Math.random()*260}px;background:${col};left:50%;top:50%`;m.append(s);setTimeout(()=>s.remove(),1000)}}
 async function doRoll(reroll,opt={}){
-  if(RT.busy)return;let prev=null;
-  if(reroll){if(!RT.cur)return;if(RT.rerolls<=0)return toast(t('noRerolls'));RT.rerolls--;RT.r++;prev=RT.cur}
-  else{RT.seed=opt.seed||newSeed();RT.r=opt.r||0;RT.rerolls=RT.maxRerolls;RT.locks=[false,false,false,false]}
-  let res;try{res=roll({seed:RT.seed,r:RT.r,heroes:RT.data.heroes,challenges:RT.data.challenges,o:S,locks:RT.locks,prev,player:S.friend.player,same:S.friend.same})}catch(e){console.error(e);return toast(t('error'))}
-  if(!res)return toast(t('error'));
-  RT.cur=res;RT.finished=false;RT.timer={ms:0,run:false,t0:0};
-  const last=S.history[0];if(reroll&&last&&last.seed===res.seed&&!last.outcome)S.history[0]=res;else S.history.unshift(res);S.history.length=Math.min(S.history.length,50);persist();setHash(res);
-  if(RT.tab!=='roulette')show('roulette');else{const rr=$('#rr');if(rr)rr.textContent=RT.rerolls}
-  RT.busy=true;beep(330);paintContract();
-  try{await paintReels(res,true)}catch(e){}
+  if(RT.busy)return;
+  if(reroll&&(!RT.cur||RT.rerolls<=0))return toast(t('noRerolls'));
+  const seed=reroll?RT.seed:(opt.seed||newSeed()),r=reroll?RT.r+1:(opt.r||0);
+  const locks=reroll?RT.locks:[false,false,false,false];
+  let res;
+  try{res=opt.result?restoreResult(opt.result,RT.data.heroes,RT.data.challenges):roll({seed,r,heroes:RT.data.heroes,challenges:RT.data.challenges,o:S,locks,prev:reroll?RT.cur:null,player:S.friend.player,same:S.friend.same})}
+  catch(e){console.error(e);return toast(t('invalidLink'))}
+  if(!res)return toast(t(heroPool(RT.data.heroes,S).length?'noConditions':'noHeroes'));
+  RT.seed=seed;RT.r=r;RT.locks=locks;RT.rerolls=reroll?RT.rerolls-1:Math.max(0,RT.maxRerolls-r);
+  const existing=S.history.find(x=>resultKey(x)===resultKey(res));
+  if(existing)res.outcome=existing.outcome;
+  S.history=S.history.filter(x=>resultKey(x)!==resultKey(res));
+  if(reroll&&S.history[0]?.seed===res.seed&&!S.history[0].outcome)S.history.shift();
+  S.history.unshift(res);S.history=S.history.slice(0,50);
+  RT.cur=res;RT.finished=!!res.outcome;RT.timer={ms:0,run:false,t0:0};
+  persist();setHash(res);show('roulette');
+  RT.busy=true;beep(330);
+  try{await paintReels(res,!opt.result)}catch(e){}
   RT.busy=false;beep(res.rarity==='cursed'?160:660,.18);
-  if(res.rarity==='epic'||res.rarity==='cursed'){particles(RC[res.rarity]);if(!reduce){const m=$('.mach');m.classList.add('shake');setTimeout(()=>m.classList.remove('shake'),450)}}
+  if(res.rarity==='epic'||res.rarity==='cursed'){particles(RC[res.rarity]);const m=$('.mach');if(!reduce&&m){m.classList.add('shake');setTimeout(()=>m.classList.remove('shake'),450)}}
+  if(RT.pendingHash){const next=RT.pendingHash;RT.pendingHash=null;fromHash(next)}
 }
-function finish(o){const x=RT.cur;if(!x||RT.finished)return;RT.finished=true;RT.timer.run=false;x.outcome=o;
+function finish(o){const x=RT.cur;if(!x||RT.finished)return;RT.finished=true;RT.timer.run=false;x.outcome=o;for(const f of S.favs)if(resultKey(f)===resultKey(x))f.outcome=o;
   if(o==='done'){S.stats.done++;S.stats.points+=x.points}else S.stats.fail++;persist();paintContract();paintHeader();beep(o==='done'?880:140,.2)}
 setInterval(()=>{const T=RT.timer;if(T.run){T.ms=Date.now()-T.t0;const e=$('#tm');if(e)e.textContent=mmss(T.ms)}},250);
 async function png(){const x=RT.cur;if(!x)return;const cv=document.createElement('canvas');
@@ -125,23 +136,25 @@ function viewHistory(){
 /* ---------- events ---------- */
 function bind(){
   document.addEventListener('click',async e=>{
+    const a=e.target.closest('.hl a');if(a){e.preventDefault();const h=parseHash(new URL(a.href).hash);if(h)return fromHash(h)}
     const b=e.target.closest('button');if(!b)return;const d=b.dataset;
     if(d.tab)return show(d.tab);
+    if(RT.busy)return;
     if(b.id==='lang'){S.lang=S.lang==='ru'?'en':'ru';setLang(S.lang);persist();applyStatic();return show(RT.tab)}
     if(b.id==='spin')return doRoll(false);
     if(b.id==='reroll')return doRoll(true);
     if(b.id==='daily')return doRoll(false,{seed:dailySeed()});
-    if(d.diff){S.diff=d.diff;persist();return $$('[data-diff]').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)})}
-    if(d.lock!==undefined){const i=+d.lock;RT.locks[i]=!RT.locks[i];b.classList.toggle('on',RT.locks[i]);return b.setAttribute('aria-pressed',RT.locks[i])}
+    if(d.diff){S.diff=d.diff;RT.locks=[false,false,false,false];paintReels(RT.cur,false);persist();return $$('[data-diff]').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)})}
+    if(d.lock!==undefined){const i=+d.lock;if(!RT.cur||(i>0&&!RT.cur.conds[i-1]))return;RT.locks[i]=!RT.locks[i];b.classList.toggle('on',RT.locks[i]);return b.setAttribute('aria-pressed',RT.locks[i])}
     if(b.id==='done')return finish('done');if(b.id==='failb')return finish('fail');
     if(b.id==='tgl'){const T=RT.timer;T.run=!T.run;if(T.run)T.t0=Date.now()-T.ms;return paintContract()}
-    if(b.id==='fav'){const x=RT.cur,k=f=>f.seed===x.seed&&f.r===x.r&&f.diff===x.diff;S.favs=S.favs.some(k)?S.favs.filter(f=>!k(f)):[{...x},...S.favs].slice(0,50);persist();return paintContract()}
-    if(b.id==='cl')return toast(await copy(linkFor(RT.cur,S.friend.same?0:S.friend.player))?t('copied'):t('error'));
+    if(b.id==='fav'){const x=RT.cur,k=f=>resultKey(f)===resultKey(x);S.favs=S.favs.some(k)?S.favs.filter(f=>!k(f)):[{...x},...S.favs].slice(0,50);persist();return paintContract()}
+    if(b.id==='cl')return toast(await copy(linkFor(RT.cur))?t('copied'):t('error'));
     if(b.id==='ct')return toast(await copy(resText(RT.cur))?t('copied'):t('error'));
     if(b.id==='cp')return png();
-    if(b.id==='rb'){RT.budget=+$('#bud').value;RT.build=makeBuild(newSeed(),RT.data.heroes,RT.data.items,RT.budget,S);return viewBuild()}
+    if(b.id==='rb'){const budget=+$('#bud').value,build=makeBuild(newSeed(),RT.data.heroes,RT.data.items,budget,S);if(!build)return toast(t('noHeroes'));RT.budget=budget;RT.build=build;return viewBuild()}
     if(b.id==='cb'){const x=RT.build;return toast(await copy(`🛠 ${H(x.hero).name}\n${x.items.map((id,i)=>`${i+1}. ${I(id).name}`).join('\n')}`)?t('copied'):t('error'))}
-    if(d.ban){RT.ban=rollBan(newSeed(),RT.data.heroes,RT.data.items,S,d.ban);return viewBan()}
+    if(d.ban){const ban=rollBan(newSeed(),RT.data.heroes,RT.data.items,S,d.ban);if(!ban)return toast(t('noHeroes'));RT.ban=ban;return viewBan()}
     if(b.id==='cb2'){const x=RT.ban;return toast(await copy(`⛔ ${H(x.hero).name}: ${x.slot?t('slot')+x.slot:I(x.item).name}`)?t('copied'):t('error'))}
     if(d.hm){S.heroMode=d.hm;applyHeroSel();return viewCustom()}
     if(b.id==='hreset'){S.sel=[];applyHeroSel();return viewCustom()}
@@ -158,20 +171,32 @@ function bind(){
     if(e.code==='Space'&&!e.target.closest('button,a')){e.preventDefault();doRoll(false)}
     else if(e.code==='KeyR')doRoll(true);
     else if(e.code==='KeyL'){const b=$('[data-lock="0"]');if(b)b.click()}});
-  addEventListener('hashchange',()=>{const h=parseHash();if(h&&h.seed!==RT.seed||h&&h.r!==RT.r)fromHash(h)});
+  addEventListener('hashchange',()=>{const h=parseHash();if(h)fromHash(h)});
+  document.addEventListener('error',e=>{if(e.target.matches?.('img.pic'))e.target.remove()},true);
   matchMedia('(max-width:780px)').addEventListener('change',()=>{if(RT.tab==='roulette')paintReels(RT.cur,false)});
 }
-function fromHash(h){if(DIFF[h.d])S.diff=DIFF[h.d]?h.d:S.diff;if(h.p){S.friend.player=h.p;S.friend.same=false}RT.tab='roulette';doRoll(false,{seed:h.seed,r:h.r})}
+function fromHash(h){
+  if(RT.busy){RT.pendingHash=h;return}
+  if(h.error){show('roulette');return toast(t('invalidLink'))}
+  if(h.result){try{restoreResult(h.result,RT.data.heroes,RT.data.challenges)}catch{show('roulette');return toast(t('invalidLink'))}}
+  Object.assign(S,options(h.result?.opts||{diff:h.d}));
+  S.diff=h.d;S.friend={same:!h.p,player:h.p||1};
+  S.heroMode=S.only.length?'only':'exclude';S.sel=[...(S.only.length?S.only:S.excluded)];
+  show('roulette');return doRoll(false,{seed:h.seed,r:h.r,result:h.result});
+}
 
 /* ---------- boot ---------- */
 export async function boot(){
   try{
     const j=u=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);return r.json()});
     const [h,i,c,l]=await Promise.all([j('data/heroes.json'),j('data/items.json'),j('data/challenges.json'),j('data/i18n.json')]);
-    RT.data={heroes:h.heroes,items:i.items,challenges:c.challenges};setDict(l,S.lang);setLang(S.lang);
+    RT.data=validateData({heroes:h.heroes,items:i.items,challenges:c.challenges},l);setDict(l,S.lang);setLang(S.lang);
+    for(const key of ['history','favs'])S[key]=S[key].flatMap(x=>{try{return [{...restoreResult(x,h.heroes,c.challenges),outcome:x.outcome}]}catch{return []}});
   }catch(e){console.error(e);$('#boot').innerHTML=`<div class="err" role="alert">Не удалось загрузить данные / Failed to load data</div>`;return}
   S.sel??=[];S.heroMode??='exclude';$('#boot').remove();$('#app').hidden=false;
   bind();applyStatic();
-  const h=parseHash();h?fromHash(h):show('roulette');
+  const h=parseHash();h?await fromHash(h):show('roulette');
+  const notice=document.createElement('p');notice.id='data-notice';notice.hidden=RT.data.heroes.every(h=>h.verified)&&RT.data.items.every(i=>i.verified);notice.className='mo';notice.textContent=t('unverifiedData');$('#foot').before(notice);
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
+

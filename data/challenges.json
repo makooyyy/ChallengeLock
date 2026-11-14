@@ -500,7 +500,7 @@
    ],
    "conflicts": [],
    "heroes": "all",
-   "mult": 1.0,
+   "mult": 1,
    "mode": "solo",
    "verified": true
   },
@@ -632,7 +632,7 @@
    ],
    "conflicts": [],
    "heroes": "all",
-   "mult": 1.0,
+   "mult": 1,
    "mode": "solo",
    "verified": true
   },
@@ -773,12 +773,12 @@
    "cat": "ch",
    "difficulty": 4,
    "name": {
-    "ru": "Смена героя после смерти",
-    "en": "Swap hero on death"
+    "ru": "После смерти — новый герой в следующем матче",
+    "en": "After a death, change hero next match"
    },
    "desc": {
-    "ru": "Каждая смерть — новый герой.",
-    "en": "Swap hero on death"
+    "ru": "Если погибнешь в этом матче, в следующем выбери другого героя. В текущем матче герой не меняется.",
+    "en": "If you die in this match, choose a different hero for the next match. Keep your current hero until this match ends."
    },
    "tags": [
     "swapdeath"
@@ -789,7 +789,7 @@
    "heroes": "all",
    "mult": 1.5,
    "mode": "solo",
-   "verified": true
+   "verified": false
   },
   {
    "id": "ch_lane",

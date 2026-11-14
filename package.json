@@ -1,0 +1,7 @@
+{
+  "name": "challengelock",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test tests/core.test.js" },
+  "engines": { "node": ">=22" }
+}
