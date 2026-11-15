@@ -3,8 +3,8 @@
   "short_name": "ChallengeLock",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f4f3f8",
-  "theme_color": "#1e172c",
+  "background_color": "#f3f5f9",
+  "theme_color": "#101217",
   "lang": "ru",
   "icons": [
     {

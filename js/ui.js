@@ -56,8 +56,8 @@ function show(tab){RT.tab=tab;$$('.nb').forEach(b=>{const on=b.dataset.tab===tab
 /* ---------- ROULETTE ---------- */
 function viewRoulette(){
   const p=$('#p-roulette');
-  p.innerHTML=intro(t('rouletteTitle'),t('rouletteIntro'),`<button id="daily" class="daily-button">${icon('calendar',16)}${t('daily')}</button>`)+`
-  <section class="mode-picker" aria-label="${t('gameModeTitle')}"><div class="mode-picker-heading"><span class="eyebrow">${t('gameModeTitle')}</span><span>${t('gameModeHint')}</span></div><div class="mode-options">${GAME_MODES.map((m,i)=>`<button data-game-mode="${m}" aria-pressed="${S.gameMode===m}" class="mode-option ${S.gameMode===m?'selected':''}"><span class="mode-glyph">${icon(['spark','dice','trophy'][i],21)}</span><span><b>${t('gameMode.'+m)}</b><small>${t('gameModeDesc.'+m)}</small></span><span class="mode-check">${icon('check',15)}</span></button>`).join('')}</div></section>
+  p.innerHTML=`<div class="studio-intro"><div><div class="eyebrow"><span class="live-indicator"></span>DEADLOCK / CHALLENGE GENERATOR</div><h1>${t('studioTitle')} <span>${t('studioTitleAccent')}</span></h1><p>${t('rouletteIntro')}</p></div><div class="studio-art" aria-hidden="true"><span class="art-orbit"></span>${['haze','abrams','ivy'].map(id=>H(id)).filter(Boolean).map(h=>`<img src="${esc(h.icon)}" alt="">`).join('')}<span class="art-caption">PICK. PLAY. REPEAT.</span></div></div><div class="session-toolbar"><span class="session-title">${icon('settings',16)}${t('sessionSetup')}</span><button id="daily" class="daily-button">${icon('calendar',16)}${t('daily')}</button></div>`+`
+  <section class="mode-picker" aria-label="${t('gameModeTitle')}"><div class="mode-picker-heading"><span class="eyebrow">${t('gameModeTitle')}</span><span>${t('gameModeHint')}</span></div><div class="mode-options">${GAME_MODES.map((m,i)=>`<button data-game-mode="${m}" aria-pressed="${S.gameMode===m}" class="mode-option ${S.gameMode===m?'selected':''}"><span class="mode-index">0${i+1}</span><span class="mode-glyph">${icon(['spark','dice','trophy'][i],21)}</span><span><b>${t('gameMode.'+m)}</b><small>${t('gameModeDesc.'+m)}</small></span><span class="mode-check">${icon('check',15)}</span></button>`).join('')}</div></section>
   <div class="roulette-layout"><section class="mach" aria-label="${t('tab.roulette')}" aria-busy="false">
     <div class="board-toolbar"><div class="toolbar-label"><b>${t('difficulty')}</b><small>${t('difficultyHint')}</small></div>${seg(DIFFS.map(d=>[d,t('diff.'+d)]),S.diff,'diff')}</div>
     <div class="reel-stage"><div class="reel hero-reel" data-i="0"><div class="reel-title"><span>01 / ${t('hero')}</span>${icon('shield',13)}</div><div class="strip"></div><button class="lk" data-lock="0" aria-label="${t('lock')} — ${t('hero')}"></button></div>
@@ -65,7 +65,7 @@ function viewRoulette(){
     <div class="filter-summary"><span>${icon('shield',12)}${heroPool(RT.data.heroes,S).length} ${t('heroesCount')}</span><span class="sep">/</span><span>${S.cats.length} ${t('categoriesCount')}</span><button data-tab="custom">${t('configure')}${icon('arrow',12)}</button></div>
     <div class="board-actions"><button class="spin" id="spin">${icon('shuffle')}<span id="spin-label">${t('spin')}</span><kbd>SPACE</kbd></button><button class="reroll-button" id="reroll">${icon('refresh',17)}${t('reroll')}<small id="rr">${RT.rerolls}</small></button></div>
     <details class="board-options"><summary><span>${icon('settings',14)}${t('extraSettings')}</span>${icon('chevron',14)}</summary><div class="options-content"><label class="chk"><input type="checkbox" id="snd" ${S.sound?'checked':''}>${t('soundOn')}</label><label class="chk"><input type="checkbox" id="fsame" ${S.friend.same?'checked':''}>${t('sameHero')}</label><label class="chk">${t('player')}<input type="number" id="fpl" min="1" max="9" value="${S.friend.player}" class="num" ${S.friend.same?'disabled':''}></label><p class="keyboard-hint">${t('keys')}</p></div></details>
-  </section><section class="paper" id="contract" aria-live="polite"></section></div>`;
+  </section><section class="paper" id="contract" aria-live="polite" tabindex="-1"></section></div>`;
   paintReels(RT.cur,false);paintContract();setBusy(RT.busy);
 }
 function paintReels(res,animate){
@@ -73,25 +73,26 @@ function paintReels(res,animate){
   for(let i=0;i<4;i++){
     const el=$(`.reel[data-i="${i}"] .strip`);if(!el)continue;
     const entry=res?(i===0?H(res.hero):C(res.conds[i-1])):null;
-    el.closest('.reel').hidden=!!res&&i>0&&!entry;
+    el.closest('.reel').hidden=i>0&&(res?!entry:i>1);
     if(i===0){
       el.innerHTML=entry?`<div class="hero-display" style="--hero-color:${entry.color}"><div class="hero-avatar"><span>${esc(entry.name[0])}</span><img class="pic" src="${esc(entry.icon)}" alt=""></div><div><h3>${esc(entry.name)}</h3><p>${t('yourHero')}</p></div></div>`:
       `<div class="hero-empty"><div class="portrait-stack">${['abrams','ivy','haze'].map(id=>H(id)).filter(Boolean).map(h=>`<img src="${esc(h.icon)}" alt="">`).join('')}</div><div><b>${t('whoNext')}</b><small>${activeHeroes().length} ${t('heroesReady')}</small></div></div>`;
     }else el.innerHTML=entry?`<div class="condition-result"><h3>${esc(loc(entry.name))}</h3><p>${esc(loc(entry.desc))}</p></div>`:`<div class="condition-empty">${res?t('unusedCondition'):t('conditionPlaceholder')}</div>`;
-    const lock=$(`.reel[data-i="${i}"] .lk`);lock.innerHTML=icon(RT.locks[i]?'lock':'unlock',12)+`<span>${t(RT.locks[i]?'locked':'lock')}</span>`;lock.title=t('lockHelp');lock.classList.toggle('on',RT.locks[i]);lock.setAttribute('aria-pressed',String(RT.locks[i]));lock.disabled=!entry||RT.busy;
+    const lock=$(`.reel[data-i="${i}"] .lk`);lock.innerHTML=icon(RT.locks[i]?'lock':'unlock',12)+`<span>${t(RT.locks[i]?'locked':'lock')}</span>`;lock.title=t('lockHelp');lock.classList.toggle('on',RT.locks[i]);lock.setAttribute('aria-pressed',String(RT.locks[i]));lock.disabled=!entry||RT.busy;lock.hidden=!entry;
     if(animate&&!reduce&&entry&&!RT.locks[i])promises.push(el.animate([{opacity:.1,transform:'translateY(9px)'},{opacity:1,transform:'translateY(0)'}],{duration:360+i*80,easing:'ease-out'}).finished);
   }
   return Promise.all(promises);
 }
 function paintContract(){
-  const el=$('#contract');if(!el)return;const x=RT.cur;
+  const el=$('#contract');if(!el)return;const x=RT.cur;el.classList.toggle('finished',RT.finished);el.classList.toggle('has-result',!!x);
   if(!x){el.innerHTML=`<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${icon('shield',16)}</div><div class="contract-empty"><div class="contract-illustration">${icon('lock',28)}</div><h2>${t('emptyTitle')}</h2><p>${t('empty')}</p><div class="steps"><b>1</b>${t('stepSpin')}<span>→</span><b>2</b>${t('stepPlay')}<span>→</span><b>3</b>${t('stepEarn')}</div></div>`;return}
   const h=H(x.hero),fav=S.favs.some(f=>resultKey(f)===resultKey(x));
   el.innerHTML=`<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${difficultyBadge(x)}</div>
   <div class="contract-hero">${dia(h)}<div><h2>${esc(h.name)}</h2><p>${modeName(x)} · ${t('diff.'+x.diff)} · ${x.conds.length} ${t('conditionsCount')}</p></div><button class="icon-button" id="fav" aria-label="${t('fav')}" title="${t('fav')}" aria-pressed="${fav}">${icon('star',18)}</button></div>
-  <p class="contract-note">${t('contractHint')}</p>
+  <div class="contract-state">${icon(RT.finished?'check':'play',12)}${t(RT.finished?'sessionClosed':'sessionActive')}</div><p class="contract-note">${t('contractHint')}</p>
   ${RT.finished?`<div class="completion-status ${x.outcome==='fail'?'failed':''}">${icon(x.outcome==='done'?'check':'close',17)}${t(x.outcome==='done'?'completedStatus':'failedStatus')}</div>`:''}
   <div class="result-actions"><button class="pb" id="done" ${RT.finished?'disabled':''}>${icon('check',16)}${t('done')}</button><button class="pb o" id="failb" ${RT.finished?'disabled':''}>${icon('close',15)}${t('fail')}</button></div>
+  ${RT.finished?`<button class="review-stamp" id="review-stamp">${icon('shield',17)}${t('reviewStamp')}${icon('arrow',15)}</button>`:''}
   <div class="timer-row"><div class="timer-readout">${icon('clock',17)}<b id="tm" class="mono-t">${mmss(RT.timer.ms)}</b></div><button class="timer-toggle" id="tgl" ${RT.finished?'disabled':''}>${icon(RT.timer.run?'clock':'play',12)}${RT.timer.run?t('pause'):t('start')}</button></div>
   <div class="share-actions"><button id="cl">${icon('link',14)}${t('copyLink')}</button><button id="ct">${icon('copy',14)}${t('copyText')}</button><button id="cp">${icon('download',14)}${t('png')}</button></div>
   <div class="contract-seed">SEED / ${esc(x.seed)} · R${x.r}</div>`;
@@ -178,6 +179,7 @@ function bind(){
     if(d.gameMode&&GAME_MODES.includes(d.gameMode)){if(S.gameMode===d.gameMode)return;S.gameMode=d.gameMode;RT.cur=null;RT.seed=null;RT.r=0;RT.finished=false;RT.locks=[false,false,false,false];RT.rerolls=RT.maxRerolls;RT.timer={ms:0,run:false,t0:0};history.replaceState(null,'',location.pathname+location.search);persist();viewRoulette();document.querySelector('[data-game-mode="'+S.gameMode+'"]').focus();return}
     if(d.diff){S.diff=d.diff;RT.locks=[false,false,false,false];paintReels(RT.cur,false);persist();return $$('[data-diff]').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)})}
     if(d.lock!==undefined){const i=+d.lock;if(!RT.cur||(i>0&&!RT.cur.conds[i-1]))return;RT.locks[i]=!RT.locks[i];paintReels(RT.cur,false);return}
+    if(b.id==='review-stamp'&&RT.cur&&RT.finished)return showCelebration(RT.cur,H(RT.cur.hero),RT.data.challenges);
     if(b.id==='done')return finish('done');if(b.id==='failb')return finish('fail');
     if(b.id==='tgl'){if(RT.finished)return;const T=RT.timer;T.run=!T.run;if(T.run)T.t0=Date.now()-T.ms;return paintContract()}
     if(b.id==='fav'){const x=RT.cur,k=f=>resultKey(f)===resultKey(x);S.favs=S.favs.some(k)?S.favs.filter(f=>!k(f)):[{...x},...S.favs].slice(0,50);persist();return paintContract()}
