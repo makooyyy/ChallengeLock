@@ -37,7 +37,7 @@ test('empty hero pool is respected by every generator',()=>{
  assert.equal(roll({...base,seed:'empty',o:{...o,cats:[]}}),null);
 });
 test('locked hero-specific challenges cannot migrate to an incompatible hero',()=>{
- const special={...challenges[0],id:'specific',heroes:[heroes[0].id]};
+ const special={...challenges[0],id:'specific',difficulty:1,heroes:[heroes[0].id]};
  const cs=[special,...challenges];
  const prev={hero:heroes[0].id,conds:['specific']};
  const result=roll({seed:'lock',heroes,challenges:cs,o:{...o,diff:'easy'},prev,locks:[false,true]});
@@ -53,7 +53,7 @@ test('corrupt saved state is normalized deeply',()=>{
  const def={...o,sound:true};
  const s=normalizeState({lang:'bad',diff:'bad',stats:{done:2,points:'oops'},friend:{player:Infinity},history:[null,{}],favs:'oops',excluded:null,sel:34},def);
  assert.equal(normalizeState({theme:'invalid'},def).theme,'system');assert.equal(normalizeState({theme:'dark'},def).theme,'dark');
- assert.deepEqual(s.stats,{done:2,fail:0,points:0});assert.deepEqual(s.friend,{same:true,player:1});assert.deepEqual(s.history,[]);assert.deepEqual(s.favs,[]);assert.deepEqual(s.excluded,[]);assert.equal(s.diff,'mid');
+ assert.deepEqual(s.stats,{done:2,fail:0});assert.deepEqual(s.friend,{same:true,player:1});assert.deepEqual(s.history,[]);assert.deepEqual(s.favs,[]);assert.deepEqual(s.excluded,[]);assert.equal(s.diff,'mid');
  for(const input of [null,[],42,'oops'])assert.equal(normalizeState(input,def).lang,'ru');
 });
 test('data schema accepts catalog and rejects corruption before rendering',()=>{
@@ -64,7 +64,7 @@ test('data schema accepts catalog and rejects corruption before rendering',()=>{
 });
 test('service worker keeps other apps caches and ignores unrelated requests',async()=>{
  const events={},deleted=[],scope='https://example.test/ChallengeLock/',prefix='challengelock:'+scope+':';
- const context={self:{registration:{scope},addEventListener:(k,f)=>events[k]=f,clients:{claim:async()=>{}}},caches:{keys:async()=>['other-app','dlr-v1',prefix+'v1',prefix+'v6:'+read('heroes')._meta.revision,'challengelock:https://example.test/Other/:v1'],delete:async k=>deleted.push(k)},URL,Promise};
+ const context={self:{registration:{scope},addEventListener:(k,f)=>events[k]=f,clients:{claim:async()=>{}}},caches:{keys:async()=>['other-app','dlr-v1',prefix+'v1',prefix+'v7:'+read('heroes')._meta.revision,'challengelock:https://example.test/Other/:v1'],delete:async k=>deleted.push(k)},URL,Promise};
  vm.runInNewContext(fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8'),context);
  let pending;events.activate({waitUntil:p=>pending=p});await pending;assert.deepEqual(deleted,[prefix+'v1']);
  for(const url of ['https://example.test/Other/index.html','https://other.test/ChallengeLock/index.html',scope+'api'])events.fetch({request:{method:'GET',url},respondWith(){assert.fail('Intercepted unrelated request')}});
@@ -82,4 +82,21 @@ test('mode pools stay separate across difficulties, rerolls and shared links',()
  assert.throws(()=>restoreResult({...street,opts:{...street.opts,gameMode:'ranked'}},heroes,challenges));
  const legacy=roll({...base,seed:'old'});delete legacy.opts.gameMode;assert.equal(restoreResult(legacy,heroes,challenges).opts.gameMode,'normal');
  const bad=structuredClone(challenges);bad[0].gameModes=['bad'];assert.throws(()=>validateData({heroes,items,challenges:bad},dict));
+});
+
+test('difficulty ceilings and contract size protect easy and normal games',()=>{
+ const sizes={easy:1,mid:1,hard:2,insane:3},ceilings={easy:1,mid:2,hard:4,insane:5};
+ for(const gameMode of ['normal','street','ranked'])for(const diff of Object.keys(sizes))for(let i=0;i<150;i++){
+  const x=roll({...base,seed:'balance-'+i,o:{...o,gameMode,diff}});assert(x);assert.equal(x.conds.length,sizes[diff]);
+  for(const id of x.conds)assert(challenges.find(c=>c.id===id).difficulty<=ceilings[diff]);
+  for(const key of ['points','mult','sum','rarity'])assert(!(key in x));
+ }
+ for(const id of ['ab_no1','ab_no2','ab_no3','ab_no_ult','gp_nobuy','gp_nozip','gp_nojump','go_guardian','go_assists','street_rounds','street_survivor','normal_courier','ranked_objective'])assert(challenges.find(c=>c.id===id).difficulty>2,id);
+});
+test('legacy scores are discarded while outcomes and favorites survive migration',()=>{
+ const old={...roll({...base,seed:'migration'}),outcome:'done',points:99,sum:8,mult:12,rarity:'cursed'};
+ const saved=normalizeState({stats:{done:4,fail:2,points:999},history:[old],favs:[old]},o);
+ assert.deepEqual(saved.stats,{done:4,fail:2});
+ for(const row of [saved.history[0],saved.favs[0],restoreResult(old,heroes,challenges)])for(const key of ['points','sum','mult','rarity'])assert(!(key in row));
+ assert.equal(saved.history[0].outcome,'done');assert.deepEqual(saved.history[0].conds,old.conds);
 });

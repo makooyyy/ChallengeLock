@@ -2,7 +2,7 @@
 import {icon} from './icons.js';
 import {applyTheme,toggleTheme} from './theme.js';
 import {showCelebration,closeCelebration,celebrationOpen} from './celebration.js';
-import {S,RT,persist as saveState,ALL_CATS,RANKS,rankIdx} from './state.js';
+import {S,RT,persist as saveState,ALL_CATS} from './state.js';
 import {t,loc,setDict,setLang} from './i18n.js';
 import {roll,rollBan,DIFF,restoreResult,resultKey,heroPool} from './roulette.js';
 import {makeBuild,BRANCHES} from './builds.js';
@@ -12,7 +12,7 @@ import {parseHash,linkFor,setHash,copy,drawCard} from './share.js';
 
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const RC={common:'#98a3bd',rare:'#4aa3ff',epic:'#b06bff',cursed:'#ff4d82'},RP={common:'#5b6478',rare:'#1f6fd1',epic:'#7a3fd0',cursed:'#e0245e'};
+const RC={easy:'#8c82a9',mid:'#7662ad',hard:'#9d62c9',insane:'#d55479'},RP=RC;
 const BC={weapon:'#a2762e',vitality:'#538563',spirit:'#8271aa'},ROM=['I','II','III'];
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const H=id=>RT.data.heroes.find(h=>h.id===id),C=id=>RT.data.challenges.find(c=>c.id===id),I=id=>RT.data.items.find(i=>i.id===id);
@@ -25,7 +25,7 @@ function persist(){if(!saveState())toast(t('storageError'))}
 let ac;function beep(f,d=.1){if(!S.sound)return;try{ac??=new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type='square';g.gain.value=.04;g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
 const dia=h=>`<div class="dia" style="--c:${h.color}"><span>${esc(h.name[0])}</span>${h.icon?`<img class="pic" src="${esc(h.icon)}" alt="" loading="lazy">`:''}</div>`;
 const seg=(arr,cur,attr)=>`<div class="seg" role="group" aria-label="${t(attr==='diff'?'difficulty':'heroFilter')}">${arr.map(([v,l])=>`<button data-${attr}="${v}" class="${v==cur?'on':''}" aria-pressed="${v==cur}">${l}</button>`).join('')}</div>`;
-const rarityBadge=x=>`<span class="rarity" style="--rar:${RP[x.rarity]}">${icon('spark',11)} ${t('rar.'+x.rarity)}</span>`;
+const difficultyBadge=x=>`<span class="difficulty-badge" style="--difficulty-color:${RP[x.diff]}">${icon('spark',11)} ${t('diff.'+x.diff)}</span>`;
 const intro=(title,description,action='')=>`<div class="page-intro"><div><div class="eyebrow">DEADLOCK / CHALLENGELOCK</div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;
 const emptyPanel=(glyph,title,description)=>`<div class="empty-panel">${icon(glyph)}<h2>${title}</h2><p>${description}</p></div>`;
 const activeHeroes=()=>RT.data.heroes.filter(h=>h.active!==false);
@@ -38,10 +38,10 @@ function setBusy(busy){
 }
 
 const modeName=x=>t('gameMode.'+options(x?.opts||S).gameMode);
-const resText=x=>`🎯 Deadlock Challenge — ${modeName(x)} — ${H(x.hero).name} [${x.rarity.toUpperCase()}]\n${x.conds.map(id=>'• '+loc(C(id).name)).join('\n')}\n${x.sum}×${x.mult}=${x.points} ${t('pts')}\n${linkFor(x)}`;
+const resText=x=>`🎯 Deadlock Challenge — ${modeName(x)} — ${H(x.hero).name} [${t('diff.'+x.diff)}]\n${x.conds.map(id=>'• '+loc(C(id).name)).join('\n')}\n${linkFor(x)}`;
 
 /* ---------- header / shell ---------- */
-function paintHeader(){const i=rankIdx(S.stats.points);$('#rank').innerHTML=`<span class="rank-icon">${icon('trophy',18)}</span><div class="rank-copy"><b>${t('ranks')[i]}</b><span>${S.stats.points} ${t('pts')}${RANKS[i+1]?' / '+RANKS[i+1]:''}</span></div>`;$('#lang').textContent=S.lang==='ru'?'EN':'RU'}
+function paintHeader(){$('#lang').textContent=S.lang==='ru'?'EN':'RU'}
 
 function applyStatic(){$$('[data-icon]').forEach(e=>e.innerHTML=icon(e.dataset.icon));$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));$('#foot').textContent=t('footer');paintCatalog();paintHeader();applyTheme()}
 function paintCatalog(){
@@ -87,9 +87,8 @@ function paintContract(){
   const el=$('#contract');if(!el)return;const x=RT.cur;
   if(!x){el.innerHTML=`<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${icon('shield',16)}</div><div class="contract-empty"><div class="contract-illustration">${icon('lock',28)}</div><h2>${t('emptyTitle')}</h2><p>${t('empty')}</p><div class="steps"><b>1</b>${t('stepSpin')}<span>→</span><b>2</b>${t('stepPlay')}<span>→</span><b>3</b>${t('stepEarn')}</div></div>`;return}
   const h=H(x.hero),fav=S.favs.some(f=>resultKey(f)===resultKey(x));
-  el.innerHTML=`<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${rarityBadge(x)}</div>
+  el.innerHTML=`<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${difficultyBadge(x)}</div>
   <div class="contract-hero">${dia(h)}<div><h2>${esc(h.name)}</h2><p>${modeName(x)} · ${t('diff.'+x.diff)} · ${x.conds.length} ${t('conditionsCount')}</p></div><button class="icon-button" id="fav" aria-label="${t('fav')}" title="${t('fav')}" aria-pressed="${fav}">${icon('star',18)}</button></div>
-  <div class="reward-box"><div><div class="eyebrow">${t('reward')}</div><div class="reward-value">+${x.points} <small>${t('pts')}</small></div></div>${icon('trophy',36)}</div>
   <p class="contract-note">${t('contractHint')}</p>
   ${RT.finished?`<div class="completion-status ${x.outcome==='fail'?'failed':''}">${icon(x.outcome==='done'?'check':'close',17)}${t(x.outcome==='done'?'completedStatus':'failedStatus')}</div>`:''}
   <div class="result-actions"><button class="pb" id="done" ${RT.finished?'disabled':''}>${icon('check',16)}${t('done')}</button><button class="pb o" id="failb" ${RT.finished?'disabled':''}>${icon('close',15)}${t('fail')}</button></div>
@@ -118,16 +117,16 @@ async function doRoll(reroll,opt={}){
   persist();setHash(res);show('roulette');
   RT.busy=true;setBusy(true);beep(330);
   try{await paintReels(res,!opt.result)}catch(e){}
-  RT.busy=false;setBusy(false);beep(res.rarity==='cursed'?160:660,.18);
-  if(res.rarity==='epic'||res.rarity==='cursed'){particles(RC[res.rarity]);const m=$('.mach');if(!reduce&&m){m.classList.add('shake');setTimeout(()=>m.classList.remove('shake'),450)}}
+  RT.busy=false;setBusy(false);beep(res.diff==='insane'?160:660,.18);
+  if(res.diff==='hard'||res.diff==='insane'){particles(RC[res.diff]);const m=$('.mach');if(!reduce&&m){m.classList.add('shake');setTimeout(()=>m.classList.remove('shake'),450)}}
   if(RT.pendingHash){const next=RT.pendingHash;RT.pendingHash=null;fromHash(next)}
 }
 function finish(o){const x=RT.cur;if(!x||RT.finished)return;RT.finished=true;RT.timer.run=false;x.outcome=o;for(const f of S.favs)if(resultKey(f)===resultKey(x))f.outcome=o;
-  if(o==='done'){S.stats.done++;S.stats.points+=x.points}else S.stats.fail++;persist();paintContract();paintHeader();beep(o==='done'?880:140,.2);showCelebration(x,H(x.hero),RT.data.challenges)}
+  if(o==='done'){S.stats.done++}else S.stats.fail++;persist();paintContract();paintHeader();beep(o==='done'?880:140,.2);showCelebration(x,H(x.hero),RT.data.challenges)}
 setInterval(()=>{const T=RT.timer;if(T.run){T.ms=Date.now()-T.t0;const e=$('#tm');if(e)e.textContent=mmss(T.ms)}},250);
 async function png(){const x=RT.cur;if(!x)return;const cv=document.createElement('canvas');
   try{await document.fonts.ready}catch(e){}
-  drawCard(cv,{hero:H(x.hero).name,lines:x.conds.map(id=>loc(C(id).name)),rar:t('rar.'+x.rarity),pts:`${x.points} ${t('pts')}`,color:RC[x.rarity],foot:`${modeName(x)} · seed ${x.seed} · Deadlock Challenge Roulette`});
+  drawCard(cv,{hero:H(x.hero).name,lines:x.conds.map(id=>loc(C(id).name)),label:t('diff.'+x.diff),color:RC[x.diff],foot:`${modeName(x)} · seed ${x.seed} · Deadlock Challenge Roulette`});
   cv.toBlob(b=>{if(!b)return toast(t('error'));const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`dlr-${x.seed}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)})}
 
 /* ---------- BUILD ---------- */
@@ -159,8 +158,8 @@ function viewCustom(){
   updateHeroSearch();
 }
 function viewHistory(){
-  const p=$('#p-history'),row=x=>`<li><a href="${linkFor(x)}">${H(x.hero)?dia(H(x.hero)):''}<div class="history-copy"><div class="fx" style="gap:6px"><b>${esc(H(x.hero)?.name||x.hero)}</b>${rarityBadge(x)}</div><small class="history-mode">${modeName(x)}</small><small>${x.conds.map(id=>esc(loc(C(id)?.name||id))).join(' · ')}</small></div></a><span class="history-status ${x.outcome==='fail'?'failed':''}">${x.outcome==='done'?'✓ +'+x.points:x.outcome==='fail'?'×':t('pending')}</span></li>`;
-  p.innerHTML=intro(t('historyTitle'),t('historyIntro'))+`<div class="stat">${[['won',S.stats.done,'check'],['lost',S.stats.fail,'close'],['total',S.stats.points,'trophy']].map(([label,value,glyph])=>`<div class="card"><div><span>${t(label)}</span><b>${value}</b></div>${icon(glyph,30)}</div>`).join('')}</div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history',18)}</div><ul class="hl">${S.history.map(row).join('')||`<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star',18)}</div><ul class="hl">${S.favs.map(row).join('')||`<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
+  const p=$('#p-history'),row=x=>`<li><a href="${linkFor(x)}">${H(x.hero)?dia(H(x.hero)):''}<div class="history-copy"><div class="fx" style="gap:6px"><b>${esc(H(x.hero)?.name||x.hero)}</b>${difficultyBadge(x)}</div><small class="history-mode">${modeName(x)}</small><small>${x.conds.map(id=>esc(loc(C(id)?.name||id))).join(' · ')}</small></div></a><span class="history-status ${x.outcome==='fail'?'failed':''}">${x.outcome==='done'?'✓':x.outcome==='fail'?'×':t('pending')}</span></li>`;
+  p.innerHTML=intro(t('historyTitle'),t('historyIntro'))+`<div class="stat">${[['won',S.stats.done,'check'],['lost',S.stats.fail,'close']].map(([label,value,glyph])=>`<div class="card"><div><span>${t(label)}</span><b>${value}</b></div>${icon(glyph,30)}</div>`).join('')}</div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history',18)}</div><ul class="hl">${S.history.map(row).join('')||`<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star',18)}</div><ul class="hl">${S.favs.map(row).join('')||`<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
 }
 
 /* ---------- events ---------- */
@@ -231,7 +230,7 @@ export async function boot(){
     for(const key of ['history','favs'])S[key]=S[key].flatMap(x=>{try{return [{...restoreResult(x,h.heroes,c.challenges),outcome:x.outcome}]}catch{return []}});
   }catch(e){console.error(e);$('#boot').innerHTML=`<div class="err" role="alert">Не удалось загрузить данные / Failed to load data</div>`;return}
   S.sel??=[];S.heroMode??='exclude';$('#boot').remove();$('#app').hidden=false;
-  bind();applyStatic();
+  bind();applyStatic();persist();
   const h=parseHash();h?await fromHash(h):show('roulette');
   const notice=document.createElement('p');notice.id='data-notice';notice.className='mo';$('#foot').before(notice);paintCatalog();
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});

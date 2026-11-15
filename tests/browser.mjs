@@ -40,15 +40,15 @@ try{
  await receiver.goto(url);await receiver.waitForSelector('#contract h2');
  const received=await receiver.evaluate(async()=>(await import('/js/state.js')).RT.cur);
  assert.equal(received.hero,rerolled.cur.hero);assert.deepEqual(received.conds,rerolled.cur.conds);assert.deepEqual(received.opts,rerolled.cur.opts);
- await page.click('#done');const points=(await state()).stats.points;
- assert(await page.locator('#completion-dialog').isVisible());assert.equal(await page.locator('#completion-dialog').getAttribute('data-outcome'),'done');assert.equal(await page.locator('.completion-rules li').count(),rerolled.cur.conds.length);
+ await page.click('#done');const completed=(await state()).stats.done;
+ assert(await page.locator('#completion-dialog').isVisible());assert(await page.locator('.result-seal').isVisible());assert.equal(await page.locator('#rank,.reward-box,.completion-points').count(),0);assert(!('points' in (await state()).stats));assert.equal(await page.locator('#completion-dialog').getAttribute('data-outcome'),'done');assert.equal(await page.locator('.completion-rules li').count(),rerolled.cur.conds.length);
  await page.keyboard.press('r');assert.deepEqual((await state()).cur.conds,rerolled.cur.conds);await page.keyboard.press('Escape');assert(await page.locator('#completion-dialog').isHidden());
  await page.click('#theme');assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');await page.reload();await page.waitForSelector('#spin');assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
- await page.click('[data-tab="history"]');await page.click('.hl a');assert(await page.locator('#done').isDisabled());assert.equal((await state()).stats.points,points);
+ await page.click('[data-tab="history"]');await page.click('.hl a');assert(await page.locator('#done').isDisabled());assert.equal((await state()).stats.done,completed);
  await page.evaluate(()=>location.hash='#seed=change&d=easy&r=0&p=2');await page.waitForFunction(async()=>(await import('/js/state.js')).S.diff==='easy');
  await page.evaluate(()=>location.hash='#seed=change&d=hard&r=0&p=3');await page.waitForFunction(async()=>(await import('/js/state.js')).S.friend.player===3);
  assert.equal((await state()).diff,'hard');
- const beforeFailure=(await state()).stats;await page.click('#failb');assert.equal(await page.locator('#completion-dialog').getAttribute('data-outcome'),'fail');assert.equal((await state()).stats.points,beforeFailure.points);assert.equal((await state()).stats.fail,beforeFailure.fail+1);await page.locator('.completion-close').click();
+ const beforeFailure=(await state()).stats;await page.click('#failb');assert.equal(await page.locator('#completion-dialog').getAttribute('data-outcome'),'fail');assert(await page.locator('.result-seal').isVisible());assert.equal((await state()).stats.done,beforeFailure.done);assert.equal((await state()).stats.fail,beforeFailure.fail+1);await page.locator('.completion-close').click();
  await page.evaluate(()=>location.hash='#seed=change&d=hard&r=0');await page.waitForFunction(async()=>(await import('/js/state.js')).S.friend.same);
  await page.click('[data-tab="build"]');await page.click('#rb');
  const priorBuild=await page.evaluate(async()=>(await import('/js/state.js')).RT.build);
@@ -63,7 +63,7 @@ try{
  assert.deepEqual(await page.evaluate(async()=>(await import('/js/state.js')).RT.build),priorBuild);
  assert.deepEqual(await page.evaluate(async()=>(await import('/js/state.js')).RT.ban),priorBan);
  await page.evaluate(()=>localStorage.setItem('dlr.v1',JSON.stringify({stats:{points:'oops'},friend:null,cats:null,history:[null,{}],favs:'broken'})));
- await page.goto(origin+'/');await page.waitForSelector('#spin');assert.equal((await state()).stats.points,0);
+ await page.goto(origin+'/');await page.waitForSelector('#spin');assert.equal((await state()).stats.done,0);
  await page.goto(origin+'/#seed=a&v=2&x=null');await page.waitForSelector('#spin');assert((await page.locator('#toast').textContent()).includes('Ссылка'));
  await page.click('#spin');await page.waitForSelector('#contract h2');await page.click('#lang');assert.equal(await page.locator('html').getAttribute('lang'),'en');
  await page.setViewportSize({width:390,height:844});assert(await page.locator('#spin').isVisible());

@@ -14,9 +14,9 @@ export function normalizeState(x,def){
   const out={...def,...options({...def,...x})};
   out.lang=x.lang==='en'?'en':'ru';out.sound=typeof x.sound==='boolean'?x.sound:def.sound;
   out.theme=['light','dark','system'].includes(x.theme)?x.theme:'system';
-  out.stats=Object.fromEntries(['done','fail','points'].map(k=>[k,count(x.stats?.[k])]));
+  out.stats=Object.fromEntries(['done','fail'].map(k=>[k,count(x.stats?.[k])]));
   out.friend={same:x.friend?.same!==false,player:Number.isInteger(x.friend?.player)?Math.max(1,Math.min(9,x.friend.player)):1};
-  for(const k of ['history','favs'])out[k]=(Array.isArray(x[k])?x[k]:[]).filter(validRecord).slice(0,50).map(r=>({...r,points:count(r.points),outcome:['done','fail'].includes(r.outcome)?r.outcome:null}));
+  for(const k of ['history','favs'])out[k]=(Array.isArray(x[k])?x[k]:[]).filter(validRecord).slice(0,50).map(r=>({seed:r.seed,r:r.r,diff:r.diff,hero:r.hero,conds:[...r.conds],player:count(r.player),opts:options(r.opts),ts:r.ts,outcome:['done','fail'].includes(r.outcome)?r.outcome:null}));
   out.heroMode=x.heroMode==='only'?'only':'exclude';
   out.sel=strings(x.sel??(out.heroMode==='only'?out.only:out.excluded));
   return out;
@@ -61,11 +61,10 @@ export function validateData(data,dict){
     }
   }
   const heroIds=new Set(data.heroes.map(h=>h.id));
-  for(const c of data.challenges)if(c.gameModes!==undefined&&(!Array.isArray(c.gameModes)||!c.gameModes.length||c.gameModes.some(m=>!GAME_MODES.includes(m)))||!CATS.includes(c.cat)||!localized(c.name)||!localized(c.desc)||!Number.isInteger(c.difficulty)||c.difficulty<1||c.difficulty>5||!Number.isFinite(c.mult)||c.mult<=0||!['solo','team'].includes(c.mode)||!Array.isArray(c.tags)||strings(c.tags).length!==c.tags.length||!Array.isArray(c.conflicts)||strings(c.conflicts).length!==c.conflicts.length||!(c.heroes==='all'||Array.isArray(c.heroes)&&c.heroes.every(id=>heroIds.has(id))))fail('challenge '+c.id);
+  for(const c of data.challenges)if(c.gameModes!==undefined&&(!Array.isArray(c.gameModes)||!c.gameModes.length||c.gameModes.some(m=>!GAME_MODES.includes(m)))||!CATS.includes(c.cat)||!localized(c.name)||!localized(c.desc)||!Number.isInteger(c.difficulty)||c.difficulty<1||c.difficulty>5||!['solo','team'].includes(c.mode)||!Array.isArray(c.tags)||strings(c.tags).length!==c.tags.length||!Array.isArray(c.conflicts)||strings(c.conflicts).length!==c.conflicts.length||!(c.heroes==='all'||Array.isArray(c.heroes)&&c.heroes.every(id=>heroIds.has(id))))fail('challenge '+c.id);
   if(!object(dict)||!object(dict.ru)||!object(dict.en))fail('translations');
   for(const lang of ['ru','en']){
-    if(!Array.isArray(dict[lang].ranks)||dict[lang].ranks.length!==6||!dict[lang].ranks.every(v=>typeof v==='string'))fail('ranks');
-    for(const k of Object.keys(dict.ru))if(k!=='ranks'&&typeof dict[lang][k]!=='string')fail('translation '+k);
+    for(const k of Object.keys(dict.ru))if(typeof dict[lang][k]!=='string')fail('translation '+k);
   }
   return data;
 }
