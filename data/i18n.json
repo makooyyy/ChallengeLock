@@ -243,7 +243,20 @@
     "banNewEmpty": "Не бан героя. Испытание для тебя.",
     "banExample": "Например: играй выбранным героем, но не используй способность в слоте 3. Все остальные действия разрешены.",
     "noBanCandidates": "Для этого героя нет подходящей способности.",
-    "noBuildForBan": "Сначала создай билд или отключи выбор только из него."
+    "noBuildForBan": "Сначала создай билд или отключи выбор только из него.",
+    "exportGame": "Код для игры",
+    "exportTitle": "Перенеси билд в Deadlock",
+    "exportCopied": "Код билда скопирован. Теперь вставь его в редакторе игры.",
+    "exportManual": "Автокопирование недоступно. Скопируй выделенный код вручную.",
+    "exportStep1": "В игре выбери этого героя и открой магазин → «Билды» → «Просмотр билдов».",
+    "exportStep2": "Нажми «Создать новый билд» (Create New Build), затем кнопку «Вставить» (Paste) в редакторе.",
+    "exportStep3": "Проверь предметы и сохрани билд. Код вставляется в редактор, а не в поиск по ID.",
+    "exportCodeLabel": "Код импорта",
+    "exportCopyAgain": "Скопировать ещё раз",
+    "exportDone": "Понятно",
+    "exportTroubleTitle": "Нет кнопки «Вставить»?",
+    "exportTroubleText": "В редакторе Deadlock один раз нажми Copy. Затем снова скопируй код здесь и вернись в игру. Передаются все предметы показанного билда и их порядок; отметки покупок и закрепления остаются на сайте.",
+    "exportError": "Не удалось создать код. Пересобери билд и попробуй снова."
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -489,6 +502,19 @@
     "banNewEmpty": "Not a hero ban. A personal challenge.",
     "banExample": "For example: play your chosen hero without using ability slot 3. All other actions are allowed.",
     "noBanCandidates": "No eligible ability is available for this hero.",
-    "noBuildForBan": "Create a build first or turn off the build-only selection."
+    "noBuildForBan": "Create a build first or turn off the build-only selection.",
+    "exportGame": "Copy for game",
+    "exportTitle": "Import your build into Deadlock",
+    "exportCopied": "Build code copied. Paste it into the in-game editor.",
+    "exportManual": "Automatic copying is unavailable. Copy the selected code manually.",
+    "exportStep1": "Select this hero in game and open Shop → Builds → Browse Builds.",
+    "exportStep2": "Click Create New Build, then the Paste button in the editor.",
+    "exportStep3": "Check the items and save the build. Paste into the editor, not the build-ID search.",
+    "exportCodeLabel": "Import code",
+    "exportCopyAgain": "Copy again",
+    "exportDone": "Got it",
+    "exportTroubleTitle": "No Paste button?",
+    "exportTroubleText": "Click Copy once in the Deadlock editor. Then copy the code here again and return to the game. All items in the displayed build and their order are exported; purchase checkmarks and pins remain on the website.",
+    "exportError": "Could not create an import code. Rebuild and try again."
   }
 }

@@ -120,6 +120,22 @@ try{
  await page.click('[data-tab="ban"]');await page.selectOption('#ban-hero','abrams');await page.click('[data-ban-type="ability"]');await page.selectOption('#ban-slot','2');await page.click('#ban-roll');assert.equal(await page.locator('.ban-slot-map .blocked b').textContent(),'2');
  await page.click('[data-ban-type="item"]');await page.check('#ban-from-build');await page.click('#ban-roll');const ban=await page.evaluate(async()=>(await import('/js/state.js')).RT.ban);assert(saved.items.includes(ban.item));
  for(const language of ['ru','en']){if(await page.locator('html').getAttribute('lang')!==language)await page.click('#lang');for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:900});for(const tab of ['build','ban']){await page.click('[data-tab="'+tab+'"]');assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Lab overflow '+tab+' '+language+' '+width)}}}
+ // Export the displayed build, even after editing the next build's budget.
+ await page.click('[data-tab="build"]');await page.fill('#bud','4800');
+ await page.evaluate(()=>{window.__copyCalls=[];navigator.clipboard.writeText=async text=>window.__copyCalls.push(text)});
+ await page.click('#copy-game-build');await page.waitForSelector('#game-export-dialog[open]');
+ const exportCode=await page.locator('#export-code').inputValue();assert(exportCode.startsWith('KLUv'));
+ assert.equal(await page.evaluate(()=>window.__copyCalls.at(-1)),exportCode);
+ assert.equal(await page.evaluate(async()=>{const {RT}=await import('/js/state.js');return (await import('/js/game-export.js')).gameBuildCode(RT.build,RT.data.heroes,RT.data.items)}),exportCode);
+ await page.click('#export-copy-again');assert.equal(await page.evaluate(()=>window.__copyCalls.length),2);
+ await page.keyboard.press('Escape');assert(await page.locator('#game-export-dialog').isHidden());assert(await page.locator('#copy-game-build').evaluate(el=>el===document.activeElement));
+ await page.evaluate(()=>{navigator.clipboard.writeText=async()=>{throw Error('denied')};document.execCommand=()=>false});
+ await page.setViewportSize({width:320,height:844});await page.click('#copy-game-build');await page.waitForSelector('#game-export-dialog[open]');
+ assert.equal(await page.locator('#export-code').inputValue(),exportCode);
+ assert(await page.locator('#export-code').evaluate(el=>el===document.activeElement&&el.selectionStart===0&&el.selectionEnd===el.value.length));
+ assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ if(process.env.EXPORT_SCREENSHOT)await page.screenshot({path:process.env.EXPORT_SCREENSHOT});
+ await page.locator('#game-export-dialog [data-export-close]').first().click();
  assert.deepEqual(errors,[]);
  console.log('PASS browser: deep links, history, locks, clean-session replay, duplicate completion, hash changes, failed-roll transaction, empty builds/bans, corrupt storage, malformed links, language, mobile, offline PWA, cache isolation; no page errors.');
 }finally{await browser?.close();await new Promise(r=>server.close(r))}
