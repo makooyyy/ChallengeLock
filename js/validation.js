@@ -1,3 +1,4 @@
+import {buildSettings,savedBuild,banSettings,savedBan} from './build-config.js';
 export const CATS=['ab','it','gp','go','tm','ch'];
 export const GAME_MODES=['street','normal','ranked'];
 export const DIFFICULTIES=['easy','mid','hard','insane'];
@@ -17,6 +18,8 @@ export function normalizeState(x,def){
   out.stats=Object.fromEntries(['done','fail'].map(k=>[k,count(x.stats?.[k])]));
   out.friend={same:x.friend?.same!==false,player:Number.isInteger(x.friend?.player)?Math.max(1,Math.min(9,x.friend.player)):1};
   for(const k of ['history','favs'])out[k]=(Array.isArray(x[k])?x[k]:[]).filter(validRecord).slice(0,50).map(r=>({seed:r.seed,r:r.r,diff:r.diff,hero:r.hero,conds:[...r.conds],player:count(r.player),opts:options(r.opts),ts:r.ts,outcome:['done','fail'].includes(r.outcome)?r.outcome:null}));
+  out.banSettings=banSettings(x.banSettings);out.savedBan=savedBan(x.savedBan);
+  out.buildSettings=buildSettings(x.buildSettings);out.savedBuild=savedBuild(x.savedBuild);
   out.heroMode=x.heroMode==='only'?'only':'exclude';
   out.sel=strings(x.sel??(out.heroMode==='only'?out.only:out.excluded));
   return out;

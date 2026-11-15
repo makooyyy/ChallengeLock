@@ -1,11 +1,12 @@
+import {renderBuilder,builderClick,builderChange,hydrateBuilder} from './builder-ui.js';
+import {renderBan,banClick,banChange,hydrateBan} from './ban-ui.js';
 // UI: tabs, reels animation, contract, timer, builds, bans, filters, history.
 import {icon} from './icons.js';
 import {applyTheme,toggleTheme} from './theme.js';
 import {showCelebration,closeCelebration,celebrationOpen} from './celebration.js';
 import {S,RT,persist as saveState,ALL_CATS} from './state.js';
 import {t,loc,setDict,setLang} from './i18n.js';
-import {roll,rollBan,DIFF,restoreResult,resultKey,heroPool} from './roulette.js';
-import {makeBuild,BRANCHES} from './builds.js';
+import {roll,DIFF,restoreResult,resultKey,heroPool} from './roulette.js';
 import {newSeed,dailySeed,pick} from './rng.js';
 import {validateData,options,GAME_MODES} from './validation.js';
 import {parseHash,linkFor,setHash,copy,drawCard} from './share.js';
@@ -13,7 +14,7 @@ import {parseHash,linkFor,setHash,copy,drawCard} from './share.js';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const RC={easy:'#8c82a9',mid:'#7662ad',hard:'#9d62c9',insane:'#d55479'},RP=RC;
-const BC={weapon:'#a2762e',vitality:'#538563',spirit:'#8271aa'},ROM=['I','II','III'];
+const ROM=['I','II','III'];
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const H=id=>RT.data.heroes.find(h=>h.id===id),C=id=>RT.data.challenges.find(c=>c.id===id),I=id=>RT.data.items.find(i=>i.id===id);
 const mmss=ms=>{const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
@@ -131,18 +132,8 @@ async function png(){const x=RT.cur;if(!x)return;const cv=document.createElement
   cv.toBlob(b=>{if(!b)return toast(t('error'));const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`dlr-${x.seed}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)})}
 
 /* ---------- BUILD ---------- */
-function viewBuild(){
-  const b=RT.build,p=$('#p-build');
-  p.innerHTML=intro(t('buildTitle'),t('buildIntro'))+`<div class="control-bar"><label>${t('budget')}<select id="bud">${[2500,5000,8000,16000,32000].map(v=>`<option value="${v}" ${v===(RT.budget||5000)?'selected':''}>${v.toLocaleString(S.lang)}</option>`).join('')}</select></label><div class="fx"><button class="spin small" id="rb">${icon('shuffle',17)}${t('build')}</button>${b?`<button id="cb">${icon('copy',16)}${t('copyText')}</button>`:''}</div></div>`;
-  if(!b){p.innerHTML+=emptyPanel('layers',t('buildEmptyTitle'),t('buildEmpty'));return}
-  p.innerHTML+=`<div class="build-hero">${dia(H(b.hero))}<div><div class="eyebrow">${t('yourHero')}</div><h2>${esc(H(b.hero).name)}</h2><p>${b.items.length} ${t('itemsCount')}</p></div><div class="budget-summary"><b>${b.spent.toLocaleString(S.lang)}</b> / ${b.budget.toLocaleString(S.lang)}<div class="budget-meter"><span style="width:${b.spent/b.budget*100}%"></span></div></div></div>
-  <div><div class="section-heading"><h2>${t('order')}</h2><span class="muted mo">${t('remaining')}: ${b.budget-b.spent}</span></div><ol class="item-grid">${b.items.map(id=>{const i=I(id);return `<li class="item-card" style="--branch:${BC[i.branch]}"><div class="item-art">${icon('layers')}${i.icon?`<img class="asset-img" src="${esc(i.icon)}" alt="" loading="lazy">`:''}</div><div class="item-info"><small>${t('branch.'+i.branch)} · T${i.tier}</small><h3>${esc(i.name)}</h3><div class="item-price"><b>${i.cost.toLocaleString(S.lang)}</b><small>${i.isActive?t('activeItem'):t('passiveItem')}</small></div></div></li>`}).join('')}</ol></div>`;
-}
-function viewBan(){
-  const b=RT.ban,p=$('#p-ban');
-  p.innerHTML=intro(t('banTitle'),t('banIntro'))+`<div class="control-bar"><span class="muted">${t('banChoose')}</span><div class="fx"><button class="spin small" data-ban="ability">${icon('spark',17)}${t('banAbility')}</button><button data-ban="item">${icon('layers',17)}${t('banItem')}</button></div></div>`;
-  p.innerHTML+=b?`<div class="card ban-result"><div class="ban-label">${icon('ban',16)}${t('banResult')}</div>${dia(H(b.hero))}<h2>${esc(H(b.hero).name)}</h2><h3>${b.slot?t('slot')+b.slot:esc(I(b.item).name)}</h3><p class="muted">${t('banHint')}</p><button id="cb2">${icon('copy',16)}${t('copyText')}</button></div>`:emptyPanel('ban',t('banEmptyTitle'),t('banEmpty'));
-}
+function viewBuild(){renderBuilder()}
+function viewBan(){renderBan()}
 function applyHeroSel(){S.excluded=S.heroMode==='exclude'?S.sel.slice():[];S.only=S.heroMode==='only'?S.sel.slice():[];persist()}
 function updateHeroSearch(){
   const query=(RT.heroSearch||'').toLowerCase().trim();let count=0;
@@ -171,6 +162,7 @@ function bind(){
     const b=e.target.closest('button');if(!b)return;const d=b.dataset;
     if(d.tab)return show(d.tab);
     if(RT.busy)return;
+    if(await builderClick(b,toast,persist)||await banClick(b,toast,persist))return;
     if(b.id==='theme'){toggleTheme();persist();return}
     if(b.id==='lang'){S.lang=S.lang==='ru'?'en':'ru';setLang(S.lang);persist();applyStatic();return show(RT.tab)}
     if(b.id==='spin')return doRoll(false);
@@ -186,14 +178,10 @@ function bind(){
     if(b.id==='cl')return toast(await copy(linkFor(RT.cur))?t('copied'):t('error'));
     if(b.id==='ct')return toast(await copy(resText(RT.cur))?t('copied'):t('error'));
     if(b.id==='cp')return png();
-    if(b.id==='rb'){const budget=+$('#bud').value,build=makeBuild(newSeed(),RT.data.heroes,RT.data.items,budget,S);if(!build)return toast(t('noHeroes'));RT.budget=budget;RT.build=build;return viewBuild()}
-    if(b.id==='cb'){const x=RT.build;return toast(await copy(`🛠 ${H(x.hero).name}\n${x.items.map((id,i)=>`${i+1}. ${I(id).name}`).join('\n')}`)?t('copied'):t('error'))}
-    if(d.ban){const ban=rollBan(newSeed(),RT.data.heroes,RT.data.items,S,d.ban);if(!ban)return toast(t('noHeroes'));RT.ban=ban;return viewBan()}
-    if(b.id==='cb2'){const x=RT.ban;return toast(await copy(`⛔ ${H(x.hero).name}: ${x.slot?t('slot')+x.slot:I(x.item).name}`)?t('copied'):t('error'))}
     if(d.hm){S.heroMode=d.hm;applyHeroSel();return viewCustom()}
     if(b.id==='hreset'){S.sel=[];applyHeroSel();return viewCustom()}
   });
-  document.addEventListener('change',e=>{const i=e.target;
+  document.addEventListener('change',e=>{const i=e.target;if(builderChange(i,toast,persist)||banChange(i,persist))return;
     if(i.dataset.cat){S.cats=$$('[data-cat]').filter(x=>x.checked).map(x=>x.dataset.cat);if(!S.cats.length){S.cats=[i.dataset.cat];i.checked=true}persist()}
     else if(i.id==='team'){S.team=i.checked;persist()}
     else if(i.dataset.h){S.sel=$$('[data-h]').filter(x=>x.checked).map(x=>x.dataset.h);applyHeroSel();updateHeroSearch()}
@@ -231,6 +219,7 @@ export async function boot(){
     RT.data=validateData({heroes:h.heroes,items:i.items,challenges:c.challenges,catalog:{heroes:h._meta,items:i._meta}},l);setDict(l,S.lang);setLang(S.lang);
     for(const key of ['history','favs'])S[key]=S[key].flatMap(x=>{try{return [{...restoreResult(x,h.heroes,c.challenges),outcome:x.outcome}]}catch{return []}});
   }catch(e){console.error(e);$('#boot').innerHTML=`<div class="err" role="alert">Не удалось загрузить данные / Failed to load data</div>`;return}
+  hydrateBuilder();hydrateBan();
   S.sel??=[];S.heroMode??='exclude';$('#boot').remove();$('#app').hidden=false;
   bind();applyStatic();persist();
   const h=parseHash();h?await fromHash(h):show('roulette');

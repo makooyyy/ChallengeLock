@@ -52,14 +52,14 @@ try{
  await page.evaluate(()=>location.hash='#seed=change&d=hard&r=0');await page.waitForFunction(async()=>(await import('/js/state.js')).S.friend.same);
  await page.click('[data-tab="build"]');await page.click('#rb');
  const priorBuild=await page.evaluate(async()=>(await import('/js/state.js')).RT.build);
- await page.click('[data-tab="ban"]');await page.click('[data-ban="item"]');
+ await page.click('[data-tab="ban"]');await page.click('[data-ban-type="item"]');await page.click('#ban-roll');
  const priorBan=await page.evaluate(async()=>(await import('/js/state.js')).RT.ban);
  await page.click('[data-tab="roulette"]');
  const before=await state();
  await page.evaluate(async()=>{const {S,RT}=await import('/js/state.js');S.excluded=RT.data.heroes.map(h=>h.id)});
  await page.click('#reroll');assert.equal((await state()).rerolls,before.rerolls);assert.deepEqual((await state()).cur,before.cur);
  await page.click('[data-tab="build"]');await page.click('#rb');assert((await page.locator('#toast').textContent()).includes('героев'));
- await page.click('[data-tab="ban"]');await page.click('[data-ban="item"]');assert((await page.locator('#toast').textContent()).includes('героев'));
+ await page.click('[data-tab="ban"]');await page.click('[data-ban-type="item"]');await page.click('#ban-roll');assert((await page.locator('#toast').textContent()).includes('героев'));
  assert.deepEqual(await page.evaluate(async()=>(await import('/js/state.js')).RT.build),priorBuild);
  assert.deepEqual(await page.evaluate(async()=>(await import('/js/state.js')).RT.ban),priorBan);
  await page.evaluate(()=>localStorage.setItem('dlr.v1',JSON.stringify({stats:{points:'oops'},friend:null,cats:null,history:[null,{}],favs:'broken'})));
@@ -108,6 +108,18 @@ try{
   await page.reload();await page.waitForSelector('#spin');assert.equal(await page.locator('[data-game-mode="'+mode+'"]').getAttribute('aria-pressed'),'true');
  }
  for(const theme of ['light','dark']){if(await page.locator('html').getAttribute('data-theme')!==theme)await page.click('#theme');for(const language of ['ru','en']){if(await page.locator('html').getAttribute('lang')!==language)await page.click('#lang');await page.setViewportSize({width:320,height:844});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))}}
+
+ // Build Lab: exact budgets, pins, shopping progress, persistence and single-item replacement.
+ await page.setViewportSize({width:1440,height:1000});await page.click('[data-tab="build"]');await page.click('[data-build-stage="full"]');await page.fill('#bud','32000');await page.selectOption('#build-hero','abrams');await page.selectOption('#build-focus','spirit');await page.selectOption('#build-active','0');await page.click('#rb');
+ let lab=await page.evaluate(async()=>(await import('/js/state.js')).RT.build);assert.equal(lab.hero,'abrams');assert(lab.spent<=32000);assert.equal(lab.settings.focus,'spirit');
+ await page.click('[data-build-lock="'+lab.items[0]+'"]');await page.check('[data-build-buy="'+lab.items[1]+'"]');await page.click('#rb');
+ let regenerated=await page.evaluate(async()=>(await import('/js/state.js')).RT.build);assert(regenerated.items.includes(lab.items[0]));assert(regenerated.items.includes(lab.items[1]));
+ const replace=regenerated.items.find(id=>!regenerated.locked.includes(id)&&!regenerated.purchased.includes(id));await page.click('[data-build-replace="'+replace+'"]');let replaced=await page.evaluate(async()=>(await import('/js/state.js')).RT.build);assert(!replaced.items.includes(replace));assert(regenerated.items.filter(id=>id!==replace).every(id=>replaced.items.includes(id)));
+ await page.reload();await page.waitForSelector('#spin');await page.click('[data-tab="build"]');let saved=await page.evaluate(async()=>(await import('/js/state.js')).RT.build);assert.deepEqual(saved.items,replaced.items);assert(saved.purchased.includes(lab.items[1]));
+ await page.fill('#bud','10');await page.click('#rb');assert.deepEqual((await page.evaluate(async()=>(await import('/js/state.js')).RT.build)).items,saved.items);await page.fill('#bud','32000');await page.locator('#build-hero').focus();
+ await page.click('[data-tab="ban"]');await page.selectOption('#ban-hero','abrams');await page.click('[data-ban-type="ability"]');await page.selectOption('#ban-slot','2');await page.click('#ban-roll');assert.equal(await page.locator('.ban-slot-map .blocked b').textContent(),'2');
+ await page.click('[data-ban-type="item"]');await page.check('#ban-from-build');await page.click('#ban-roll');const ban=await page.evaluate(async()=>(await import('/js/state.js')).RT.ban);assert(saved.items.includes(ban.item));
+ for(const language of ['ru','en']){if(await page.locator('html').getAttribute('lang')!==language)await page.click('#lang');for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:900});for(const tab of ['build','ban']){await page.click('[data-tab="'+tab+'"]');assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Lab overflow '+tab+' '+language+' '+width)}}}
  assert.deepEqual(errors,[]);
  console.log('PASS browser: deep links, history, locks, clean-session replay, duplicate completion, hash changes, failed-roll transaction, empty builds/bans, corrupt storage, malformed links, language, mobile, offline PWA, cache isolation; no page errors.');
 }finally{await browser?.close();await new Promise(r=>server.close(r))}
