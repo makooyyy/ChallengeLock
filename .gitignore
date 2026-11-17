@@ -20,3 +20,9 @@ npm-debug.log*
 
 # Temporary
 *.tmp
+
+# Desktop app
+desktop/node_modules/
+desktop/dist/
+desktop/web/
+
