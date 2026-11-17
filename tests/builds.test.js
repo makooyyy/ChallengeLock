@@ -7,6 +7,15 @@ test('build settings constrain tier, budget, hero, active items and slot count',
  for(const budget of [0,799,-1,Infinity,NaN,100001,1600.5])assert.equal(makeBuild('bad',heroes,items,budget,o),null);
  assert.equal(makeBuild('excluded',heroes,items,4800,{...o,excluded:['abrams']},{heroId:'abrams'}),null);
 });
+test('large budgets are spent on items instead of being left as remainder',()=>{
+ const cap=stage=>buildSettings({stage}).maxItems*Math.max(...items.filter(i=>i.tier<=BUILD_STAGES[stage].maxTier).map(i=>i.cost));
+ for(const stage of Object.keys(BUILD_STAGES))for(const budget of [16000,32000,48000,64000,100000])for(let n=0;n<5;n++){
+  const cfg=buildSettings({stage,budget,maxActive:4}),b=makeBuild('spend'+n,heroes,items,budget,o,cfg);assert(b);
+  assert(b.spent<=budget);assert(b.spent<=cap(stage));assert(budget-b.spent<800||b.spent>=cap(stage)-800,`${stage} ${budget} spent ${b.spent}`);
+  assert.equal(new Set(b.items).size,b.items.length);
+ }
+ for(let n=0;n<5;n++)for(const budget of [48000,64000]){const b=makeBuild('exact'+n,heroes,items,budget,o,buildSettings({stage:'full',budget,maxActive:4}));assert.equal(b.spent,budget,`full ${budget} spent ${b.spent}`)}
+});
 test('pins and purchased items survive; replacing one item preserves the rest',()=>{
  const cfg=buildSettings({stage:'full',budget:32000}),b=makeBuild('pins',heroes,items,32000,o,cfg);b.locked=[b.items[0]];b.purchased=[b.items[1]];
  const next=makeBuild('again',heroes,items,32000,o,{...cfg,locked:[...b.locked,...b.purchased]});assert(next.items.includes(b.items[0]));assert(next.items.includes(b.items[1]));

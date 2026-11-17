@@ -63,9 +63,9 @@ test('data schema accepts catalog and rejects corruption before rendering',()=>{
  }
 });
 test('service worker keeps other apps caches and ignores unrelated requests',async()=>{
- const events={},deleted=[],scope='https://example.test/ChallengeLock/',prefix='challengelock:'+scope+':';
- const context={self:{registration:{scope},addEventListener:(k,f)=>events[k]=f,clients:{claim:async()=>{}}},caches:{keys:async()=>['other-app','dlr-v1',prefix+'v1',prefix+'v13:'+read('heroes')._meta.revision,'challengelock:https://example.test/Other/:v1'],delete:async k=>deleted.push(k)},URL,Promise};
- vm.runInNewContext(fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8'),context);
+ const events={},deleted=[],scope='https://example.test/ChallengeLock/',prefix='challengelock:'+scope+':',swSource=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8'),release=swSource.match(/VERSION=PREFIX\+'(v\d+:)'/)[1];
+ const context={self:{registration:{scope},addEventListener:(k,f)=>events[k]=f,clients:{claim:async()=>{}}},caches:{keys:async()=>['other-app','dlr-v1',prefix+'v1',prefix+release+read('heroes')._meta.revision,'challengelock:https://example.test/Other/:v1'],delete:async k=>deleted.push(k)},URL,Promise};
+ vm.runInNewContext(swSource,context);
  let pending;events.activate({waitUntil:p=>pending=p});await pending;assert.deepEqual(deleted,[prefix+'v1']);
  for(const url of ['https://example.test/Other/index.html','https://other.test/ChallengeLock/index.html',scope+'api'])events.fetch({request:{method:'GET',url},respondWith(){assert.fail('Intercepted unrelated request')}});
 });

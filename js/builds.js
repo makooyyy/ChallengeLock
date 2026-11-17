@@ -4,6 +4,28 @@ import {heroPool} from './roulette.js';
 import {BUILD_STAGES,buildSettings,savedBuild} from './build-config.js';
 export const BRANCHES=['weapon','vitality','spirit'];
 function catalog(items){const byId=new Map(items.filter(i=>i.active!==false).map(i=>[i.id,i]));const ancestors=(id,seen=new Set())=>{if(seen.has(id))return [];const next=new Set([...seen,id]);return (byId.get(id)?.components||[]).flatMap(p=>[p,...ancestors(p,next)])};return {byId,conflict:(a,b)=>a.id===b.id||ancestors(a.id).includes(b.id)||ancestors(b.id).includes(a.id)}}
+// The greedy pass stops at the slot cap, so a large budget can stay half spent.
+// Upgrade unpinned items to pricier compatible ones until the budget is used.
+function spendRemaining(out,left,{candidates,conflict,locked,settings}){
+ for(let pass=0;pass<8&&left>0;pass++){
+  let changed=false;
+  const order=out.map((_,i)=>i).filter(i=>!locked.has(out[i].id)).sort((a,b)=>out[a].cost-out[b].cost);
+  for(const i of order){
+   const current=out[i],others=out.filter((_,j)=>j!==i);
+   let best=null;
+   for(const cand of candidates){
+    const delta=cand.cost-current.cost;
+    if(delta<=0||delta>left||(best&&cand.cost<=best.cost))continue;
+    if(others.some(other=>conflict(cand,other)))continue;
+    if(cand.isActive&&others.filter(other=>other.isActive).length>=settings.maxActive)continue;
+    best=cand;
+   }
+   if(best){left-=best.cost-current.cost;out[i]=best;changed=true}
+  }
+  if(!changed)break;
+ }
+ return left;
+}
 export function makeBuild(seed,heroes,items,budget,o,raw={stage:'full',maxActive:4}){
  if(!Number.isSafeInteger(budget)||budget<800||budget>100000)return null;
  const settings=buildSettings({...raw,budget}),stage=BUILD_STAGES[settings.stage],r=makeRng(seed+':build'),pool=heroPool(heroes,o),hero=settings.heroId?pool.find(h=>h.id===settings.heroId):pick(r,pool);
@@ -24,6 +46,7 @@ export function makeBuild(seed,heroes,items,budget,o,raw={stage:'full',maxActive
   eligible.sort((a,b)=>score(b)-score(a));const item=eligible[0];out.push(item);left-=item.cost;
  }
  if(!out.length)return null;
+ left=spendRemaining(out,left,{candidates,conflict,locked:new Set(locked),settings});
  out.sort((a,b)=>a.tier-b.tier||a.cost-b.cost||a.name.localeCompare(b.name));
  return {hero:hero.id,budget,spent:budget-left,items:out.map(x=>x.id),seed,settings,locked,purchased:[]};
 }
