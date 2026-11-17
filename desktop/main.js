@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Menu } = require('electron');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -46,6 +46,7 @@ const server = http.createServer((req, res) => {
 let mainWindow = null;
 
 app.whenReady().then(() => {
+  Menu.setApplicationMenu(null);
   server.listen(0, '127.0.0.1', () => {
     const port = server.address().port;
     mainWindow = new BrowserWindow({
