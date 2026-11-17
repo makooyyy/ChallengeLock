@@ -256,7 +256,10 @@
     "exportDone": "Понятно",
     "exportTroubleTitle": "Нет кнопки «Вставить»?",
     "exportTroubleText": "В редакторе Deadlock один раз нажми Copy. Затем снова скопируй код здесь и вернись в игру. Передаются все предметы показанного билда и их порядок; отметки покупок и закрепления остаются на сайте.",
-    "exportError": "Не удалось создать код. Пересобери билд и попробуй снова."
+    "exportError": "Не удалось создать код. Пересобери билд и попробуй снова.",
+    "exportChallengeTitle": "ТЕКУЩИЙ ЧЕЛЛЕНДЖ",
+    "exportChallengeIncluded": "Челлендж включён — посмотреть условия",
+    "exportChallengeMismatch": "Герой билда отличается от героя челленджа. В игре сохранится исходный герой задания."
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -515,6 +518,9 @@
     "exportDone": "Got it",
     "exportTroubleTitle": "No Paste button?",
     "exportTroubleText": "Click Copy once in the Deadlock editor. Then copy the code here again and return to the game. All items in the displayed build and their order are exported; purchase checkmarks and pins remain on the website.",
-    "exportError": "Could not create an import code. Rebuild and try again."
+    "exportError": "Could not create an import code. Rebuild and try again.",
+    "exportChallengeTitle": "CURRENT CHALLENGE",
+    "exportChallengeIncluded": "Challenge included — view conditions",
+    "exportChallengeMismatch": "The build hero differs from the challenge hero. The original challenge hero remains in the instructions."
   }
 }

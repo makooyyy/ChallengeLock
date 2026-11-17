@@ -124,9 +124,10 @@ try{
  await page.click('[data-tab="build"]');await page.fill('#bud','4800');
  await page.evaluate(()=>{window.__copyCalls=[];navigator.clipboard.writeText=async text=>window.__copyCalls.push(text)});
  await page.click('#copy-game-build');await page.waitForSelector('#game-export-dialog[open]');
+ assert(await page.locator('.export-challenge').isVisible());await page.locator('.export-challenge summary').click();assert((await page.locator('.export-challenge pre').textContent()).includes('1.'));
  const exportCode=await page.locator('#export-code').inputValue();assert(exportCode.startsWith('KLUv'));
  assert.equal(await page.evaluate(()=>window.__copyCalls.at(-1)),exportCode);
- assert.equal(await page.evaluate(async()=>{const {RT}=await import('/js/state.js');return (await import('/js/game-export.js')).gameBuildCode(RT.build,RT.data.heroes,RT.data.items)}),exportCode);
+ assert.equal(await page.evaluate(async()=>{const {RT,S}=await import('/js/state.js');const {gameBuildCode,challengeForExport}=await import('/js/game-export.js');const {getDict}=await import('/js/i18n.js');return gameBuildCode(RT.build,RT.data.heroes,RT.data.items,challengeForExport(RT.cur,RT.data.heroes,RT.data.challenges,getDict(),S.lang))}),exportCode);
  await page.click('#export-copy-again');assert.equal(await page.evaluate(()=>window.__copyCalls.length),2);
  await page.keyboard.press('Escape');assert(await page.locator('#game-export-dialog').isHidden());assert(await page.locator('#copy-game-build').evaluate(el=>el===document.activeElement));
  await page.evaluate(()=>{navigator.clipboard.writeText=async()=>{throw Error('denied')};document.execCommand=()=>false});
