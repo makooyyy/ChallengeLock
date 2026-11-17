@@ -1,5 +1,10 @@
 # Deadlock Challenge Roulette
 
+![Tests](https://github.com/makooyyy/ChallengeLock/actions/workflows/test.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa&logoColor=white)
+![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)
+
 Фан-генератор челленджей для Deadlock: рулетка, случайный билд, запрет, свой набор, история. Чистые HTML/CSS/JS (ES modules), без сборки и бэкенда.
 > Фан-проект, не связан с Valve. Deadlock — торговая марка Valve.
 
