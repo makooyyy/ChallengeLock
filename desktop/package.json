@@ -1,12 +1,13 @@
 {
   "name": "challengelock-desktop",
-  "version": "1.20.2",
+  "version": "1.20.3",
   "description": "Desktop app for ChallengeLock (Deadlock Challenge Roulette)",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "prebuild": "node copy-web.js",
-    "build": "electron-builder --win portable"
+    "build": "electron-builder --win nsis && node scripts/generate-latest-yml.js",
+    "generate:latest": "node scripts/generate-latest-yml.js"
   },
   "author": "makooyyy",
   "license": "MIT",
@@ -38,7 +39,8 @@
     "publish": {
       "provider": "github",
       "owner": "makooyyy",
-      "repo": "ChallengeLock"
+      "repo": "ChallengeLock",
+      "releaseType": "release"
     }
   }
 }
