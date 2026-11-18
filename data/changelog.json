@@ -1,6 +1,22 @@
 {
   "releases": [
     {
+      "version": "1.20.1",
+      "date": "2026-11-18",
+      "title": {
+        "ru": "Тест автообновления",
+        "en": "Auto-update test"
+      },
+      "items": {
+        "ru": [
+          "Тестовая версия для проверки автоматического обновления desktop-приложения."
+        ],
+        "en": [
+          "Test release for checking desktop auto-update."
+        ]
+      }
+    },
+    {
       "version": "1.20.0",
       "date": "2026-11-18",
       "title": {
