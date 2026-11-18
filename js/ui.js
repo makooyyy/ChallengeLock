@@ -130,10 +130,35 @@ function paintHeader() {
   button.title = name;
 }
 
+/* ---------- version / changelog ---------- */
+const releases = () =>
+  Array.isArray(RT.data.changelog?.releases) ? RT.data.changelog.releases : [];
+const siteVersion = () => releases()[0]?.version || '';
+
+// Footer chip: the current version doubles as the entry point to the changelog.
+function paintFooterVersion() {
+  const button = $('#foot-version');
+  if (!button) return;
+  const version = siteVersion();
+  button.textContent = (version ? 'v' + version + ' · ' : '') + t('whatsNew');
+  button.title = t('versionLabel') + (version ? ' ' + version : '');
+}
+
+const releaseDate = (iso) => {
+  const date = new Date(String(iso) + 'T00:00:00');
+  if (Number.isNaN(date.getTime())) return String(iso);
+  return new Intl.DateTimeFormat(S.lang === 'ru' ? 'ru-RU' : 'en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+};
+
 function applyStatic() {
   $$('[data-icon]').forEach((e) => (e.innerHTML = icon(e.dataset.icon)));
   $$('[data-i18n]').forEach((e) => (e.textContent = t(e.dataset.i18n)));
   $('#foot').textContent = t('footer');
+  paintFooterVersion();
   paintCatalog();
   paintHeader();
   applyTheme();
@@ -174,6 +199,7 @@ function show(tab) {
     ban: viewBan,
     custom: viewCustom,
     history: viewHistory,
+    updates: viewUpdates,
   })[tab]();
 }
 
@@ -471,6 +497,32 @@ function viewHistory() {
       )}</div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history', 18)}</div><ul class="hl">${S.history.map(row).join('') || `<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star', 18)}</div><ul class="hl">${S.favs.map(row).join('') || `<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
 }
 
+/* ---------- UPDATES ---------- */
+function viewUpdates() {
+  const p = $('#p-updates');
+  const list = releases();
+  const version = siteVersion();
+  p.innerHTML =
+    intro(
+      t('updatesTitle'),
+      t('updatesIntro'),
+      version ? `<span class="version-pill">v${esc(version)}</span>` : '',
+    ) +
+    (list.length
+      ? `<div class="release-list">${list
+          .map(
+            (r, i) => `<article class="card release">
+      <div class="release-head"><span class="release-version">v${esc(r.version)}</span><time datetime="${esc(r.date)}">${esc(releaseDate(r.date))}</time>${
+        i === 0 ? `<span class="release-current">${t('currentVersion')}</span>` : ''
+      }</div>
+      <h2>${esc(loc(r.title))}</h2>
+      <ul>${(loc(r.items) || []).map((item) => `<li>${esc(item)}</li>`).join('')}</ul>
+    </article>`,
+          )
+          .join('')}</div>`
+      : `<div class="card"><p>${t('updatesEmpty')}</p></div>`);
+}
+
 /* ---------- events ---------- */
 function bind() {
   document.addEventListener('click', async (e) => {
@@ -686,11 +738,14 @@ export async function boot() {
         if (!r.ok) throw new Error(u + ' ' + r.status);
         return r.json();
       });
-    const [h, i, c, l] = await Promise.all([
+    // The changelog is optional: a missing file must not block the app.
+    const optional = (u) => j(u).catch(() => null);
+    const [h, i, c, l, u] = await Promise.all([
       j('data/heroes.json'),
       j('data/items.json'),
       j('data/challenges.json'),
       j('data/i18n.json'),
+      optional('data/changelog.json'),
     ]);
     RT.data = validateData(
       {
@@ -701,6 +756,7 @@ export async function boot() {
       },
       l,
     );
+    RT.data.changelog = u && Array.isArray(u.releases) ? u : { releases: [] };
     setDict(l, S.lang);
     setLang(S.lang);
     for (const key of ['history', 'favs'])

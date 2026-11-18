@@ -1,0 +1,94 @@
+{
+  "releases": [
+    {
+      "version": "1.17.0",
+      "date": "2026-11-18",
+      "title": {
+        "ru": "Надёжность, офлайн и доступность",
+        "en": "Reliability, offline and accessibility"
+      },
+      "items": {
+        "ru": [
+          "Свои шрифты и один файл стилей: сайт быстрее загружается и не обращается к Google Fonts.",
+          "Превью ссылок в мессенджерах, sitemap, robots.txt и страница 404.",
+          "Строгая политика безопасности (CSP), PNG-иконки приложения и обновлённый манифест.",
+          "Контраст интерфейса доведён до WCAG AA в светлой и тёмной темах.",
+          "«Вызов дня» считается по локальной дате, а таймер матча переживает перезагрузку.",
+          "Дневник обновлений и номер версии прямо на сайте.",
+          "Десктопная сборка на Electron — в папке desktop репозитория."
+        ],
+        "en": [
+          "Self-hosted fonts and a single stylesheet: the site loads faster and no longer calls Google Fonts.",
+          "Link previews in messengers, plus sitemap, robots.txt and a 404 page.",
+          "Strict Content-Security-Policy, PNG app icons and an updated web manifest.",
+          "Interface contrast now meets WCAG AA in both light and dark themes.",
+          "The daily challenge follows your local date, and the match timer survives reloads.",
+          "A changelog and the site version, right on the site.",
+          "An Electron desktop build lives in the desktop folder of the repository."
+        ]
+      }
+    },
+    {
+      "version": "1.16.0",
+      "date": "2026-11-15",
+      "title": {
+        "ru": "Экспорт билда и челленджа в игру",
+        "en": "Build and challenge export"
+      },
+      "items": {
+        "ru": [
+          "Кнопка «Код для игры» копирует сборку, которую можно вставить в Deadlock через Shop → Builds.",
+          "В код попадает текущий челлендж: герой, режим, сложность и все условия.",
+          "Формат совместим с игрой: Base64, сжатие zstd и protobuf-схема сборки."
+        ],
+        "en": [
+          "The “Game code” button copies a build you can paste into Deadlock via Shop → Builds.",
+          "The current challenge travels with the build: hero, mode, difficulty and every condition.",
+          "Game-compatible format: Base64, zstd compression and the build protobuf schema."
+        ]
+      }
+    },
+    {
+      "version": "1.15.0",
+      "date": "2026-11-14",
+      "title": {
+        "ru": "Build Lab, запреты и новый интерфейс",
+        "en": "Build Lab, bans and a new look"
+      },
+      "items": {
+        "ru": [
+          "Генератор билдов: этапы лайн, середина и вся игра, точный бюджет, ветки и лимит активных предметов.",
+          "Вкладка «Ограничение»: запрет героя, слота способности, ультимейта или предмета из своего билда.",
+          "Режимы матчей и 32 авторских задания; сложность без очков, множителей и рангов.",
+          "Новая палитра, компактная навигация и нижнее меню на телефоне."
+        ],
+        "en": [
+          "Build generator: lane, mid and full game stages with an exact budget, branches and an active-item limit.",
+          "A new Ban tab: block a hero, an ability slot, an ultimate or an item from your own build.",
+          "Match modes and 32 hand-written challenges; difficulty without points, multipliers or ranks.",
+          "A new palette, compact navigation and a bottom menu on phones."
+        ]
+      }
+    },
+    {
+      "version": "1.14.0",
+      "date": "2026-11-13",
+      "title": {
+        "ru": "Первый релиз",
+        "en": "First release"
+      },
+      "items": {
+        "ru": [
+          "Рулетка героя и условий, ссылки с seed, история и избранное.",
+          "Каталог из Deadlock API с фиксацией версии клиента и хеша данных.",
+          "Русский и английский, светлая и тёмная темы, офлайн через Service Worker."
+        ],
+        "en": [
+          "Hero and condition roulette, seed links, history and favourites.",
+          "Catalog from the Deadlock API with a pinned client version and data hash.",
+          "Russian and English, light and dark themes, offline through a service worker."
+        ]
+      }
+    }
+  ]
+}

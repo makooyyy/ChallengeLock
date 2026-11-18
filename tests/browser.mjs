@@ -56,6 +56,16 @@ try {
     await page.locator('#data-notice a').getAttribute('href'),
     'https://deadlock-api.com/',
   );
+  // Version chip and the changelog tab.
+  assert.match(await page.locator('#foot-version').textContent(), /^v\d+\.\d+\.\d+ · /);
+  await page.click('#foot-version');
+  await page.waitForSelector('#p-updates .release');
+  assert(await page.locator('#p-updates').isVisible());
+  assert((await page.locator('#p-updates .release').count()) >= 1);
+  assert.match(await page.locator('#p-updates .release-version').first().textContent(), /^v\d/);
+  assert((await page.locator('#p-updates h1').textContent()).trim().length > 0);
+  await page.click('[data-tab="roulette"]');
+  assert(await page.locator('#spin').isVisible());
   const state = () =>
     page.evaluate(async () => {
       const { S, RT } = await import('/js/state.js');

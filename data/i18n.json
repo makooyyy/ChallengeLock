@@ -2,7 +2,7 @@
   "ru": {
     "tab.roulette": "Рулетка",
     "tab.build": "Билд",
-    "tab.ban": "Ограничение",
+    "tab.ban": "Запрет",
     "tab.custom": "Настройки",
     "tab.history": "История",
     "h1a": "Выбери свою",
@@ -261,12 +261,19 @@
     "exportChallengeTitle": "ТЕКУЩИЙ ЧЕЛЛЕНДЖ",
     "exportChallengeIncluded": "Челлендж включён — посмотреть условия",
     "exportChallengeMismatch": "Герой билда отличается от героя челленджа. В игре сохранится исходный герой задания.",
-    "switchLanguage": "Сменить язык"
+    "switchLanguage": "Сменить язык",
+    "tab.updates": "Версии",
+    "updatesTitle": "Дневник обновлений",
+    "updatesIntro": "Что менялось в ChallengeLock: свежие правки, новые разделы и первые версии.",
+    "currentVersion": "Текущая версия",
+    "versionLabel": "Версия сайта",
+    "whatsNew": "Что нового",
+    "updatesEmpty": "Записей пока нет."
   },
   "en": {
     "tab.roulette": "Roulette",
     "tab.build": "Build",
-    "tab.ban": "Restriction",
+    "tab.ban": "Ban",
     "tab.custom": "Settings",
     "tab.history": "History",
     "h1a": "Pick your",
@@ -525,6 +532,13 @@
     "exportChallengeTitle": "CURRENT CHALLENGE",
     "exportChallengeIncluded": "Challenge included — view conditions",
     "exportChallengeMismatch": "The build hero differs from the challenge hero. The original challenge hero remains in the instructions.",
-    "switchLanguage": "Switch language"
+    "switchLanguage": "Switch language",
+    "tab.updates": "Updates",
+    "updatesTitle": "Changelog",
+    "updatesIntro": "What changed in ChallengeLock: recent fixes, new sections and the first releases.",
+    "currentVersion": "Current version",
+    "versionLabel": "Site version",
+    "whatsNew": "What's new",
+    "updatesEmpty": "No entries yet."
   }
 }
