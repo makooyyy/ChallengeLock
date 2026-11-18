@@ -6273,6 +6273,17 @@ input {
 }
 
 /* ---- accessibility fixes: WCAG AA contrast (audited with Lighthouse) ---- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
 .mode-index {
   font-size: 10px;
   color: #59657a;
@@ -6298,4 +6309,8 @@ input {
   background: #1c47a3;
   border-color: #ffffff66;
   color: #fff;
+}
+/* Seed line is 8px small text; keep the full opacity so it stays readable. */
+.contract-seed {
+  opacity: 1;
 }
