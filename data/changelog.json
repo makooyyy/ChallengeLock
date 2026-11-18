@@ -1,6 +1,24 @@
 {
   "releases": [
     {
+      "version": "1.20.0",
+      "date": "2026-11-18",
+      "title": {
+        "ru": "Автообновление приложения",
+        "en": "Automatic app updates"
+      },
+      "items": {
+        "ru": [
+          "Приложение теперь само обновляется: новая версия активируется и страница перезагружается автоматически.",
+          "Улучшена надёжность работы Service Worker."
+        ],
+        "en": [
+          "The app now updates itself: the new version activates and the page reloads automatically.",
+          "Improved Service Worker reliability."
+        ]
+      }
+    },
+    {
       "version": "1.19.0",
       "date": "2026-11-18",
       "title": {

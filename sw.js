@@ -2,7 +2,7 @@
 // CATALOG_VERSION is rewritten automatically by scripts/sync-catalog.mjs.
 const CATALOG_VERSION = '7df33ce9dbedca22';
 const PREFIX = 'challengelock:' + self.registration.scope + ':';
-const VERSION = PREFIX + 'v21:' + CATALOG_VERSION;
+const VERSION = PREFIX + 'v22:' + CATALOG_VERSION;
 const FILES = [
   './',
   'index.html',
@@ -44,9 +44,13 @@ const FILES = [
   'assets/fonts/jetbrains-mono-latin.woff2',
   'assets/fonts/jetbrains-mono-cyrillic.woff2',
 ];
-self.addEventListener('install', (e) =>
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES))),
-);
+self.addEventListener('install', (e) => {
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES)));
+  self.skipWaiting();
+});
+self.addEventListener('message', (e) => {
+  if (e.data === 'skipWaiting') self.skipWaiting();
+});
 self.addEventListener('activate', (e) =>
   e.waitUntil(
     caches
