@@ -1,8 +1,29 @@
-node_modules/
-*.log
-*.tmp
+# OS
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# Editors
+.vscode/
+.idea/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Test output
 test-results/
 playwright-report/
+
+# Desktop app
+desktop/node_modules/
+desktop/dist/
+desktop/web/

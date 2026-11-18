@@ -1,0 +1,32 @@
+{
+  "name": "challengelock-desktop",
+  "version": "1.0.0",
+  "description": "Desktop app for ChallengeLock (Deadlock Challenge Roulette)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "prebuild": "node copy-web.js",
+    "build": "electron-builder --win portable"
+  },
+  "author": "makooyyy",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.makooyyy.challengelock",
+    "productName": "ChallengeLock",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "web/**/*"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  }
+}

@@ -12,6 +12,7 @@
 - `robots.txt`, `sitemap.xml`.
 - Prettier, `.editorconfig`, `.gitattributes`, `.gitignore`; `npm run check` объединяет проверки.
 - Отдельный workflow `maintenance.yml`: еженедельная проверка актуальности каталога и браузерный сценарий.
+- Electron-обёртка в `desktop/` (локальный сервер + portable-сборка), не участвует в веб-деплое.
 
 ### Изменено
 

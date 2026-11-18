@@ -1,5 +1,10 @@
 # ChallengeLock
 
+![Tests](https://github.com/makooyyy/ChallengeLock/actions/workflows/test.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa&logoColor=white)
+![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen)
+
 Фан-генератор челленджей для Deadlock: рулетка героя и условий, случайный билд под бюджет, запрет на следующий матч и история контрактов. Чистые HTML/CSS/JS (ES-модули), без сборки, без бэкенда, с полным офлайн-режимом.
 
 **Сайт:** <https://makooyyy.github.io/ChallengeLock/>
@@ -32,6 +37,19 @@ python3 -m http.server            # или: npx serve .
 
 Откройте <http://localhost:8000>.
 
+## Десктопная версия
+
+В `desktop/` лежит Electron-обёртка: она поднимает локальный HTTP-сервер над этой же папкой и открывает сайт в отдельном окне. Сборка необязательна для веба и в деплой на Pages не входит.
+
+```sh
+cd desktop
+npm install
+npm start        # запуск
+npm run build    # portable .exe в desktop/dist
+```
+
+Подробности — в [desktop/README.md](desktop/README.md).
+
 ## Структура
 
 ```text
@@ -48,6 +66,7 @@ data/*.json           каталог Deadlock API, задания, перево�
 assets/               иконки, OG-картинка, шрифты (woff2)
 scripts/              синхронизация каталога, проверка Service Worker
 tests/                unit-тесты (node --test) и браузерный сценарий
+desktop/              Electron-обёртка (не участвует в веб-деплое)
 sw.js                 офлайн-кэш одного релиза
 ```
 
