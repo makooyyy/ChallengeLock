@@ -1,4 +1,5 @@
 import { showGameExport } from './game-export-ui.js';
+import { decodeGameBuild } from './game-export.js';
 import { rememberFocus, revealResult } from './tool-focus.js';
 import { S, RT } from './state.js';
 import { t } from './i18n.js';
@@ -54,7 +55,7 @@ export function renderBuilder() {
  )
    .map((n) => `<option value="${n}" ${s.maxItems === n ? 'selected' : ''}>${n}</option>`)
    .join('')}</select></label></div>
- <label class="chk lab-keep"><input type="checkbox" id="build-keep" ${s.keepHero ? 'checked' : ''}>${t('keepHero')}</label><button class="spin" id="rb">${icon('shuffle', 18)}${t(b ? 'rebuild' : 'createBuild')}</button><p class="lab-help">${t('buildMethod')}</p></section>
+ <label class="chk lab-keep"><input type="checkbox" id="build-keep" ${s.keepHero ? 'checked' : ''}>${t('keepHero')}</label><button class="spin" id="rb">${icon('shuffle', 18)}${t(b ? 'rebuild' : 'createBuild')}</button><button class="ghost" id="build-import">${icon('download', 18)}${t('importGame')}</button><p class="lab-help">${t('buildMethod')}</p></section>
  <section class="lab-result" aria-live="polite">${b ? result(b, stale) : `<div class="lab-empty"><div class="lab-empty-icon">${icon('layers', 36)}</div><span class="eyebrow">BUILD LAB</span><h2>${t('labEmptyTitle')}</h2><p>${t('labEmptyText')}</p><div class="lab-preview-items">${[1, 2, 3].map((n) => `<span>${String(n).padStart(2, '0')}${icon('layers', 24)}</span>`).join('')}</div>`}</section></div>`;
   restoreFocus();
 }
@@ -148,6 +149,21 @@ export async function builderClick(button, notify, save) {
     store(save);
     renderBuilder();
     revealResult(document.getElementById('p-build'));
+    return true;
+  }
+  if (button.id === 'build-import') {
+    const code = window.prompt(t('importGamePrompt'));
+    if (!code) return true;
+    try {
+      const build = decodeGameBuild(code, RT.data.heroes, RT.data.items);
+      RT.build = build;
+      store(save);
+      renderBuilder();
+      notify(t('importGameDone'));
+    } catch (e) {
+      console.warn(e);
+      notify(t('importGameError'));
+    }
     return true;
   }
   if (button.id === 'copy-game-build' && RT.build) {

@@ -3,6 +3,7 @@
 // Zstandard raw blocks are defined by RFC 8878; no server or runtime dependency is needed.
 import { restoreResult } from './roulette.js';
 import { restoreBuild } from './builds.js';
+import { buildSettings, BUILD_STAGES } from './build-config.js';
 const utf8 = new TextEncoder();
 const uint32 = (n) => {
   if (!Number.isSafeInteger(n) || n < 0 || n > 0xffffffff) throw new Error('Invalid uint32');
@@ -116,4 +117,158 @@ export function zstdFrame(payload) {
 export function gameBuildCode(build, heroes, items, challenge = null) {
   const frame = zstdFrame(encodeGameBuild(build, heroes, items, challenge));
   return btoa(String.fromCharCode(...frame));
+}
+
+function base64ToBytes(value) {
+  const clean = String(value).trim().replace(/\s+/g, '');
+  if (!/^[A-Za-z0-9+/]+=*$/.test(clean)) throw new Error('Invalid base64');
+  const binary = atob(clean);
+  const out = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) out[i] = binary.charCodeAt(i);
+  return out;
+}
+
+function readVarint(bytes, start) {
+  let result = 0,
+    shift = 0,
+    i = start;
+  while (i < bytes.length) {
+    const byte = bytes[i++];
+    result |= (byte & 0x7f) << shift;
+    if (!(byte & 0x80)) return { value: result >>> 0, next: i };
+    shift += 7;
+    if (shift >= 35) throw new Error('Varint too long');
+  }
+  throw new Error('Truncated varint');
+}
+
+function parseFields(bytes) {
+  const fields = new Map();
+  let i = 0;
+  while (i < bytes.length) {
+    const tag = readVarint(bytes, i);
+    i = tag.next;
+    const field = tag.value >>> 3;
+    const wire = tag.value & 7;
+    let value;
+    if (wire === 0) {
+      const v = readVarint(bytes, i);
+      value = v.value;
+      i = v.next;
+    } else if (wire === 2) {
+      const len = readVarint(bytes, i);
+      i = len.next;
+      value = bytes.slice(i, i + len.value);
+      i += len.value;
+    } else if (wire === 5) {
+      value = bytes.slice(i, i + 4);
+      i += 4;
+    } else {
+      throw new Error('Unsupported protobuf wire type');
+    }
+    if (!fields.has(field)) fields.set(field, []);
+    fields.get(field).push(value);
+  }
+  return fields;
+}
+
+function fieldNumber(fields, number) {
+  const values = fields.get(number);
+  return values?.length ? values[0] : null;
+}
+
+function fieldNumbers(fields, number) {
+  return fields.get(number) || [];
+}
+
+function bytesToText(bytes) {
+  return new TextDecoder().decode(bytes);
+}
+
+function decodeZstdFrame(bytes) {
+  if (
+    bytes.length < 8 ||
+    bytes[0] !== 0x28 ||
+    bytes[1] !== 0xb5 ||
+    bytes[2] !== 0x2f ||
+    bytes[3] !== 0xfd
+  )
+    throw new Error('Invalid zstd frame');
+  let pos = 4;
+  const flag = bytes[pos++];
+  let size;
+  if (flag === 0x20) {
+    size = bytes[pos++];
+  } else if (flag === 0x60) {
+    size = bytes[pos++] + (bytes[pos++] << 8) + 256;
+  } else {
+    throw new Error('Unsupported zstd content size');
+  }
+  const header = bytes[pos] | (bytes[pos + 1] << 8) | (bytes[pos + 2] << 16);
+  pos += 3;
+  const type = (header >>> 1) & 3;
+  const blockSize = header >>> 3;
+  if (type !== 0) throw new Error('Unsupported zstd block type');
+  if (blockSize !== size) throw new Error('Unexpected zstd block size');
+  return bytes.slice(pos, pos + blockSize);
+}
+
+export function decodeGameBuild(code, heroes, items) {
+  const payload = decodeZstdFrame(base64ToBytes(code));
+  const fields = parseFields(payload);
+  const heroApiId = fieldNumber(fields, 2);
+  const hero = heroes.find((h) => h.apiId === heroApiId);
+  if (!hero) throw new Error('Unknown hero in game build');
+  const name = fieldNumber(fields, 5) ? bytesToText(fieldNumber(fields, 5)) : '';
+  const description = fieldNumber(fields, 6) ? bytesToText(fieldNumber(fields, 6)) : '';
+  const stageName =
+    name
+      .split('|')
+      .map((part) => part.trim())
+      .pop() || '';
+  const stage = stageName === 'Mid game' ? 'mid' : stageName === 'Full game' ? 'full' : 'lane';
+  const budgetMatch = description.match(/Budget:\s*([\d\s]+)\s*souls/i);
+  const budget = budgetMatch
+    ? Number(budgetMatch[1].replace(/\s+/g, ''))
+    : BUILD_STAGES[stage].budget;
+  const focusMatch = description.match(/Experimental\s+(\w+)\s+build/i);
+  const focus = ['balanced', 'weapon', 'vitality', 'spirit'].includes(focusMatch?.[1])
+    ? focusMatch[1]
+    : 'balanced';
+  const details = fieldNumber(fields, 10);
+  if (!details) throw new Error('Missing build details');
+  const groupFields = parseFields(details);
+  const itemApiIds = [];
+  for (const groupBytes of fieldNumbers(groupFields, 1)) {
+    const group = parseFields(groupBytes);
+    for (const itemBytes of fieldNumbers(group, 1)) {
+      const tag = readVarint(itemBytes, 0);
+      itemApiIds.push(readVarint(itemBytes, tag.next).value);
+    }
+  }
+  const ids = itemApiIds
+    .map((apiId) => items.find((item) => item.apiId === apiId)?.id)
+    .filter(Boolean);
+  if (!ids.length) throw new Error('No known items in game build');
+  const settings = buildSettings({
+    stage,
+    budget: Number.isSafeInteger(budget) ? budget : BUILD_STAGES[stage].budget,
+    heroId: hero.id,
+    focus,
+    maxActive: 2,
+    maxItems: Math.min(ids.length, BUILD_STAGES[stage].slots),
+    keepHero: true,
+  });
+  const build = {
+    hero: hero.id,
+    seed: 'imported-' + Date.now(),
+    items: [...new Set(ids)],
+    budget: settings.budget,
+    settings,
+    locked: [],
+    purchased: [],
+  };
+  const restored = restoreBuild(build, heroes, items);
+  if (!restored) throw new Error('Imported build failed validation');
+  return restored;
 }

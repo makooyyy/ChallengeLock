@@ -494,11 +494,25 @@ function viewHistory() {
   const p = $('#p-history'),
     row = (x) =>
       `<li><a href="${linkFor(x)}">${H(x.hero) ? dia(H(x.hero)) : ''}<div class="history-copy"><div class="fx" style="gap:6px"><b>${esc(H(x.hero)?.name || x.hero)}</b>${difficultyBadge(x)}</div><small class="history-mode">${modeName(x)}</small><small>${x.conds.map((id) => esc(loc(C(id)?.name || id))).join(' · ')}</small></div></a><span class="history-status ${x.outcome === 'fail' ? 'failed' : ''}">${x.outcome === 'done' ? '✓' : x.outcome === 'fail' ? '×' : t('pending')}</span></li>`;
+  const total = S.stats.done + S.stats.fail;
+  const rate = total ? Math.round((S.stats.done / total) * 100) : 0;
+  const heroCounts = new Map();
+  for (const x of S.history)
+    if (x.outcome === 'done') heroCounts.set(x.hero, (heroCounts.get(x.hero) || 0) + 1);
+  const topHeroes = [...heroCounts.entries()]
+    .sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])))
+    .slice(0, 3);
+  const topHeroesHtml = topHeroes.length
+    ? topHeroes
+        .map(([id, count]) => `<li><span>${esc(H(id)?.name || id)}</span><b>${count}</b></li>`)
+        .join('')
+    : `<li class="history-empty">${t('noStats')}</li>`;
   p.innerHTML =
     intro(t('historyTitle'), t('historyIntro')) +
     `<div class="stat">${[
       ['won', S.stats.done, 'check'],
       ['lost', S.stats.fail, 'close'],
+      ['successRate', rate + '%', 'spark'],
     ]
       .map(
         ([label, value, glyph]) =>
@@ -506,7 +520,7 @@ function viewHistory() {
       )
       .join(
         '',
-      )}</div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history', 18)}</div><ul class="hl">${S.history.map(row).join('') || `<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star', 18)}</div><ul class="hl">${S.favs.map(row).join('') || `<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
+      )}</div><div class="card"><div class="section-heading"><h2>${t('topHeroes')}</h2>${icon('trophy', 18)}</div><ul class="hl">${topHeroesHtml}</ul></div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history', 18)}</div><ul class="hl">${S.history.map(row).join('') || `<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star', 18)}</div><ul class="hl">${S.favs.map(row).join('') || `<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
 }
 
 /* ---------- UPDATES ---------- */

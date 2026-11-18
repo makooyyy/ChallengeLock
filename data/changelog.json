@@ -1,6 +1,26 @@
 {
   "releases": [
     {
+      "version": "1.19.0",
+      "date": "2026-11-18",
+      "title": {
+        "ru": "Импорт билдов и статистика истории",
+        "en": "Build import and history stats"
+      },
+      "items": {
+        "ru": [
+          "Импорт билда из игры: вставьте код Deadlock и восстановите билд в Build Lab.",
+          "Статистика в истории: успешность и лучшие герои по завершённым контрактам.",
+          "Усилены безопасность, синхронизация и надёжность приложения."
+        ],
+        "en": [
+          "Import a build from the game: paste a Deadlock code and restore it in Build Lab.",
+          "History stats: success rate and top heroes from completed contracts.",
+          "Security, synchronization and reliability improvements."
+        ]
+      }
+    },
+    {
       "version": "1.18.0",
       "date": "2026-11-18",
       "title": {
