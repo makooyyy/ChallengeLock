@@ -735,4 +735,39 @@ export async function boot() {
   $('#foot').before(notice);
   paintCatalog();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  checkForUpdates();
+}
+
+async function checkForUpdates() {
+  const APP_VERSION = '1.0.1';
+  try {
+    const r = await fetch('https://api.github.com/repos/makooyyy/ChallengeLock/releases/latest');
+    if (!r.ok) return;
+    const data = await r.json();
+    const latest = String(data.tag_name || '').replace(/^v/, '');
+    if (!latest || !isNewerVersion(latest, APP_VERSION)) return;
+    showUpdateBanner(latest, data.html_url || 'https://github.com/makooyyy/ChallengeLock/releases/latest');
+  } catch {}
+}
+
+function isNewerVersion(latest, current) {
+  const a = latest.split('.').map((n) => parseInt(n, 10) || 0);
+  const b = current.split('.').map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    if ((a[i] || 0) > (b[i] || 0)) return true;
+    if ((a[i] || 0) < (b[i] || 0)) return false;
+  }
+  return false;
+}
+
+function showUpdateBanner(version, url) {
+  if (document.getElementById('update-banner')) return;
+  const b = document.createElement('div');
+  b.id = 'update-banner';
+  b.style.cssText =
+    'position:fixed;top:0;left:0;right:0;z-index:9999;background:#3475fa;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.2)';
+  b.innerHTML = `<span>Доступна новая версия ${version}</span><span><a href="${url}" target="_blank" rel="noopener" style="color:#fff;font-weight:700;margin-right:12px;text-decoration:underline;">Скачать</a><button id="update-close" style="background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;line-height:1;">×</button></span>`;
+  document.body.prepend(b);
+  const close = b.querySelector('#update-close');
+  if (close) close.onclick = () => b.remove();
 }
