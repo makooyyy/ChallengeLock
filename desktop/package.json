@@ -10,6 +10,9 @@
   },
   "author": "makooyyy",
   "license": "MIT",
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
   "devDependencies": {
     "electron": "^33.2.0",
     "electron-builder": "^25.1.8"
@@ -26,7 +29,15 @@
       "web/**/*"
     ],
     "win": {
-      "target": "portable"
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "makooyyy",
+      "repo": "ChallengeLock"
     }
   }
 }

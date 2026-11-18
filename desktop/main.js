@@ -1,4 +1,10 @@
 const { app, BrowserWindow, Menu } = require('electron');
+let autoUpdater = null;
+try {
+  autoUpdater = require('electron-updater').autoUpdater;
+} catch (e) {
+  autoUpdater = null;
+}
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -67,6 +73,11 @@ const server = http.createServer((req, res) => {
 let mainWindow = null;
 
 app.whenReady().then(() => {
+  if (autoUpdater) {
+    autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.checkForUpdatesAndNotify().catch(() => {});
+  }
   Menu.setApplicationMenu(null);
   server.listen(0, '127.0.0.1', () => {
     const port = server.address().port;
