@@ -94,7 +94,11 @@ export function validateData(data, dict) {
       h.abilities > 4
     )
       fail('hero');
-    if (h.icon && !(typeof h.icon === 'string' && /^https:\/\//.test(h.icon))) fail('hero icon');
+    if (
+      h.icon &&
+      !(typeof h.icon === 'string' && /^https:\/\/assets-bucket\.deadlock-api\.com\//.test(h.icon))
+    )
+      fail('hero icon');
   }
   for (const i of data.items)
     if (
@@ -127,7 +131,11 @@ export function validateData(data, dict) {
           i[field].some((id) => !itemIds.has(id)))
       )
         fail('recipe ' + i.id);
-    if (i.icon && !(typeof i.icon === 'string' && /^https:\/\//.test(i.icon))) fail('item icon');
+    if (
+      i.icon &&
+      !(typeof i.icon === 'string' && /^https:\/\/assets-bucket\.deadlock-api\.com\//.test(i.icon))
+    )
+      fail('item icon');
     if (i.active !== false)
       for (const id of i.components || []) {
         const component = itemIds.get(id);

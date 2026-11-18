@@ -1,6 +1,6 @@
 // Single mutable state object, persisted via storage.js.
 import { load, save } from './storage.js';
-const CATS = ['ab', 'it', 'gp', 'go', 'tm', 'ch'];
+import { CATS } from './validation.js';
 export const S = load({
   lang: 'ru',
   diff: 'mid',

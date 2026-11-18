@@ -30,11 +30,24 @@ function webRoot() {
 
 const root = webRoot();
 const server = http.createServer((req, res) => {
-  let urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+  let urlPath;
+  try {
+    urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+  } catch {
+    res.statusCode = 400;
+    res.end('Bad request');
+    return;
+  }
   if (urlPath === '/' || urlPath === '') urlPath = '/index.html';
-  const filePath = path.join(root, urlPath);
-  // prevent path traversal
-  if (!filePath.startsWith(root)) {
+  if (process.platform === 'win32' && urlPath.includes('\\')) {
+    res.statusCode = 403;
+    res.end('Forbidden');
+    return;
+  }
+  const filePath = path.resolve(root, '.' + urlPath);
+  const relative = path.relative(root, filePath);
+  // prevent path traversal and sibling-directory prefix matches
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
     res.statusCode = 403;
     res.end('Forbidden');
     return;

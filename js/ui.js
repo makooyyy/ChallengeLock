@@ -18,8 +18,7 @@ const esc = (s) =>
     /[&<>"]/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
   );
-const RC = { easy: '#8c82a9', mid: '#7662ad', hard: '#9d62c9', insane: '#d55479' },
-  RP = RC;
+const RC = { easy: '#8c82a9', mid: '#7662ad', hard: '#9d62c9', insane: '#d55479' };
 const ROM = ['I', 'II', 'III'];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const H = (id) => RT.data.heroes.find((h) => h.id === id),
@@ -57,20 +56,25 @@ function saveTimer() {
         t0: RT.timer.t0,
       }),
     );
-  } catch (e) {}
+  } catch (e) {
+    console.warn(e);
+  }
 }
 function restoreTimer() {
   if (!RT.cur) return;
   try {
     const s = JSON.parse(localStorage.getItem(TIMER_KEY) || 'null');
     if (!s || s.key !== resultKey(RT.cur) || !Number.isFinite(s.ms) || s.ms < 0) return;
+    if (s.run && (!Number.isFinite(s.t0) || s.t0 > Date.now())) return;
     RT.timer = {
       ms: s.run ? Math.max(0, Date.now() - s.t0) : s.ms,
       run: !!s.run,
       t0: s.run ? Number(s.t0) || 0 : 0,
     };
     paintContract();
-  } catch (e) {}
+  } catch (e) {
+    console.warn(e);
+  }
 }
 let ac;
 function beep(f, d = 0.1) {
@@ -86,14 +90,16 @@ function beep(f, d = 0.1) {
     o.connect(g).connect(ac.destination);
     o.start();
     o.stop(ac.currentTime + d);
-  } catch (e) {}
+  } catch (e) {
+    console.warn(e);
+  }
 }
 const dia = (h) =>
   `<div class="dia" style="--c:${h.color}"><span>${esc(h.name[0])}</span>${h.icon ? `<img class="pic" src="${esc(h.icon)}" alt="" loading="lazy">` : ''}</div>`;
 const seg = (arr, cur, attr) =>
   `<div class="seg" role="group" aria-label="${t(attr === 'diff' ? 'difficulty' : 'heroFilter')}">${arr.map(([v, l]) => `<button data-${attr}="${v}" class="${v == cur ? 'on' : ''}" aria-pressed="${v == cur}">${l}</button>`).join('')}</div>`;
 const difficultyBadge = (x) =>
-  `<span class="difficulty-badge" style="--difficulty-color:${RP[x.diff]}">${icon('spark', 11)} ${t('diff.' + x.diff)}</span>`;
+  `<span class="difficulty-badge" style="--difficulty-color:${RC[x.diff]}">${icon('spark', 11)} ${t('diff.' + x.diff)}</span>`;
 const intro = (title, description, action = '') =>
   `<div class="page-intro"><div><div class="eyebrow">DEADLOCK / CHALLENGELOCK</div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;
 const emptyPanel = (glyph, title, description) =>
@@ -193,14 +199,16 @@ function show(tab) {
     b.setAttribute('aria-current', on ? 'page' : 'false');
   });
   $$('.panel').forEach((p) => (p.hidden = p.id !== 'p-' + tab));
-  ({
+  const views = {
     roulette: viewRoulette,
     build: viewBuild,
     ban: viewBan,
     custom: viewCustom,
     history: viewHistory,
     updates: viewUpdates,
-  })[tab]();
+  };
+  const view = views[tab];
+  if (typeof view === 'function') view();
 }
 
 /* ---------- ROULETTE ---------- */
@@ -361,7 +369,9 @@ async function doRoll(reroll, opt = {}) {
   beep(330);
   try {
     await paintReels(res, !opt.result);
-  } catch (e) {}
+  } catch (e) {
+    console.warn(e);
+  }
   RT.busy = false;
   setBusy(false);
   beep(res.diff === 'insane' ? 160 : 660, 0.18);
@@ -409,7 +419,9 @@ async function png() {
   const cv = document.createElement('canvas');
   try {
     await document.fonts.ready;
-  } catch (e) {}
+  } catch (e) {
+    console.warn(e);
+  }
   drawCard(cv, {
     hero: H(x.hero).name,
     lines: x.conds.map((id) => loc(C(id).name)),
@@ -795,15 +807,20 @@ export async function boot() {
 }
 
 async function checkForUpdates() {
-  const APP_VERSION = '1.0.1';
+  const APP_VERSION = RT.data?.changelog?.releases?.[0]?.version || '1.0.1';
   try {
     const r = await fetch('https://api.github.com/repos/makooyyy/ChallengeLock/releases/latest');
     if (!r.ok) return;
     const data = await r.json();
     const latest = String(data.tag_name || '').replace(/^v/, '');
     if (!latest || !isNewerVersion(latest, APP_VERSION)) return;
-    showUpdateBanner(latest, data.html_url || 'https://github.com/makooyyy/ChallengeLock/releases/latest');
-  } catch {}
+    showUpdateBanner(
+      latest,
+      data.html_url || 'https://github.com/makooyyy/ChallengeLock/releases/latest',
+    );
+  } catch (e) {
+    console.warn(e);
+  }
 }
 
 function isNewerVersion(latest, current) {
@@ -818,12 +835,35 @@ function isNewerVersion(latest, current) {
 
 function showUpdateBanner(version, url) {
   if (document.getElementById('update-banner')) return;
+  const safeVersion = String(version).replace(
+    /[&<>"]/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+  );
+  const safeUrl = /^https:\/\/github\.com\/makooyyy\/ChallengeLock\//.test(String(url))
+    ? String(url)
+    : 'https://github.com/makooyyy/ChallengeLock/releases/latest';
   const b = document.createElement('div');
   b.id = 'update-banner';
   b.style.cssText =
     'position:fixed;top:0;left:0;right:0;z-index:9999;background:#3475fa;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.2)';
-  b.innerHTML = `<span>Доступна новая версия ${version}</span><span><a href="${url}" target="_blank" rel="noopener" style="color:#fff;font-weight:700;margin-right:12px;text-decoration:underline;">Скачать</a><button id="update-close" style="background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;line-height:1;">×</button></span>`;
+  const text = document.createElement('span');
+  text.textContent = 'Доступна новая версия ' + safeVersion;
+  const actions = document.createElement('span');
+  const link = document.createElement('a');
+  link.href = safeUrl;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.style.cssText = 'color:#fff;font-weight:700;margin-right:12px;text-decoration:underline;';
+  link.textContent = 'Скачать';
+  const close = document.createElement('button');
+  close.id = 'update-close';
+  close.type = 'button';
+  close.setAttribute('aria-label', 'Закрыть уведомление об обновлении');
+  close.style.cssText =
+    'background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;line-height:1;';
+  close.textContent = '×';
+  close.onclick = () => b.remove();
+  actions.append(link, close);
+  b.append(text, actions);
   document.body.prepend(b);
-  const close = b.querySelector('#update-close');
-  if (close) close.onclick = () => b.remove();
 }

@@ -1,6 +1,30 @@
 {
   "releases": [
     {
+      "version": "1.18.0",
+      "date": "2026-11-18",
+      "title": {
+        "ru": "Безопасность, синхронизация и порядок в коде",
+        "en": "Security, synchronization and code cleanup"
+      },
+      "items": {
+        "ru": [
+          "Проверена и подтверждена актуальность каталога Deadlock API.",
+          "Desktop-версия синхронизирована с сайтом: веб-ассеты обновлены.",
+          "Усилены безопасность: CSP, встроенный сервер desktop-версии, баннер обновлений и URL иконок.",
+          "Улучшена надёжность: валидация таймера, логирование ошибок и защита от неизвестных иконок.",
+          "Наведён порядок в коде: единый источник категорий и меньше дублирования."
+        ],
+        "en": [
+          "Verified and confirmed the Deadlock API catalog is up to date.",
+          "The desktop app is synchronized with the site: web assets were refreshed.",
+          "Security hardened: CSP, the desktop built-in server, the update banner and icon URLs.",
+          "Reliability improved: timer validation, error logging and protection against unknown icons.",
+          "Code cleaned up: a single source of categories and less duplication."
+        ]
+      }
+    },
+    {
       "version": "1.17.0",
       "date": "2026-11-18",
       "title": {
