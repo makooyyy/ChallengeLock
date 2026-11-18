@@ -1,6 +1,6 @@
 {
   "name": "challengelock-desktop",
-  "version": "1.20.1",
+  "version": "1.20.2",
   "description": "Desktop app for ChallengeLock (Deadlock Challenge Roulette)",
   "main": "main.js",
   "scripts": {
@@ -29,10 +29,11 @@
       "web/**/*"
     ],
     "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ]
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     },
     "publish": {
       "provider": "github",

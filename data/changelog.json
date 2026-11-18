@@ -1,6 +1,22 @@
 {
   "releases": [
     {
+      "version": "1.20.2",
+      "date": "2026-11-18",
+      "title": {
+        "ru": "Тест автообновления 2",
+        "en": "Auto-update test 2"
+      },
+      "items": {
+        "ru": [
+          "Тестовый релиз NSIS-установщика для проверки автообновления."
+        ],
+        "en": [
+          "Test NSIS installer release for auto-update check."
+        ]
+      }
+    },
+    {
       "version": "1.20.1",
       "date": "2026-11-18",
       "title": {
