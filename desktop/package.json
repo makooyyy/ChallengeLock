@@ -1,6 +1,6 @@
 {
   "name": "challengelock-desktop",
-  "version": "1.20.3",
+  "version": "1.20.4",
   "description": "Desktop app for ChallengeLock (Deadlock Challenge Roulette)",
   "main": "main.js",
   "scripts": {
@@ -21,6 +21,7 @@
   "build": {
     "appId": "com.makooyyy.challengelock",
     "productName": "ChallengeLock",
+    "artifactName": "ChallengeLock-${version}.exe",
     "directories": {
       "output": "dist"
     },

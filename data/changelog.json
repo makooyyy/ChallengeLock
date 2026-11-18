@@ -1,6 +1,22 @@
 {
   "releases": [
     {
+      "version": "1.20.4",
+      "date": "2026-11-18",
+      "title": {
+        "ru": "Тест автообновления 4",
+        "en": "Auto-update test 4"
+      },
+      "items": {
+        "ru": [
+          "Тестовый NSIS-релиз с latest.yml и корректным именем файла."
+        ],
+        "en": [
+          "Test NSIS release with latest.yml and correct file name."
+        ]
+      }
+    },
+    {
       "version": "1.20.3",
       "date": "2026-11-18",
       "title": {

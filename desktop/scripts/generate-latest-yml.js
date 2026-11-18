@@ -3,7 +3,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 
 const dist = path.join(__dirname, '..', 'dist');
-const files = fs.readdirSync(dist).filter((name) => /^ChallengeLock-.*\.exe$/i.test(name));
+const files = fs.readdirSync(dist).filter((name) => /\.exe$/i.test(name) && name !== 'latest.yml');
 if (!files.length) throw new Error('No installer exe found in dist');
 const exe = files[0];
 const exePath = path.join(dist, exe);
