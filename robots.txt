@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://makooyyy.github.io/ChallengeLock/sitemap.xml

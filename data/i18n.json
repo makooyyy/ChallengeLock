@@ -260,7 +260,8 @@
     "exportError": "Не удалось создать код. Пересобери билд и попробуй снова.",
     "exportChallengeTitle": "ТЕКУЩИЙ ЧЕЛЛЕНДЖ",
     "exportChallengeIncluded": "Челлендж включён — посмотреть условия",
-    "exportChallengeMismatch": "Герой билда отличается от героя челленджа. В игре сохранится исходный герой задания."
+    "exportChallengeMismatch": "Герой билда отличается от героя челленджа. В игре сохранится исходный герой задания.",
+    "switchLanguage": "Сменить язык"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -523,6 +524,7 @@
     "exportError": "Could not create an import code. Rebuild and try again.",
     "exportChallengeTitle": "CURRENT CHALLENGE",
     "exportChallengeIncluded": "Challenge included — view conditions",
-    "exportChallengeMismatch": "The build hero differs from the challenge hero. The original challenge hero remains in the instructions."
+    "exportChallengeMismatch": "The build hero differs from the challenge hero. The original challenge hero remains in the instructions.",
+    "switchLanguage": "Switch language"
   }
 }
