@@ -42,9 +42,9 @@ test('changelog releases are complete and ordered newest first', () => {
 
 test('the newest release is the version rendered by the site', () => {
   const newest = changelog.releases[0];
-  const ui = fs.readFileSync(new URL('../js/ui.js', import.meta.url), 'utf8');
-  // ui.js derives the version from the first release; keep it that way.
-  assert.match(ui, /releases\(\)\[0\]\?\.version/);
+  const views = fs.readFileSync(new URL('../js/views/updates.js', import.meta.url), 'utf8');
+  // The updates view derives the site version from the first release; keep it that way.
+  assert.match(views, /releases\[0\]\?\.version/);
   assert.ok(newest.version.length > 0);
 });
 

@@ -1,5 +1,8 @@
 /* ChallengeLock stylesheet. Bundled from the former style/enhancements/studio/lab/challenge files.
    No build step: this file is the deployed source of truth. */
+/* Colors: the palette lives in the :root blocks — light theme here, dark theme in
+   "Persisted color themes". New rules should consume var(--token) instead of a literal
+   color; tests/css-tokens.test.js stops the number of raw hex values from growing. */
 /* Self-hosted variable fonts (SIL Open Font License 1.1).
    Subsets: latin + cyrillic. Source: Google Fonts. */
 @font-face {
@@ -67,7 +70,6 @@
   --muted: #726985;
   --line: #d8d5df;
   --dark: #1e172c;
-  --dark2: #282039;
   --accent: #efbc57;
   --green: #4d3e6c;
   --radius: 18px;
@@ -2242,7 +2244,6 @@ select,
   --muted: #a39cb1;
   --line: #3d3748;
   --dark: #1a1329;
-  --dark2: #2d253c;
   --green: #8f7eb1;
   --shadow: 0 10px 35px #0002;
 }
@@ -2350,16 +2351,8 @@ select,
   background: #4d4328;
   color: #efca75;
 }
-[data-theme='dark'] .num,
-[data-theme='dark'] select,
-[data-theme='dark'] .search-wrap {
-  background: #181322;
-  border-color: #484058;
-  color: #d1cae0;
-}
 [data-theme='dark'] .search-input {
   background: transparent;
-  color: #d1cae0;
 }
 [data-theme='dark'] .hc {
   background: var(--surface);
@@ -3093,7 +3086,6 @@ body.completion-open {
   --muted: #5f6a7b;
   --line: #dfe4ed;
   --dark: #151b27;
-  --dark2: #202939;
   --accent: #316fff;
   --green: #245edb;
   --radius: 20px;
@@ -3108,7 +3100,6 @@ body.completion-open {
   --muted: #9aa7ba;
   --line: #2b3444;
   --dark: #151b27;
-  --dark2: #202939;
   --accent: #4a83ff;
   --green: #8eb4ff;
   --soft: #1e2e4a;

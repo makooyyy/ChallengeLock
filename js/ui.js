@@ -11,23 +11,24 @@ import { newSeed, dailySeed } from './rng.js';
 import { validateData, normalizeState, options, GAME_MODES } from './validation.js';
 import { parseHash, linkFor, setHash, copy, drawCard } from './share.js';
 import { checkForUpdates } from './update-check.js';
+import { releasesOf, siteVersionOf, renderUpdates } from './views/updates.js';
+import {
+  $,
+  $$,
+  esc,
+  toast,
+  dia,
+  seg,
+  difficultyBadge,
+  intro,
+  mmss,
+  reduce,
+  ROMAN,
+  DIFF_COLOR,
+} from './ui-kit.js';
 
-const $ = (s, r = document) => r.querySelector(s),
-  $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const esc = (s) =>
-  String(s).replace(
-    /[&<>"]/g,
-    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
-  );
-const RC = { easy: '#8c82a9', mid: '#7662ad', hard: '#9d62c9', insane: '#d55479' };
-const ROM = ['I', 'II', 'III'];
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const H = (id) => RT.data.heroes.find((h) => h.id === id),
   C = (id) => RT.data.challenges.find((c) => c.id === id);
-const mmss = (ms) => {
-  const s = Math.floor(ms / 1000);
-  return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
-};
 const DIFFS = Object.keys(DIFF);
 const TABS = ['roulette', 'build', 'ban', 'custom', 'history', 'updates'];
 // Why a roll produced nothing, phrased as an i18n key the player can act on.
@@ -39,14 +40,6 @@ const ROLL_FAILURE = {
 };
 
 /* ---------- helpers ---------- */
-let tt;
-function toast(m) {
-  const e = $('#toast');
-  e.textContent = m;
-  e.classList.add('on');
-  clearTimeout(tt);
-  tt = setTimeout(() => e.classList.remove('on'), 1800);
-}
 function persist() {
   if (!saveState()) toast(t('storageError'));
 }
@@ -102,14 +95,6 @@ function beep(f, d = 0.1) {
     console.warn(e);
   }
 }
-const dia = (h) =>
-  `<div class="dia" style="--c:${h.color}"><span>${esc(h.name[0])}</span>${h.icon ? `<img class="pic" src="${esc(h.icon)}" alt="" loading="lazy">` : ''}</div>`;
-const seg = (arr, cur, attr) =>
-  `<div class="seg" role="group" aria-label="${t(attr === 'diff' ? 'difficulty' : 'heroFilter')}">${arr.map(([v, l]) => `<button data-${attr}="${v}" class="${v == cur ? 'on' : ''}" aria-pressed="${v == cur}">${l}</button>`).join('')}</div>`;
-const difficultyBadge = (x) =>
-  `<span class="difficulty-badge" style="--difficulty-color:${RC[x.diff]}">${icon('spark', 11)} ${t('diff.' + x.diff)}</span>`;
-const intro = (title, description, action = '') =>
-  `<div class="page-intro"><div><div class="eyebrow">DEADLOCK / CHALLENGELOCK</div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;
 const activeHeroes = () => RT.data.heroes.filter((h) => h.active !== false);
 function setBusy(busy) {
   const board = $('.mach');
@@ -143,9 +128,8 @@ function paintHeader() {
 }
 
 /* ---------- version / changelog ---------- */
-const releases = () =>
-  Array.isArray(RT.data.changelog?.releases) ? RT.data.changelog.releases : [];
-const siteVersion = () => releases()[0]?.version || '';
+const releases = () => releasesOf(RT.data);
+const siteVersion = () => siteVersionOf(releases());
 
 // Footer chip: the current version doubles as the entry point to the changelog.
 function paintFooterVersion() {
@@ -155,16 +139,6 @@ function paintFooterVersion() {
   button.textContent = (version ? 'v' + version + ' · ' : '') + t('whatsNew');
   button.title = t('versionLabel') + (version ? ' ' + version : '');
 }
-
-const releaseDate = (iso) => {
-  const date = new Date(String(iso) + 'T00:00:00');
-  if (Number.isNaN(date.getTime())) return String(iso);
-  return new Intl.DateTimeFormat(S.lang === 'ru' ? 'ru-RU' : 'en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(date);
-};
 
 function applyStatic() {
   $$('[data-icon]').forEach((e) => (e.innerHTML = icon(e.dataset.icon)));
@@ -242,7 +216,7 @@ function viewRoulette() {
       'diff',
     )}</div>
     <div class="reel-stage"><div class="reel hero-reel" data-i="0"><div class="reel-title"><span>${t('yourHero')}</span>${icon('shield', 13)}</div><div class="strip"></div><button class="lk" data-lock="0" aria-label="${t('lock')} — ${t('hero')}"></button></div>
-    <div class="conditions">${[1, 2, 3].map((i) => `<div class="reel condition-reel" data-i="${i}"><div class="condition-top"><div class="reel-title"><span class="condition-number">0${i}</span><span>${t('cond')} ${ROM[i - 1]}</span></div><button class="lk" data-lock="${i}" aria-label="${t('lock')} — ${t('cond')} ${ROM[i - 1]}"></button></div><div class="strip"></div></div>`).join('')}</div></div>
+    <div class="conditions">${[1, 2, 3].map((i) => `<div class="reel condition-reel" data-i="${i}"><div class="condition-top"><div class="reel-title"><span class="condition-number">0${i}</span><span>${t('cond')} ${ROMAN[i - 1]}</span></div><button class="lk" data-lock="${i}" aria-label="${t('lock')} — ${t('cond')} ${ROMAN[i - 1]}"></button></div><div class="strip"></div></div>`).join('')}</div></div>
     <div class="filter-summary"><span>${icon('shield', 12)}${heroPool(RT.data.heroes, S).length} ${t('heroesCount')}</span><span class="sep">/</span><span>${S.cats.length} ${t('categoriesCount')}</span><button data-tab="custom">${t('configure')}${icon('arrow', 12)}</button></div>
     <div class="board-actions"><button class="spin" id="spin">${icon('shuffle')}<span id="spin-label">${t('spin')}</span><kbd>SPACE</kbd></button><button class="reroll-button" id="reroll">${icon('refresh', 17)}${t('reroll')}<small id="rr">${RT.rerolls}</small></button></div>
     <details class="board-options"><summary><span>${icon('settings', 14)}${t('extraSettings')}</span>${icon('chevron', 14)}</summary><div class="options-content"><label class="chk"><input type="checkbox" id="snd" ${S.sound ? 'checked' : ''}>${t('soundOn')}</label><label class="chk"><input type="checkbox" id="fsame" ${S.friend.same ? 'checked' : ''}>${t('sameHero')}</label><label class="chk">${t('player')}<input type="number" id="fpl" min="1" max="9" value="${S.friend.player}" class="num" ${S.friend.same ? 'disabled' : ''}></label><p class="keyboard-hint">${t('keys')}</p></div></details>
@@ -383,7 +357,7 @@ async function doRoll(reroll, opt = {}) {
   setBusy(false);
   beep(res.diff === 'insane' ? 160 : 660, 0.18);
   if (res.diff === 'hard' || res.diff === 'insane') {
-    particles(RC[res.diff]);
+    particles(DIFF_COLOR[res.diff]);
     const m = $('.mach');
     if (!reduce && m) {
       m.classList.add('shake');
@@ -433,7 +407,7 @@ async function png() {
     hero: H(x.hero).name,
     lines: x.conds.map((id) => loc(C(id).name)),
     label: t('diff.' + x.diff),
-    color: RC[x.diff],
+    color: DIFF_COLOR[x.diff],
     foot: `${modeName(x)} · seed ${x.seed} · Deadlock Challenge Roulette`,
   });
   cv.toBlob((b) => {
@@ -578,28 +552,7 @@ async function importData(file) {
 
 /* ---------- UPDATES ---------- */
 function viewUpdates() {
-  const p = $('#p-updates');
-  const list = releases();
-  const version = siteVersion();
-  p.innerHTML =
-    intro(
-      t('updatesTitle'),
-      t('updatesIntro'),
-      version ? `<span class="version-pill">v${esc(version)}</span>` : '',
-    ) +
-    (list.length
-      ? `<div class="release-list">${list
-          .map(
-            (r, i) => `<article class="card release">
-      <div class="release-head"><span class="release-version">v${esc(r.version)}</span><time datetime="${esc(r.date)}">${esc(releaseDate(r.date))}</time>${
-        i === 0 ? `<span class="release-current">${t('currentVersion')}</span>` : ''
-      }</div>
-      <h2>${esc(loc(r.title))}</h2>
-      <ul>${(loc(r.items) || []).map((item) => `<li>${esc(item)}</li>`).join('')}</ul>
-    </article>`,
-          )
-          .join('')}</div>`
-      : `<div class="card"><p>${t('updatesEmpty')}</p></div>`);
+  renderUpdates($('#p-updates'), releases(), S.lang);
 }
 
 /* ---------- events ---------- */
