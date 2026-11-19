@@ -44,5 +44,8 @@
       "repo": "ChallengeLock",
       "releaseType": "release"
     }
+  },
+  "allowScripts": {
+    "electron@45.4.1": true
   }
 }

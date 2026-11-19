@@ -22,6 +22,39 @@ const path = require('path');
 const { execFile } = require('child_process');
 const game = require('./game.js');
 
+// Windows GUI builds do not attach the main-process console to the terminal, so the
+// startup trail goes to a file next to the profile. Without it "nothing happens" is
+// the only symptom a user can report.
+const LOG_NAME = 'challenge-lock.log';
+const LOG_LIMIT = 512 * 1024;
+let logPathCache;
+
+function logPath() {
+  if (logPathCache !== undefined) return logPathCache;
+  try {
+    logPathCache = path.join(app.getPath('userData'), LOG_NAME);
+  } catch {
+    logPathCache = null;
+  }
+  return logPathCache;
+}
+
+function log(...args) {
+  const line = new Date().toISOString() + ' ' + args.map((value) => String(value)).join(' ');
+  const file = logPath();
+  // Plain Node (tests) must not touch the profile directory.
+  if (file && process.versions.electron) {
+    try {
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      if (fs.existsSync(file) && fs.statSync(file).size > LOG_LIMIT) fs.writeFileSync(file, '');
+      fs.appendFileSync(file, line + '\n');
+    } catch {
+      // Logging must never break the app.
+    }
+  }
+  console.log(line);
+}
+
 // A fixed port keeps the page origin stable. Chromium keys localStorage, the Service
 // Worker cache and the theme by origin, so the previous random port wiped every
 // contract, setting and cached asset on each launch.
@@ -188,6 +221,14 @@ function createWindow() {
     mainWindow = null;
   });
   mainWindow.loadURL(pageUrl());
+  log('window created for ' + pageUrl());
+  // A restored or off-screen window would look like a silent start: force it once.
+  setTimeout(() => {
+    if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) {
+      log('window stayed hidden for 3s, showing it');
+      mainWindow.show();
+    }
+  }, 3000).unref?.();
   return mainWindow;
 }
 
@@ -351,7 +392,7 @@ function refreshTrayMenu() {
 function createTray() {
   const icon = trayIcon();
   if (!icon) {
-    console.warn('ChallengeLock: tray icon is missing, running without a tray');
+    log('tray icon is missing, running without a tray');
     return null;
   }
   tray = new Tray(icon);
@@ -367,8 +408,8 @@ function registerShortcuts() {
     failed.push(SPIN_ACCELERATOR);
   if (!globalShortcut.register(COMPACT_ACCELERATOR, () => toggleCompact()))
     failed.push(COMPACT_ACCELERATOR);
-  if (failed.length) console.warn('ChallengeLock: hotkeys already taken: %s', failed.join(', '));
-  else console.log('ChallengeLock: hotkeys %s and %s', SPIN_ACCELERATOR, COMPACT_ACCELERATOR);
+  if (failed.length) log('hotkeys already taken: ' + failed.join(', '));
+  else log('hotkeys ' + SPIN_ACCELERATOR + ' and ' + COMPACT_ACCELERATOR);
 }
 
 // The renderer reports what it rolled, so the tray tooltip shows the current contract
@@ -468,10 +509,12 @@ function startServer() {
     server.close(() => {
       server.listen(0, HOST, () => {
         serverPort = server.address().port;
-        console.warn(
-          'ChallengeLock: port %d is busy, using %d instead (data will not persist).',
-          PORT,
-          serverPort,
+        log(
+          'port ' +
+            PORT +
+            ' is busy, using ' +
+            serverPort +
+            ' instead (this run starts with an empty profile)',
         );
         createWindow();
       });
@@ -483,7 +526,7 @@ function startServer() {
   });
   server.listen(PORT, HOST, () => {
     serverPort = PORT;
-    console.log('ChallengeLock: serving the app on http://%s:%d', HOST, PORT);
+    log('serving the app on http://' + HOST + ':' + PORT);
     createWindow();
   });
 }
@@ -492,10 +535,11 @@ function startServer() {
 // window. A native error box is the only thing a user can report back.
 function reportFatal(error) {
   const text = String((error && (error.stack || error.message)) || error || 'unknown error');
+  log('fatal: ' + text);
   try {
     dialog.showErrorBox('ChallengeLock не смог запуститься', text);
   } catch {
-    console.error(text);
+    // The dialog is the last resort; the log file already has the text.
   }
   app.exit(1);
 }
@@ -505,14 +549,30 @@ if (process.versions.electron) {
   process.on('unhandledRejection', (reason) => reportFatal(reason));
 }
 
-// A second launch would bind another port and therefore another profile.
+// A second launch would bind another port and therefore another profile. It also used
+// to exit silently, which reads exactly like "the app does not start".
 if (!app.requestSingleInstanceLock()) {
-  app.quit();
+  log('another instance holds the profile lock: focusing it and exiting');
+  app
+    .whenReady()
+    .then(() =>
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'ChallengeLock',
+        message: 'Приложение уже запущено.',
+        detail:
+          'Окно должно быть на панели задач или в трее рядом с часами (иконка может быть в скрытых значках). Если окна нет — завершите все процессы electron.exe и запустите снова.',
+        buttons: ['Ок'],
+      }),
+    )
+    .catch(() => {})
+    .finally(() => app.quit());
 } else {
   app.on('second-instance', () => showWindow());
 
   app.whenReady().then(() => {
     try {
+      log('ready');
       if (autoUpdater) {
         autoUpdater.autoDownload = true;
         autoUpdater.autoInstallOnAppQuit = true;

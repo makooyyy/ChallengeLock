@@ -107,5 +107,13 @@ function checkPort() {
     process.exit(1);
   }
   console.log('Всё на месте. Запуск: npm start');
+  console.log(
+    'Если окно не появится, причина будет в логе: ' +
+      path.join(
+        process.env.APPDATA || process.env.HOME || '',
+        'challengelock-desktop',
+        'challenge-lock.log',
+      ),
+  );
   process.exit(0);
 })();
