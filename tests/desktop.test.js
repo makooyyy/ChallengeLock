@@ -1,6 +1,6 @@
 // The desktop shell is testable without Electron: the electron module is replaced by
-// a stub, then the local server and the window guards are exercised for real.
-import test from 'node:test';
+// a stub, then the server, the tray, the hotkeys and the window guards are exercised.
+import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import path from 'node:path';
@@ -10,20 +10,31 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const root = fileURLToPath(new URL('..', import.meta.url));
 
-const opened = [];
-const windows = [];
-const handlers = {};
+const state = {
+  opened: [],
+  windows: [],
+  sent: [],
+  shortcuts: new Map(),
+  ipc: {},
+  tray: null,
+};
 
 class FakeWebContents {
+  constructor() {
+    this.handlers = {};
+    this.reloads = 0;
+  }
   setWindowOpenHandler(fn) {
-    handlers.open = fn;
+    this.handlers.open = fn;
   }
   on(event, fn) {
-    if (event === 'will-navigate') handlers.navigate = fn;
-    if (event === 'before-input-event') handlers.input = fn;
+    this.handlers[event] = fn;
+  }
+  send(channel, payload) {
+    state.sent.push({ channel, payload });
   }
   reload() {
-    handlers.reloads = (handlers.reloads || 0) + 1;
+    this.reloads++;
   }
   toggleDevTools() {}
 }
@@ -32,24 +43,64 @@ class FakeWindow {
   constructor(options) {
     this.options = options;
     this.webContents = new FakeWebContents();
+    this.handlers = {};
     this.url = null;
-    windows.push(this);
+    this.bounds = { x: 100, y: 100, width: 1280, height: 820 };
+    this.visible = true;
+    this.alwaysOnTop = false;
+    state.windows.push(this);
   }
   loadURL(url) {
     this.url = url;
   }
-  on() {}
+  on(event, fn) {
+    this.handlers[event] = fn;
+  }
   isDestroyed() {
     return false;
   }
   isMinimized() {
     return false;
   }
+  isVisible() {
+    return this.visible;
+  }
   restore() {}
   focus() {}
-  static getAllWindows() {
-    return windows;
+  show() {
+    this.visible = true;
   }
+  hide() {
+    this.visible = false;
+  }
+  getBounds() {
+    return { ...this.bounds };
+  }
+  setBounds(bounds) {
+    this.bounds = { ...bounds };
+  }
+  setAlwaysOnTop(value) {
+    this.alwaysOnTop = value;
+  }
+  static getAllWindows() {
+    return state.windows;
+  }
+}
+
+class FakeTray {
+  constructor(icon) {
+    this.icon = icon;
+    this.menu = null;
+    this.tooltip = '';
+    state.tray = this;
+  }
+  setToolTip(text) {
+    this.tooltip = text;
+  }
+  setContextMenu(menu) {
+    this.menu = menu;
+  }
+  on() {}
 }
 
 const fakeElectron = {
@@ -58,12 +109,36 @@ const fakeElectron = {
     requestSingleInstanceLock: () => true,
     quit: () => assert.fail('a first instance must not quit'),
     on: () => {},
+    getPath: () => 'C:/user-data',
   },
   BrowserWindow: FakeWindow,
-  Menu: { setApplicationMenu: () => {} },
+  Tray: FakeTray,
+  Menu: {
+    setApplicationMenu: () => {},
+    buildFromTemplate: (template) => ({ items: template }),
+  },
+  globalShortcut: {
+    register: (accelerator, handler) => {
+      state.shortcuts.set(accelerator, handler);
+      return true;
+    },
+    unregisterAll: () => state.shortcuts.clear(),
+  },
+  screen: { getPrimaryDisplay: () => ({ workArea: { x: 0, y: 0, width: 1920, height: 1040 } }) },
+  ipcMain: {
+    on: (channel, handler) => {
+      state.ipc[channel] = handler;
+    },
+  },
+  nativeImage: {
+    createFromPath: () => ({ isEmpty: () => false, resize: () => ({ resized: true }) }),
+  },
   shell: {
     openExternal: async (url) => {
-      opened.push(url);
+      state.opened.push(url);
+    },
+    openPath: async (target) => {
+      state.opened.push(target);
     },
   },
 };
@@ -77,6 +152,9 @@ Module._load = function (request, ...rest) {
 };
 const shell = require(path.join(root, 'desktop', 'main.js'));
 Module._load = originalLoad;
+
+// One server for all three checks; close it once the file is done.
+after(() => shell.server.close());
 
 const request = (pathname, host, port) =>
   new Promise((resolve, reject) => {
@@ -101,16 +179,16 @@ async function listening(timeout = 3000) {
   return shell.server.address().port;
 }
 
-test('desktop shell keeps a stable origin and guards the window', async (t) => {
+test('the shell serves the app from a stable origin and guards the window', async () => {
   const port = await listening();
-  t.after(() => shell.server.close());
   await new Promise((resolve) => setTimeout(resolve, 25));
+  const [window] = state.windows;
 
   assert.equal(port, shell.PORT, 'the port must be fixed, not random');
-  assert.equal(windows.length, 1, 'one window is created on start');
-  assert.equal(windows[0].url, `http://127.0.0.1:${shell.PORT}/index.html`);
-  assert.ok(windows[0].options.webPreferences.contextIsolation);
-  assert.equal(windows[0].options.webPreferences.nodeIntegration, false);
+  assert.equal(state.windows.length, 1, 'one window is created on start');
+  assert.equal(window.url, `http://127.0.0.1:${shell.PORT}/index.html`);
+  assert.ok(window.options.webPreferences.contextIsolation);
+  assert.equal(window.options.webPreferences.nodeIntegration, false);
 
   const page = await request('/index.html', `127.0.0.1:${port}`, port);
   assert.equal(page.status, 200);
@@ -122,13 +200,69 @@ test('desktop shell keeps a stable origin and guards the window', async (t) => {
   const traversal = await request('/../package.json', `127.0.0.1:${port}`, port);
   assert.equal(traversal.status, 403, 'path traversal is rejected');
 
-  assert.deepEqual(handlers.open({ url: 'https://deadlock-api.com/' }), { action: 'deny' });
-  assert.deepEqual(opened, ['https://deadlock-api.com/'], 'external links leave the shell');
+  assert.deepEqual(window.webContents.handlers.open({ url: 'https://deadlock-api.com/' }), {
+    action: 'deny',
+  });
+  assert.deepEqual(state.opened, ['https://deadlock-api.com/'], 'external links leave the shell');
 
   let blocked = false;
-  handlers.navigate({ preventDefault: () => (blocked = true) }, 'https://example.com/');
+  window.webContents.handlers['will-navigate'](
+    { preventDefault: () => (blocked = true) },
+    'https://example.com/',
+  );
   assert.equal(blocked, true, 'navigation away is prevented');
 
-  handlers.input({ preventDefault: () => {} }, { type: 'keyDown', key: 'F5', control: false });
-  assert.equal(handlers.reloads, 1, 'F5 reloads the page');
+  window.webContents.handlers['before-input-event'](
+    { preventDefault: () => {} },
+    { type: 'keyDown', key: 'F5', control: false },
+  );
+  assert.equal(window.webContents.reloads, 1, 'F5 reloads the page');
+});
+
+test('closing the window parks the app in the tray instead of quitting', async () => {
+  await listening();
+  const [window] = state.windows;
+
+  let prevented = false;
+  window.handlers.close({ preventDefault: () => (prevented = true) });
+  assert.equal(prevented, true, 'close is intercepted');
+  assert.equal(window.isVisible(), false, 'the window is hidden, not destroyed');
+  assert.ok(state.tray, 'the tray exists');
+});
+
+test('the tray and the hotkeys drive the page', async () => {
+  await listening();
+  const [window] = state.windows;
+
+  assert.deepEqual([...state.shortcuts.keys()].sort(), ['Control+Alt+O', 'Control+Alt+R']);
+  assert.ok(state.tray.icon, 'the tray gets an icon');
+  assert.equal(state.tray.tooltip, 'ChallengeLock');
+
+  const labels = state.tray.menu.items.map((item) => item.label).filter(Boolean);
+  assert.ok(labels.includes('Новый челлендж'), 'tray offers a new contract');
+  assert.ok(labels.includes('Поверх игры'), 'tray offers compact mode');
+  assert.ok(labels.includes('Выход'), 'tray offers quit');
+
+  state.shortcuts.get('Control+Alt+R')();
+  assert.deepEqual(
+    state.sent.filter((message) => message.channel === 'desktop:spin').length,
+    1,
+    'the hotkey asks the page for a contract',
+  );
+
+  const compactItem = state.tray.menu.items.find((item) => item.label === 'Поверх игры');
+  compactItem.click();
+  assert.equal(window.alwaysOnTop, true, 'compact mode stays on top');
+  assert.equal(window.bounds.width, 430, 'compact mode shrinks the window');
+  assert.equal(window.bounds.x, 1920 - 430 - 24, 'and parks it by the right edge');
+  compactItem.click();
+  assert.equal(window.alwaysOnTop, false);
+  assert.deepEqual(window.bounds, { x: 100, y: 100, width: 1280, height: 820 });
+
+  state.ipc['desktop:contract']({}, 'Abrams · Сложная');
+  assert.equal(
+    state.tray.tooltip,
+    'ChallengeLock — Abrams · Сложная',
+    'the tray shows the contract',
+  );
 });

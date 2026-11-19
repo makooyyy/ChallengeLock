@@ -31,6 +31,8 @@ const H = (id) => RT.data.heroes.find((h) => h.id === id),
   C = (id) => RT.data.challenges.find((c) => c.id === id);
 const DIFFS = Object.keys(DIFF);
 const TABS = ['roulette', 'build', 'ban', 'custom', 'history', 'updates'];
+// Present only inside the Electron shell; undefined in a normal browser tab.
+const desktop = globalThis.challengeLockDesktop;
 // Why a roll produced nothing, phrased as an i18n key the player can act on.
 const ROLL_FAILURE = {
   'no-heroes': 'noHeroes',
@@ -345,6 +347,7 @@ async function doRoll(reroll, opt = {}) {
   RT.timer = { ms: 0, run: false, t0: 0 };
   persist();
   setHash(res);
+  desktop?.reportContract?.(`${H(res.hero).name} · ${t('diff.' + res.diff)}`);
   show('roulette');
   RT.busy = true;
   setBusy(true);
@@ -904,6 +907,10 @@ export async function boot() {
       })
       .catch(() => {});
   }
+  // The desktop hotkey rolls a new contract without stealing focus from the game.
+  desktop?.onSpin?.(() => {
+    if (!RT.busy) doRoll(false);
+  });
   checkForUpdates(siteVersion());
 }
 

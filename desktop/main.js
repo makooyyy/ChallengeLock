@@ -1,4 +1,14 @@
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  Tray,
+  globalShortcut,
+  shell,
+  screen,
+  ipcMain,
+  nativeImage,
+} = require('electron');
 let autoUpdater = null;
 try {
   autoUpdater = require('electron-updater').autoUpdater;
@@ -14,6 +24,11 @@ const path = require('path');
 // contract, setting and cached asset on each launch.
 const HOST = '127.0.0.1';
 const PORT = 47821;
+
+// Compact mode: a small always-on-top window you can park next to the game.
+const COMPACT = { width: 430, height: 580, margin: 24 };
+const SPIN_ACCELERATOR = 'Control+Alt+R';
+const COMPACT_ACCELERATOR = 'Control+Alt+O';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -91,14 +106,26 @@ const server = http.createServer((req, res) => {
 
 let mainWindow = null;
 let serverPort = null;
+let tray = null;
+let quitting = false;
+let compact = false;
+let normalBounds = null;
 
 function pageUrl() {
   return `http://${HOST}:${serverPort}/index.html`;
 }
 
+function trayIcon() {
+  const file = path.join(root, 'assets', 'icon-192.png');
+  if (!fs.existsSync(file)) return null;
+  const image = nativeImage.createFromPath(file);
+  return image.isEmpty() ? null : image.resize({ width: 16, height: 16 });
+}
+
 function createWindow() {
   if (mainWindow && !mainWindow.isDestroyed()) {
     if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
     mainWindow.focus();
     return mainWindow;
   }
@@ -106,8 +133,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 820,
-    minWidth: 900,
-    minHeight: 600,
+    minWidth: 360,
+    minHeight: 320,
     title: 'ChallengeLock',
     backgroundColor: '#101217',
     webPreferences: {
@@ -140,12 +167,132 @@ function createWindow() {
       event.preventDefault();
     }
   });
-  mainWindow.loadURL(pageUrl());
+  // Closing the window parks the app in the tray instead of killing it, so the
+  // hotkey keeps working while the game is in the foreground.
+  mainWindow.on('close', (event) => {
+    if (quitting) return;
+    event.preventDefault();
+    mainWindow.hide();
+    refreshTrayMenu();
+  });
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+  mainWindow.loadURL(pageUrl());
   return mainWindow;
 }
+
+function spinFromDesktop() {
+  if (!mainWindow || mainWindow.isDestroyed()) return false;
+  mainWindow.webContents.send('desktop:spin');
+  return true;
+}
+
+function showWindow() {
+  if (!mainWindow || mainWindow.isDestroyed()) return createWindow();
+  mainWindow.show();
+  mainWindow.focus();
+  refreshTrayMenu();
+  return mainWindow;
+}
+
+function toggleCompact() {
+  if (!mainWindow || mainWindow.isDestroyed()) return false;
+  compact = !compact;
+  if (compact) {
+    normalBounds = mainWindow.getBounds();
+    const area = screen.getPrimaryDisplay().workArea;
+    const width = Math.min(COMPACT.width, area.width);
+    const height = Math.min(COMPACT.height, area.height);
+    mainWindow.setAlwaysOnTop(true, 'screen-saver');
+    mainWindow.setBounds({
+      x: area.x + area.width - width - COMPACT.margin,
+      y: area.y + COMPACT.margin,
+      width,
+      height,
+    });
+  } else {
+    mainWindow.setAlwaysOnTop(false);
+    if (normalBounds) mainWindow.setBounds(normalBounds);
+  }
+  mainWindow.show();
+  mainWindow.focus();
+  refreshTrayMenu();
+  return compact;
+}
+
+function openDataFolder() {
+  Promise.resolve(shell.openPath(app.getPath('userData'))).catch(() => {});
+}
+
+function checkUpdates() {
+  if (autoUpdater) autoUpdater.checkForUpdates().catch(() => {});
+}
+
+function buildTrayMenu() {
+  const visible = Boolean(mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible());
+  return Menu.buildFromTemplate([
+    {
+      label: visible ? 'Скрыть окно' : 'Показать окно',
+      click: () => (visible ? mainWindow.hide() : showWindow()),
+    },
+    {
+      label: 'Новый челлендж',
+      accelerator: SPIN_ACCELERATOR,
+      click: () => showWindow() && spinFromDesktop(),
+    },
+    {
+      label: 'Поверх игры',
+      type: 'checkbox',
+      checked: compact,
+      accelerator: COMPACT_ACCELERATOR,
+      click: () => toggleCompact(),
+    },
+    { type: 'separator' },
+    { label: 'Открыть папку данных', click: openDataFolder },
+    { label: 'Проверить обновления', click: checkUpdates },
+    { type: 'separator' },
+    {
+      label: 'Выход',
+      click: () => {
+        quitting = true;
+        app.quit();
+      },
+    },
+  ]);
+}
+
+function refreshTrayMenu() {
+  if (tray) tray.setContextMenu(buildTrayMenu());
+}
+
+function createTray() {
+  const icon = trayIcon();
+  if (!icon) {
+    console.warn('ChallengeLock: tray icon is missing, running without a tray');
+    return null;
+  }
+  tray = new Tray(icon);
+  tray.setToolTip('ChallengeLock');
+  refreshTrayMenu();
+  tray.on('click', () => (mainWindow && mainWindow.isVisible() ? mainWindow.hide() : showWindow()));
+  return tray;
+}
+
+function registerShortcuts() {
+  const failed = [];
+  if (!globalShortcut.register(SPIN_ACCELERATOR, () => spinFromDesktop()))
+    failed.push(SPIN_ACCELERATOR);
+  if (!globalShortcut.register(COMPACT_ACCELERATOR, () => toggleCompact()))
+    failed.push(COMPACT_ACCELERATOR);
+  if (failed.length) console.warn('ChallengeLock: hotkeys already taken: %s', failed.join(', '));
+}
+
+// The renderer reports what it rolled, so the tray tooltip shows the current contract
+// while the window is hidden behind the game.
+ipcMain.on('desktop:contract', (_event, text) => {
+  if (tray && typeof text === 'string') tray.setToolTip('ChallengeLock — ' + text.slice(0, 120));
+});
 
 // The fixed port is the normal path. If another process already holds it, fall back
 // to a random one: the app still works, but that run starts with an empty profile.
@@ -177,12 +324,7 @@ function startServer() {
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on('second-instance', () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
-    }
-  });
+  app.on('second-instance', () => showWindow());
 
   app.whenReady().then(() => {
     if (autoUpdater) {
@@ -192,7 +334,15 @@ if (!app.requestSingleInstanceLock()) {
     }
     Menu.setApplicationMenu(null);
     startServer();
+    createTray();
+    registerShortcuts();
   });
+
+  app.on('before-quit', () => {
+    quitting = true;
+  });
+
+  app.on('will-quit', () => globalShortcut.unregisterAll());
 
   app.on('window-all-closed', () => {
     // Windows/Linux: quit as before. macOS keeps the app (and the single server)
@@ -209,5 +359,5 @@ if (!app.requestSingleInstanceLock()) {
   });
 }
 
-// Exposed for tests/desktop.test.js, which drives the server without Electron.
+// Exposed for tests/desktop.test.js, which drives the shell without Electron.
 module.exports = { server, pageUrl, PORT };
