@@ -208,3 +208,6 @@ if (!app.requestSingleInstanceLock()) {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 }
+
+// Exposed for tests/desktop.test.js, which drives the server without Electron.
+module.exports = { server, pageUrl, PORT };
