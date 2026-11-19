@@ -28,6 +28,8 @@ export const RT = {
   busy: false,
   build: null,
   ban: null,
+  heroSearch: '',
+  pendingHash: null,
 };
 export const persist = () => save(S);
 export const ALL_CATS = CATS;

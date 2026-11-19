@@ -6426,3 +6426,58 @@ input {
     padding: 6px 1px;
   }
 }
+
+/* History backup: the only way user data leaves the browser. */
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Desktop release notice. Sits above the app, so it owns its own surface. */
+.update-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  border-bottom: 1px solid var(--accent);
+  box-shadow: 0 2px 8px #0003;
+}
+
+.update-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.update-banner a {
+  margin-right: 8px;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.update-banner button {
+  min-height: 0;
+  padding: 2px 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.update-banner button:hover:not(:disabled) {
+  background: transparent;
+  border-color: transparent;
+}

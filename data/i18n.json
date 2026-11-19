@@ -275,7 +275,18 @@
     "currentVersion": "Текущая версия",
     "versionLabel": "Версия сайта",
     "whatsNew": "Что нового",
-    "updatesEmpty": "Записей пока нет."
+    "updatesEmpty": "Записей пока нет.",
+    "lockedHeroGone": "Заблокированный герой больше недоступен. Снимите замок героя или верните его в фильтр.",
+    "lockedConditionBlocked": "Замки несовместимы с текущими настройками. Снимите замки условий или измените сложность и категории.",
+    "updateAvailable": "Вышла новая версия приложения для Windows:",
+    "updateDownload": "Скачать",
+    "updateClose": "Закрыть уведомление об обновлении",
+    "backupTitle": "Резервная копия",
+    "backupHint": "История и избранное хранятся только в этом браузере. Сохраните файл, чтобы не потерять их при очистке данных.",
+    "exportData": "Скачать копию",
+    "importData": "Загрузить копию",
+    "importDone": "Загружено контрактов:",
+    "importFailed": "Не удалось прочитать файл резервной копии."
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -553,6 +564,17 @@
     "currentVersion": "Current version",
     "versionLabel": "Site version",
     "whatsNew": "What's new",
-    "updatesEmpty": "No entries yet."
+    "updatesEmpty": "No entries yet.",
+    "lockedHeroGone": "The locked hero is no longer available. Unlock it or bring it back to the filter.",
+    "lockedConditionBlocked": "The current locks conflict with these settings. Unlock a condition or change the difficulty and categories.",
+    "updateAvailable": "A new Windows app release is out:",
+    "updateDownload": "Download",
+    "updateClose": "Dismiss the update notice",
+    "backupTitle": "Backup",
+    "backupHint": "History and favourites live only in this browser. Save a file so clearing site data does not wipe them.",
+    "exportData": "Download a copy",
+    "importData": "Load a copy",
+    "importDone": "Contracts restored:",
+    "importFailed": "That backup file could not be read."
   }
 }

@@ -1,66 +1,26 @@
 {
   "releases": [
     {
-      "version": "1.20.4",
-      "date": "2026-11-18",
+      "version": "1.21.0",
+      "date": "2026-11-19",
       "title": {
-        "ru": "Тест автообновления 4",
-        "en": "Auto-update test 4"
+        "ru": "Резервные копии, честные уведомления и порядок в проверках",
+        "en": "Backups, honest notices and a tighter pipeline"
       },
       "items": {
         "ru": [
-          "Тестовый NSIS-релиз с latest.yml и корректным именем файла."
+          "Историю и избранное можно сохранить в файл и восстановить из него — очистка данных браузера больше не стирает контракты.",
+          "Уведомление о новой версии переведено, проверяется раз в сутки и не выдаёт сборку для Windows за обновление сайта.",
+          "Понятные причины, если бросок не состоялся: занятый замок, недоступный герой или несовместимые категории.",
+          "Дата контракта больше не перезаписывается при каждой загрузке, а снятые с генерации задания остаются в истории.",
+          "Добавлены линтер, браузерные тесты в CI, ярлыки PWA и политика безопасности."
         ],
         "en": [
-          "Test NSIS release with latest.yml and correct file name."
-        ]
-      }
-    },
-    {
-      "version": "1.20.3",
-      "date": "2026-11-18",
-      "title": {
-        "ru": "Тест автообновления 3",
-        "en": "Auto-update test 3"
-      },
-      "items": {
-        "ru": [
-          "Тестовый NSIS-релиз с latest.yml для проверки автообновления."
-        ],
-        "en": [
-          "Test NSIS release with latest.yml for auto-update check."
-        ]
-      }
-    },
-    {
-      "version": "1.20.2",
-      "date": "2026-11-18",
-      "title": {
-        "ru": "Тест автообновления 2",
-        "en": "Auto-update test 2"
-      },
-      "items": {
-        "ru": [
-          "Тестовый релиз NSIS-установщика для проверки автообновления."
-        ],
-        "en": [
-          "Test NSIS installer release for auto-update check."
-        ]
-      }
-    },
-    {
-      "version": "1.20.1",
-      "date": "2026-11-18",
-      "title": {
-        "ru": "Тест автообновления",
-        "en": "Auto-update test"
-      },
-      "items": {
-        "ru": [
-          "Тестовая версия для проверки автоматического обновления desktop-приложения."
-        ],
-        "en": [
-          "Test release for checking desktop auto-update."
+          "History and favourites can be saved to a file and restored from it — clearing site data no longer wipes your contracts.",
+          "The new-version notice is translated, checked once a day, and no longer presents a Windows build as a site update.",
+          "Clear reasons when a roll produces nothing: a busy lock, an unavailable hero or incompatible categories.",
+          "A contract keeps its original date across reloads, and challenges retired from generation stay in history.",
+          "Added a linter, browser tests in CI, PWA shortcuts and a security policy."
         ]
       }
     },

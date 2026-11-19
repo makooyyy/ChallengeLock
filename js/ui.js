@@ -6,10 +6,11 @@ import { applyTheme, toggleTheme } from './theme.js';
 import { showCelebration, closeCelebration, celebrationOpen } from './celebration.js';
 import { S, RT, persist as saveState, ALL_CATS } from './state.js';
 import { t, loc, setDict, setLang } from './i18n.js';
-import { roll, DIFF, restoreResult, resultKey, heroPool } from './roulette.js';
-import { newSeed, dailySeed, pick } from './rng.js';
-import { validateData, options, GAME_MODES } from './validation.js';
+import { rollDetailed, DIFF, restoreResult, resultKey, heroPool } from './roulette.js';
+import { newSeed, dailySeed } from './rng.js';
+import { validateData, normalizeState, options, GAME_MODES } from './validation.js';
 import { parseHash, linkFor, setHash, copy, drawCard } from './share.js';
+import { checkForUpdates } from './update-check.js';
 
 const $ = (s, r = document) => r.querySelector(s),
   $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -22,13 +23,20 @@ const RC = { easy: '#8c82a9', mid: '#7662ad', hard: '#9d62c9', insane: '#d55479'
 const ROM = ['I', 'II', 'III'];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const H = (id) => RT.data.heroes.find((h) => h.id === id),
-  C = (id) => RT.data.challenges.find((c) => c.id === id),
-  I = (id) => RT.data.items.find((i) => i.id === id);
+  C = (id) => RT.data.challenges.find((c) => c.id === id);
 const mmss = (ms) => {
   const s = Math.floor(ms / 1000);
   return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
 };
 const DIFFS = Object.keys(DIFF);
+const TABS = ['roulette', 'build', 'ban', 'custom', 'history', 'updates'];
+// Why a roll produced nothing, phrased as an i18n key the player can act on.
+const ROLL_FAILURE = {
+  'no-heroes': 'noHeroes',
+  'locked-hero': 'lockedHeroGone',
+  'locked-condition': 'lockedConditionBlocked',
+  'no-conditions': 'noConditions',
+};
 
 /* ---------- helpers ---------- */
 let tt;
@@ -102,8 +110,6 @@ const difficultyBadge = (x) =>
   `<span class="difficulty-badge" style="--difficulty-color:${RC[x.diff]}">${icon('spark', 11)} ${t('diff.' + x.diff)}</span>`;
 const intro = (title, description, action = '') =>
   `<div class="page-intro"><div><div class="eyebrow">DEADLOCK / CHALLENGELOCK</div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;
-const emptyPanel = (glyph, title, description) =>
-  `<div class="empty-panel">${icon(glyph)}<h2>${title}</h2><p>${description}</p></div>`;
 const activeHeroes = () => RT.data.heroes.filter((h) => h.active !== false);
 function setBusy(busy) {
   const board = $('.mach');
@@ -328,26 +334,27 @@ async function doRoll(reroll, opt = {}) {
   const seed = reroll ? RT.seed : opt.seed || newSeed(),
     r = reroll ? RT.r + 1 : opt.r || 0;
   const locks = reroll ? RT.locks : [false, false, false, false];
-  let res;
+  let res,
+    reason = null;
   try {
-    res = opt.result
-      ? restoreResult(opt.result, RT.data.heroes, RT.data.challenges)
-      : roll({
-          seed,
-          r,
-          heroes: RT.data.heroes,
-          challenges: RT.data.challenges,
-          o: S,
-          locks,
-          prev: reroll ? RT.cur : null,
-          player: S.friend.player,
-          same: S.friend.same,
-        });
+    if (opt.result) res = restoreResult(opt.result, RT.data.heroes, RT.data.challenges);
+    else
+      ({ result: res, reason } = rollDetailed({
+        seed,
+        r,
+        heroes: RT.data.heroes,
+        challenges: RT.data.challenges,
+        o: S,
+        locks,
+        prev: reroll ? RT.cur : null,
+        player: S.friend.player,
+        same: S.friend.same,
+      }));
   } catch (e) {
     console.error(e);
     return toast(t('invalidLink'));
   }
-  if (!res) return toast(t(heroPool(RT.data.heroes, S).length ? 'noConditions' : 'noHeroes'));
+  if (!res) return toast(t(ROLL_FAILURE[reason] || 'noConditions'));
   RT.seed = seed;
   RT.r = r;
   RT.locks = locks;
@@ -520,7 +527,53 @@ function viewHistory() {
       )
       .join(
         '',
-      )}</div><div class="card"><div class="section-heading"><h2>${t('topHeroes')}</h2>${icon('trophy', 18)}</div><ul class="hl">${topHeroesHtml}</ul></div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history', 18)}</div><ul class="hl">${S.history.map(row).join('') || `<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star', 18)}</div><ul class="hl">${S.favs.map(row).join('') || `<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
+      )}</div><div class="card"><div class="section-heading"><h2>${t('topHeroes')}</h2>${icon('trophy', 18)}</div><ul class="hl">${topHeroesHtml}</ul></div><div class="card"><div class="section-heading"><div><h2>${t('backupTitle')}</h2><p>${t('backupHint')}</p></div>${icon('download', 18)}</div><div class="backup-actions"><button id="export-data">${icon('download', 14)}${t('exportData')}</button><button id="import-data">${icon('refresh', 14)}${t('importData')}</button><input id="import-file" type="file" accept="application/json,.json" hidden></div></div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history', 18)}</div><ul class="hl">${S.history.map(row).join('') || `<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star', 18)}</div><ul class="hl">${S.favs.map(row).join('') || `<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
+}
+// Local-only data never leaves the browser on its own: give the player a file.
+function exportData() {
+  const payload = {
+    v: 1,
+    exportedAt: new Date().toISOString(),
+    history: S.history,
+    favs: S.favs,
+    stats: S.stats,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'challengelock-backup.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+async function importData(file) {
+  if (!file) return;
+  let parsed;
+  try {
+    parsed = JSON.parse(await file.text());
+  } catch (e) {
+    console.warn(e);
+    return toast(t('importFailed'));
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+    return toast(t('importFailed'));
+  if (!Array.isArray(parsed.history) && !Array.isArray(parsed.favs))
+    return toast(t('importFailed'));
+  const clean = normalizeState({ ...S, ...parsed }, S);
+  const dedupe = (list) => {
+    const seen = new Set();
+    return list.filter((x) => {
+      const key = resultKey(x);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+  S.history = dedupe(clean.history).slice(0, 50);
+  S.favs = dedupe(clean.favs).slice(0, 50);
+  S.stats = clean.stats;
+  persist();
+  show('history');
+  toast(`${t('importDone')} ${S.history.length} / ${S.favs.length}`);
 }
 
 /* ---------- UPDATES ---------- */
@@ -639,6 +692,11 @@ function bind() {
     if (b.id === 'cl') return toast((await copy(linkFor(RT.cur))) ? t('copied') : t('error'));
     if (b.id === 'ct') return toast((await copy(resText(RT.cur))) ? t('copied') : t('error'));
     if (b.id === 'cp') return png();
+    if (b.id === 'export-data') return exportData();
+    if (b.id === 'import-data') {
+      $('#import-file')?.click();
+      return;
+    }
     if (d.hm) {
       S.heroMode = d.hm;
       applyHeroSel();
@@ -682,6 +740,9 @@ function bind() {
     } else if (i.id === 'fpl') {
       S.friend.player = Math.max(1, Math.min(9, +i.value || 1));
       persist();
+    } else if (i.id === 'import-file') {
+      importData(i.files?.[0]);
+      i.value = '';
     }
   });
   document.addEventListener('input', (e) => {
@@ -809,7 +870,13 @@ export async function boot() {
   applyStatic();
   persist();
   const h = parseHash();
-  h ? await fromHash(h) : show('roulette');
+  if (h) await fromHash(h);
+  else {
+    show(initialTab());
+    // A PWA shortcut for the daily challenge opens the app with the roll already made.
+    if (new URLSearchParams(location.search).has('daily'))
+      await doRoll(false, { seed: dailySeed() });
+  }
   restoreTimer();
   const notice = document.createElement('p');
   notice.id = 'data-notice';
@@ -838,67 +905,16 @@ export async function boot() {
       })
       .catch(() => {});
   }
-  checkForUpdates();
+  checkForUpdates(siteVersion());
 }
 
-async function checkForUpdates() {
-  const APP_VERSION = RT.data?.changelog?.releases?.[0]?.version || '1.0.1';
+// PWA shortcuts and bookmarked sections arrive as ?tab=<name>; a shared result
+// hash still wins because it carries the contract itself.
+function initialTab() {
   try {
-    const r = await fetch('https://api.github.com/repos/makooyyy/ChallengeLock/releases/latest');
-    if (!r.ok) return;
-    const data = await r.json();
-    const latest = String(data.tag_name || '').replace(/^v/, '');
-    if (!latest || !isNewerVersion(latest, APP_VERSION)) return;
-    showUpdateBanner(
-      latest,
-      data.html_url || 'https://github.com/makooyyy/ChallengeLock/releases/latest',
-    );
-  } catch (e) {
-    console.warn(e);
+    const tab = new URLSearchParams(location.search).get('tab');
+    return TABS.includes(tab) ? tab : 'roulette';
+  } catch {
+    return 'roulette';
   }
-}
-
-function isNewerVersion(latest, current) {
-  const a = latest.split('.').map((n) => parseInt(n, 10) || 0);
-  const b = current.split('.').map((n) => parseInt(n, 10) || 0);
-  for (let i = 0; i < Math.max(a.length, b.length); i++) {
-    if ((a[i] || 0) > (b[i] || 0)) return true;
-    if ((a[i] || 0) < (b[i] || 0)) return false;
-  }
-  return false;
-}
-
-function showUpdateBanner(version, url) {
-  if (document.getElementById('update-banner')) return;
-  const safeVersion = String(version).replace(
-    /[&<>"]/g,
-    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
-  );
-  const safeUrl = /^https:\/\/github\.com\/makooyyy\/ChallengeLock\//.test(String(url))
-    ? String(url)
-    : 'https://github.com/makooyyy/ChallengeLock/releases/latest';
-  const b = document.createElement('div');
-  b.id = 'update-banner';
-  b.style.cssText =
-    'position:fixed;top:0;left:0;right:0;z-index:9999;background:#3475fa;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.2)';
-  const text = document.createElement('span');
-  text.textContent = 'Доступна новая версия ' + safeVersion;
-  const actions = document.createElement('span');
-  const link = document.createElement('a');
-  link.href = safeUrl;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  link.style.cssText = 'color:#fff;font-weight:700;margin-right:12px;text-decoration:underline;';
-  link.textContent = 'Скачать';
-  const close = document.createElement('button');
-  close.id = 'update-close';
-  close.type = 'button';
-  close.setAttribute('aria-label', 'Закрыть уведомление об обновлении');
-  close.style.cssText =
-    'background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;line-height:1;';
-  close.textContent = '×';
-  close.onclick = () => b.remove();
-  actions.append(link, close);
-  b.append(text, actions);
-  document.body.prepend(b);
 }

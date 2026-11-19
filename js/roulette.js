@@ -18,12 +18,13 @@ export function heroPool(heroes, f) {
 }
 export const supportsMode = (c, mode) => (c.gameModes || ['normal']).includes(mode);
 const ok = (c, hero, o) =>
+  c.active !== false &&
   supportsMode(c, o.gameMode) &&
   o.cats.includes(c.cat) &&
   c.difficulty <= DIFF[o.diff].max &&
   (c.mode !== 'team' || o.team) &&
   (c.heroes === 'all' || c.heroes.includes(hero.id));
-export function resultFor({ seed, r = 0, diff, hero, conds, player = 0, opts }, challenges) {
+export function resultFor({ seed, r = 0, diff, hero, conds, player = 0, opts, ts }) {
   return {
     seed,
     r,
@@ -32,7 +33,8 @@ export function resultFor({ seed, r = 0, diff, hero, conds, player = 0, opts }, 
     conds: [...conds],
     player,
     opts: options({ ...opts, diff }),
-    ts: Date.now(),
+    // Restoring a saved contract keeps its original timestamp; a new roll starts now.
+    ts: Number.isFinite(ts) && ts > 0 ? ts : Date.now(),
     outcome: null,
   };
 }
@@ -44,12 +46,16 @@ export function restoreResult(x, heroes, challenges) {
     cs.some((a, i) => cs.slice(i + 1).some((b) => !compatible(a, b)))
   )
     throw new Error('Unavailable result');
-  return resultFor(x, challenges);
+  return resultFor(x);
 }
 export const resultKey = (x) =>
   JSON.stringify([x.seed, x.diff, x.r, x.hero, x.conds, options(x.opts).gameMode]);
 // Independent count stream keeps direct replay and unlocked reroll identical.
-export function roll({
+export function roll(input) {
+  return rollDetailed(input).result;
+}
+// Same generator, but every refusal carries a reason the UI can explain.
+export function rollDetailed({
   seed,
   r = 0,
   heroes,
@@ -60,9 +66,10 @@ export function roll({
   player = 0,
   same = true,
 }) {
+  const fail = (reason) => ({ result: null, reason });
   o = options(o);
   const pool = heroPool(heroes, o);
-  if (!pool.length) return null;
+  if (!pool.length) return fail('no-heroes');
   const rng = makeRng(seed + ':' + o.diff + ':' + r),
     hr = makeRng(seed + (same ? '' : '#' + player) + ':' + o.diff + ':' + r + ':h');
   const [lo, hi] = DIFF[o.diff].n,
@@ -70,10 +77,14 @@ export function roll({
   const locked = prev
     ? prev.conds.map((id, i) => (locks[i + 1] ? challenges.find((c) => c.id === id) : null))
     : [];
-  if (locked.some((c, i) => locks[i + 1] && (!c || i >= n))) return null;
+  if (locked.some((c, i) => locks[i + 1] && (!c || i >= n))) return fail('locked-condition');
   const eligible = pool.filter((h) => locked.every((c) => !c || ok(c, h, o)));
-  const hero = prev && locks[0] ? eligible.find((h) => h.id === prev.hero) : pick(hr, eligible);
-  if (!hero) return null;
+  const keptHero = prev && locks[0] ? pool.find((h) => h.id === prev.hero) : null;
+  if (prev && locks[0] && !keptHero) return fail('locked-hero');
+  if (!eligible.length) return fail(locked.some(Boolean) ? 'locked-condition' : 'no-conditions');
+  if (keptHero && !eligible.includes(keptHero)) return fail('locked-condition');
+  const hero = keptHero || pick(hr, eligible);
+  if (!hero) return fail('locked-hero');
   const conds = Array.from({ length: n }, (_, i) => locked[i] || null);
   const cand = shuffle(
     rng,
@@ -90,10 +101,10 @@ export function roll({
       }
     return false;
   }
-  if (!fill(0)) return null;
+  if (!fill(0)) return fail('no-conditions');
   const list = conds;
-  return resultFor(
-    {
+  return {
+    result: resultFor({
       seed,
       r,
       diff: o.diff,
@@ -101,9 +112,9 @@ export function roll({
       conds: list.map((c) => c.id),
       player: same ? 0 : player,
       opts: o,
-    },
-    challenges,
-  );
+    }),
+    reason: null,
+  };
 }
 export function rollBan(seed, heroes, items, o, type) {
   items = items.filter((i) => i.active !== false);

@@ -2,7 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import { roll, heroPool, rollBan, compatible, restoreResult, resultKey } from '../js/roulette.js';
+import {
+  roll,
+  rollDetailed,
+  heroPool,
+  rollBan,
+  compatible,
+  restoreResult,
+  resultKey,
+} from '../js/roulette.js';
 import { makeBuild } from '../js/builds.js';
 import { hashFor, parseHash } from '../js/share.js';
 import { options, normalizeState, validateData } from '../js/validation.js';
@@ -263,4 +271,75 @@ test('legacy scores are discarded while outcomes and favorites survive migration
     for (const key of ['points', 'sum', 'mult', 'rarity']) assert(!(key in row));
   assert.equal(saved.history[0].outcome, 'done');
   assert.deepEqual(saved.history[0].conds, old.conds);
+});
+
+test('restored contracts keep their original timestamp', () => {
+  const x = roll({ ...base, seed: 'keep-ts' });
+  const past = 1700000000000;
+  assert.equal(restoreResult({ ...x, ts: past }, heroes, challenges).ts, past);
+  const fresh = restoreResult({ ...x, ts: undefined }, heroes, challenges);
+  assert(Number.isFinite(fresh.ts) && fresh.ts > 0);
+  assert(resultKey(restoreResult({ ...x, ts: past }, heroes, challenges)) === resultKey(x));
+});
+
+test('retired challenges leave generation but stay readable in history', () => {
+  const sample = roll({ ...base, seed: 'retire-me', o: { ...o, diff: 'insane' } });
+  const target = sample.conds[0];
+  const retired = challenges.map((c) => (c.id === target ? { ...c, active: false } : c));
+  for (let i = 0; i < 100; i++) {
+    const next = roll({
+      seed: 'retire-' + i,
+      heroes,
+      challenges: retired,
+      o: { ...o, diff: 'insane' },
+    });
+    assert(!next.conds.includes(target));
+  }
+  assert.equal(restoreResult(sample, heroes, retired).conds[0], target);
+  const broken = structuredClone(challenges);
+  broken[0].active = 'no';
+  assert.throws(() => validateData({ heroes, items, challenges: broken }, dict));
+});
+
+test('a refused roll reports why it produced nothing', () => {
+  assert.deepEqual(
+    rollDetailed({ ...base, seed: 'x', o: { ...o, excluded: heroes.map((h) => h.id) } }),
+    {
+      result: null,
+      reason: 'no-heroes',
+    },
+  );
+  const first = roll({ ...base, seed: 'lock-why', o: { ...o, diff: 'hard' } });
+  const gone = rollDetailed({
+    ...base,
+    seed: 'lock-why',
+    o: { ...o, diff: 'hard', excluded: [first.hero] },
+    prev: first,
+    locks: [true, false, false, false],
+  });
+  assert.equal(gone.reason, 'locked-hero');
+  const insane = roll({ ...base, seed: 'lock-why', o: { ...o, diff: 'insane' } });
+  const tooMany = rollDetailed({
+    ...base,
+    seed: 'lock-why',
+    o: { ...o, diff: 'mid' },
+    prev: insane,
+    locks: [false, false, true, false],
+  });
+  assert.equal(tooMany.reason, 'locked-condition');
+  assert.equal(rollDetailed({ ...base, seed: 'lock-why', o }).reason, null);
+});
+
+test('imported backups drop junk records and normalize counters', () => {
+  const a = roll({ ...base, seed: 'imp-a' }),
+    b = roll({ ...base, seed: 'imp-b' });
+  const imported = normalizeState(
+    { ...o, history: [a, b, null, {}, { junk: true }], favs: [a], stats: { done: 3, fail: -1 } },
+    o,
+  );
+  assert.equal(imported.history.length, 2);
+  assert.equal(imported.favs.length, 1);
+  assert.deepEqual(imported.stats, { done: 3, fail: 0 });
+  const capped = normalizeState({ ...o, history: Array.from({ length: 80 }, () => a) }, o);
+  assert.equal(capped.history.length, 50);
 });
