@@ -128,6 +128,10 @@ const fakeElectron = {
   },
   dialog: {
     showErrorBox: () => {},
+    showMessageBoxSync: (options) => {
+      state.dialogs.push(options);
+      return 2;
+    },
     showMessageBox: (options) => {
       state.dialogs.push(options);
       return Promise.resolve({ response: 0 });
@@ -170,6 +174,8 @@ const fakeElectron = {
 };
 
 const Module = require('node:module');
+// A port of its own: the real app may be running on 47821 while tests execute.
+process.env.CHALLENGELOCK_PORT = '47999';
 const originalLoad = Module._load;
 Module._load = function (request, ...rest) {
   if (request === 'electron') return fakeElectron;
@@ -303,7 +309,7 @@ test('the tray exposes diagnostics and autostart', async () => {
   about.click();
   const detail = state.dialogs.at(-1).detail;
   assert.match(detail, /Версия: 1\.21\.0/);
-  assert.match(detail, /Порт: 47821/);
+  assert.match(detail, new RegExp('Порт: ' + shell.PORT));
   assert.match(detail, /Данные: C:\/user-data/);
 
   const autostart = menu().find((item) => item.label === 'Запускать с Windows');

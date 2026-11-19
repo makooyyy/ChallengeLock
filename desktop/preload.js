@@ -12,6 +12,11 @@ contextBridge.exposeInMainWorld('challengeLockDesktop', {
   reportContract: (text) => {
     if (typeof text === 'string') ipcRenderer.send('desktop:contract', text);
   },
+  // The shell asks the outcome question when a match ends in the game log.
+  onOutcome: (callback) => {
+    if (typeof callback !== 'function') return;
+    ipcRenderer.on('desktop:outcome', (_event, outcome) => callback(outcome));
+  },
   // Where the game is installed and what its console log says.
   game: () => ipcRenderer.invoke('desktop:game'),
   gameLog: (count) => ipcRenderer.invoke('desktop:game-log', count),

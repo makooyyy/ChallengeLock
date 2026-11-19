@@ -1,0 +1,14 @@
+// Excerpt of a real Deadlock console.log, trimmed to the state transitions.
+// Keeps the exact format: "MM/DD HH:MM:SS <message>".
+11/19 20:51:17 Local bot match: Init. -citadel_local_lobby='', -citadel_local_report_port=0
+11/19 20:51:20 CCitadelMatchDataWatcher Tracked Stats
+11/19 20:51:20 	Player Kills: Meta: N, Account: 1, Hero: 1
+11/19 20:51:20 [Server] SV:  Game started
+11/19 20:51:26 ChangeGameState: WaitingForPlayersToJoin (2)
+11/19 20:51:26 ChangeGameState: HeroSelection (3)
+11/19 20:51:26 ChangeGameState: MatchIntro (4)
+11/19 20:51:26 ChangeGameState: WaitForMapToLoad (5)
+11/19 20:51:26 ChangeGameState: PreGameWait (6)
+11/19 20:51:26 ChangeGameState: GameInProgress (7)
+11/19 20:51:26 Citadel HLTV Director, Entering game state: 7 (GameInProgress)  (no HLTV server found)
+11/19 20:51:30 [Client] CL:  something unrelated in the middle of a match

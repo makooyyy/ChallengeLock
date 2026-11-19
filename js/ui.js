@@ -387,6 +387,8 @@ function finish(o) {
   persist();
   paintContract();
   paintHeader();
+  // Nothing is in play any more: the shell should not ask about the next match.
+  desktop?.reportContract?.('');
   beep(o === 'done' ? 880 : 140, 0.2);
   showCelebration(x, H(x.hero), RT.data.challenges);
 }
@@ -941,6 +943,10 @@ export async function boot() {
   // The desktop hotkey rolls a new contract without stealing focus from the game.
   desktop?.onSpin?.(() => {
     if (!RT.busy) doRoll(false);
+  });
+  // The shell detected a finished match and the player picked the outcome.
+  desktop?.onOutcome?.((outcome) => {
+    if (RT.cur && !RT.finished) finish(outcome === 'fail' ? 'fail' : 'done');
   });
   checkForUpdates(siteVersion());
 }

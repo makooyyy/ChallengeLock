@@ -21,6 +21,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFile } = require('child_process');
 const game = require('./game.js');
+const logWatch = require('./log-watch.js');
 
 // The interface is 2D, so software compositing costs nothing and removes the GPU
 // process. On some Windows setups that process dies at startup with
@@ -63,9 +64,10 @@ function log(...args) {
 
 // A fixed port keeps the page origin stable. Chromium keys localStorage, the Service
 // Worker cache and the theme by origin, so the previous random port wiped every
-// contract, setting and cached asset on each launch.
+// contract, setting and cached asset on each launch. CHALLENGELOCK_PORT is an escape
+// hatch for tests and for a machine where 47821 is taken by something permanent.
 const HOST = '127.0.0.1';
-const PORT = 47821;
+const PORT = Number(process.env.CHALLENGELOCK_PORT) || 47821;
 
 // Compact mode: a small always-on-top window you can park next to the game.
 const COMPACT = { width: 430, height: 580, margin: 24 };
@@ -284,8 +286,8 @@ function openDataFolder() {
 function aboutDialog() {
   const lines = [
     'Версия: ' + app.getVersion(),
-    'Electron: ' + process.versions.electron,
-    'Chromium: ' + process.versions.chrome,
+    'Electron: ' + (process.versions.electron || '—'),
+    'Chromium: ' + (process.versions.chrome || '—'),
     'Порт: ' + (serverPort || '—'),
     'Данные: ' + app.getPath('userData'),
     'Лог игры: ' + (game.logPathFor(probeCache.install) || 'не найден'),
@@ -420,9 +422,121 @@ function registerShortcuts() {
 
 // The renderer reports what it rolled, so the tray tooltip shows the current contract
 // while the window is hidden behind the game.
+let contractActive = false;
 ipcMain.on('desktop:contract', (_event, text) => {
-  if (tray && typeof text === 'string') tray.setToolTip('ChallengeLock — ' + text.slice(0, 120));
+  contractActive = Boolean(text && String(text).trim());
+  if (tray && contractActive) tray.setToolTip('ChallengeLock — ' + String(text).slice(0, 120));
+  else if (tray && !contractActive) tray.setToolTip('ChallengeLock');
 });
+
+// Match watching: the game rewrites console.log on every launch, so the reader keeps
+// an offset and resets it when the file shrinks.
+const logWatcher = {
+  timer: null,
+  file: null,
+  offset: 0,
+  carry: '',
+  tracker: logWatch.createTracker(),
+  lastLookup: 0,
+};
+
+function readChunk(file, from) {
+  const fd = fs.openSync(file, 'r');
+  try {
+    const size = fs.fstatSync(fd).size;
+    if (size <= from) return '';
+    const buffer = Buffer.alloc(size - from);
+    fs.readSync(fd, buffer, 0, buffer.length, from);
+    return buffer.toString('utf8');
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+function promptMatchResult() {
+  if (!contractActive) {
+    log('match ended, but no contract is active');
+    return;
+  }
+  const answer = dialog.showMessageBoxSync({
+    type: 'question',
+    title: 'ChallengeLock',
+    message: 'Матч закончился. Засчитать контракт?',
+    buttons: ['Выполнено', 'Провал', 'Позже'],
+    defaultId: 0,
+    cancelId: 2,
+    noLink: true,
+  });
+  if (answer === 2) {
+    log('match ended, the player chose to decide later');
+    return;
+  }
+  const outcome = answer === 1 ? 'fail' : 'done';
+  log('match ended, sending outcome ' + outcome);
+  if (mainWindow && !mainWindow.isDestroyed())
+    mainWindow.webContents.send('desktop:outcome', outcome);
+  showWindow();
+}
+
+function watchTick() {
+  const now = Date.now();
+  if (!logWatcher.file || !fs.existsSync(logWatcher.file)) {
+    // Look the install up again at most every 30 seconds: the game may appear later.
+    if (now - logWatcher.lastLookup < 30000) return;
+    logWatcher.lastLookup = now;
+    probeGame()
+      .then((info) => {
+        if (info.log && info.log.exists) {
+          logWatcher.file = info.log.path;
+          logWatcher.offset = 0;
+          logWatcher.carry = '';
+          log('watching the game log: ' + info.log.path);
+        }
+      })
+      .catch(() => {});
+    return;
+  }
+  let size;
+  try {
+    size = fs.statSync(logWatcher.file).size;
+  } catch {
+    logWatcher.file = null;
+    return;
+  }
+  const from = logWatch.nextOffset(size, logWatcher.offset);
+  if (from === 0 && logWatcher.offset !== 0) {
+    logWatcher.carry = '';
+    log('the game started a fresh log');
+  }
+  if (size <= from) return;
+  let chunk;
+  try {
+    chunk = readChunk(logWatcher.file, from);
+  } catch {
+    logWatcher.file = null;
+    return;
+  }
+  logWatcher.offset = size;
+  // Never treat a mid-line start as a line of its own.
+  if (from > 0) chunk = chunk.slice(chunk.indexOf('\n') + 1 || chunk.length);
+  const split = logWatch.splitLines(chunk, logWatcher.carry);
+  logWatcher.carry = split.carry;
+  for (const line of split.lines) {
+    const event = logWatch.trackLine(logWatcher.tracker, line);
+    if (!event) continue;
+    if (event.type === 'start') log('match started');
+    else if (event.type === 'end') {
+      log('match ended in state ' + event.state);
+      promptMatchResult();
+    } else log('unrecognised game state after GameInProgress: ' + event.state);
+  }
+}
+
+function startMatchWatch() {
+  if (logWatcher.timer) return;
+  logWatcher.timer = setInterval(watchTick, 2000);
+  logWatcher.timer.unref?.();
+}
 
 const GAME_LOG_TAIL_BYTES = 64 * 1024;
 
@@ -588,6 +702,7 @@ if (!app.requestSingleInstanceLock()) {
       startServer();
       createTray();
       registerShortcuts();
+      startMatchWatch();
     } catch (error) {
       reportFatal(error);
     }
