@@ -30,6 +30,7 @@
       "main.js",
       "preload.js",
       "game.js",
+      "log-watch.js",
       "web/**/*"
     ],
     "win": {

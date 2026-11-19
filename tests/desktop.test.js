@@ -3,6 +3,7 @@
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
+import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -317,6 +318,20 @@ test('the tray exposes diagnostics and autostart', async () => {
   assert.equal(autostart.checked, false);
   autostart.click();
   assert.equal(state.loginItem, true, 'autostart is registered');
+});
+
+test('every local module the shell requires ships with the app', () => {
+  const pkg = require('../desktop/package.json');
+  const files = pkg.build.files;
+  let checked = 0;
+  for (const name of ['main.js', 'preload.js']) {
+    const source = fs.readFileSync(new URL('../desktop/' + name, import.meta.url), 'utf8');
+    for (const [, module] of source.matchAll(/require\('\.\/([^']+)'\)/g)) {
+      checked++;
+      assert.ok(files.includes(module), module + ' is required by ' + name + ' but not packaged');
+    }
+  }
+  assert.ok(checked >= 2, 'the check must actually find local requires');
 });
 
 test('the game probe is reachable from the page', async () => {
