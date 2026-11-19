@@ -56,6 +56,9 @@ class FakeWindow {
   on(event, fn) {
     this.handlers[event] = fn;
   }
+  once(event, fn) {
+    this.handlers[event] = fn;
+  }
   isDestroyed() {
     return false;
   }

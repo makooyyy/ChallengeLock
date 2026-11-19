@@ -168,13 +168,17 @@ function createWindow() {
     }
   });
   // Closing the window parks the app in the tray instead of killing it, so the
-  // hotkey keeps working while the game is in the foreground.
+  // hotkey keeps working while the game is in the foreground. Without a tray there
+  // would be no way back, so the close must really close.
   mainWindow.on('close', (event) => {
-    if (quitting) return;
+    if (quitting || !tray) return;
     event.preventDefault();
     mainWindow.hide();
     refreshTrayMenu();
   });
+  // Show only when the page is ready: no white flash, and a window that is
+  // guaranteed to be visible even if something hid it earlier.
+  mainWindow.once('ready-to-show', () => mainWindow.show());
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -286,6 +290,7 @@ function registerShortcuts() {
   if (!globalShortcut.register(COMPACT_ACCELERATOR, () => toggleCompact()))
     failed.push(COMPACT_ACCELERATOR);
   if (failed.length) console.warn('ChallengeLock: hotkeys already taken: %s', failed.join(', '));
+  else console.log('ChallengeLock: hotkeys %s and %s', SPIN_ACCELERATOR, COMPACT_ACCELERATOR);
 }
 
 // The renderer reports what it rolled, so the tray tooltip shows the current contract
@@ -316,6 +321,7 @@ function startServer() {
   });
   server.listen(PORT, HOST, () => {
     serverPort = PORT;
+    console.log('ChallengeLock: serving the app on http://%s:%d', HOST, PORT);
     createWindow();
   });
 }
