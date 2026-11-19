@@ -837,8 +837,15 @@ export async function boot() {
   $('#foot').before(notice);
   paintCatalog();
   if ('serviceWorker' in navigator) {
+    // The first claim of a fresh visit is not an update: the page just came from the
+    // network, so reloading it would restart the boot for no reason.
+    let controlled = !!navigator.serviceWorker.controller;
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!controlled) {
+        controlled = true;
+        return;
+      }
       if (refreshing) return;
       refreshing = true;
       window.location.reload();
