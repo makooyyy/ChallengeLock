@@ -1,6 +1,6 @@
 {
   "name": "challengelock-desktop",
-  "version": "1.20.4",
+  "version": "1.21.0",
   "description": "Desktop app for ChallengeLock (Deadlock Challenge Roulette)",
   "main": "main.js",
   "scripts": {
@@ -29,14 +29,19 @@
     "files": [
       "main.js",
       "preload.js",
+      "game.js",
       "web/**/*"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ChallengeLock"
     },
     "publish": {
       "provider": "github",
