@@ -22,6 +22,12 @@ const path = require('path');
 const { execFile } = require('child_process');
 const game = require('./game.js');
 
+// The interface is 2D, so software compositing costs nothing and removes the GPU
+// process. On some Windows setups that process dies at startup with
+// "GPU process isn't usable. Goodbye.", which kills the app before any window exists.
+// Run with --enable-gpu to opt back in.
+if (!process.argv.includes('--enable-gpu')) app.disableHardwareAcceleration();
+
 // Windows GUI builds do not attach the main-process console to the terminal, so the
 // startup trail goes to a file next to the profile. Without it "nothing happens" is
 // the only symptom a user can report.

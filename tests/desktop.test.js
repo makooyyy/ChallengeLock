@@ -118,6 +118,9 @@ const fakeElectron = {
     exit: () => assert.fail('a healthy start must not exit'),
     isPackaged: true,
     getVersion: () => '1.21.0',
+    disableHardwareAcceleration: () => {
+      state.gpuDisabled = true;
+    },
     getLoginItemSettings: () => ({ openAtLogin: Boolean(state.loginItem) }),
     setLoginItemSettings: (options) => {
       state.loginItem = options.openAtLogin;
@@ -208,6 +211,7 @@ test('the shell serves the app from a stable origin and guards the window', asyn
   const [window] = state.windows;
 
   assert.equal(port, shell.PORT, 'the port must be fixed, not random');
+  assert.equal(state.gpuDisabled, true, 'software rendering is the default');
   assert.equal(state.windows.length, 1, 'one window is created on start');
   assert.equal(window.url, `http://127.0.0.1:${shell.PORT}/index.html`);
   assert.ok(window.options.webPreferences.contextIsolation);
