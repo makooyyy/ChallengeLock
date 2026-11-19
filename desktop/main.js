@@ -8,6 +8,7 @@ const {
   screen,
   ipcMain,
   nativeImage,
+  dialog,
 } = require('electron');
 let autoUpdater = null;
 try {
@@ -326,6 +327,23 @@ function startServer() {
   });
 }
 
+// A failed start used to show nothing at all: just a process that never opened a
+// window. A native error box is the only thing a user can report back.
+function reportFatal(error) {
+  const text = String((error && (error.stack || error.message)) || error || 'unknown error');
+  try {
+    dialog.showErrorBox('ChallengeLock не смог запуститься', text);
+  } catch {
+    console.error(text);
+  }
+  app.exit(1);
+}
+
+if (process.versions.electron) {
+  process.on('uncaughtException', reportFatal);
+  process.on('unhandledRejection', (reason) => reportFatal(reason));
+}
+
 // A second launch would bind another port and therefore another profile.
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -333,15 +351,19 @@ if (!app.requestSingleInstanceLock()) {
   app.on('second-instance', () => showWindow());
 
   app.whenReady().then(() => {
-    if (autoUpdater) {
-      autoUpdater.autoDownload = true;
-      autoUpdater.autoInstallOnAppQuit = true;
-      autoUpdater.checkForUpdatesAndNotify().catch(() => {});
+    try {
+      if (autoUpdater) {
+        autoUpdater.autoDownload = true;
+        autoUpdater.autoInstallOnAppQuit = true;
+        autoUpdater.checkForUpdatesAndNotify().catch(() => {});
+      }
+      Menu.setApplicationMenu(null);
+      startServer();
+      createTray();
+      registerShortcuts();
+    } catch (error) {
+      reportFatal(error);
     }
-    Menu.setApplicationMenu(null);
-    startServer();
-    createTray();
-    registerShortcuts();
   });
 
   app.on('before-quit', () => {

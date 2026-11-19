@@ -113,7 +113,9 @@ const fakeElectron = {
     quit: () => assert.fail('a first instance must not quit'),
     on: () => {},
     getPath: () => 'C:/user-data',
+    exit: () => assert.fail('a healthy start must not exit'),
   },
+  dialog: { showErrorBox: () => {} },
   BrowserWindow: FakeWindow,
   Tray: FakeTray,
   Menu: {
