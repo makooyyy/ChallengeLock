@@ -33,7 +33,7 @@ function checkElectron() {
   try {
     binary = require('electron');
   } catch {
-    binary = null;
+    // Not installed: the check below reports it.
   }
   if (binary && fs.existsSync(binary))
     pass('Бинарник Electron', path.relative(process.cwd(), binary));
