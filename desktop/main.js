@@ -113,6 +113,8 @@ let tray = null;
 let quitting = false;
 let compact = false;
 let normalBounds = null;
+// Last successful probe, so the About dialog can name the log without re-scanning.
+let probeCache = { install: null };
 
 function pageUrl() {
   return `http://${HOST}:${serverPort}/index.html`;
@@ -232,8 +234,74 @@ function openDataFolder() {
   Promise.resolve(shell.openPath(app.getPath('userData'))).catch(() => {});
 }
 
-function checkUpdates() {
-  if (autoUpdater) autoUpdater.checkForUpdates().catch(() => {});
+function aboutDialog() {
+  const lines = [
+    'Версия: ' + app.getVersion(),
+    'Electron: ' + process.versions.electron,
+    'Chromium: ' + process.versions.chrome,
+    'Порт: ' + (serverPort || '—'),
+    'Данные: ' + app.getPath('userData'),
+    'Лог игры: ' + (game.logPathFor(probeCache.install) || 'не найден'),
+  ];
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'ChallengeLock',
+    message: 'ChallengeLock',
+    detail: lines.join('\n'),
+    buttons: ['Ок'],
+  });
+}
+
+function loginItemEnabled() {
+  try {
+    return Boolean(app.getLoginItemSettings().openAtLogin);
+  } catch {
+    return false;
+  }
+}
+
+function toggleLoginItem() {
+  if (!app.isPackaged) {
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'ChallengeLock',
+      message: 'Автозапуск доступен только в собранной версии приложения.',
+      buttons: ['Ок'],
+    });
+    return;
+  }
+  app.setLoginItemSettings({ openAtLogin: !loginItemEnabled() });
+  refreshTrayMenu();
+}
+
+async function checkUpdates() {
+  if (!autoUpdater) {
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'ChallengeLock',
+      message: 'Проверка обновлений работает только в собранной версии.',
+      buttons: ['Ок'],
+    });
+    return;
+  }
+  try {
+    const result = await autoUpdater.checkForUpdates();
+    const latest = result && result.updateInfo && result.updateInfo.version;
+    const newer = latest && game.compareVersions(latest, app.getVersion()) > 0;
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'ChallengeLock',
+      message: newer
+        ? 'Скачивается версия ' + latest + '. Она установится при выходе.'
+        : 'У вас последняя версия: ' + app.getVersion(),
+      buttons: ['Ок'],
+    });
+  } catch (error) {
+    dialog.showErrorBox(
+      'Не удалось проверить обновления',
+      String((error && error.message) || error),
+    );
+  }
 }
 
 function buildTrayMenu() {
@@ -257,7 +325,14 @@ function buildTrayMenu() {
     },
     { type: 'separator' },
     { label: 'Открыть папку данных', click: openDataFolder },
+    {
+      label: 'Запускать с Windows',
+      type: 'checkbox',
+      checked: loginItemEnabled(),
+      click: toggleLoginItem,
+    },
     { label: 'Проверить обновления', click: checkUpdates },
+    { label: 'О приложении', click: aboutDialog },
     { type: 'separator' },
     {
       label: 'Выход',
@@ -352,6 +427,7 @@ async function probeGame() {
     : [];
   const candidates = game.candidateInstalls(steamPath, libraries);
   const install = game.findInstall((directory) => fs.existsSync(directory), candidates);
+  probeCache = { install };
   return {
     steamPath,
     libraries,

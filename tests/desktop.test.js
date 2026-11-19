@@ -17,6 +17,8 @@ const state = {
   shortcuts: new Map(),
   ipc: {},
   tray: null,
+  dialogs: [],
+  loginItem: null,
 };
 
 class FakeWebContents {
@@ -114,8 +116,20 @@ const fakeElectron = {
     on: () => {},
     getPath: () => 'C:/user-data',
     exit: () => assert.fail('a healthy start must not exit'),
+    isPackaged: true,
+    getVersion: () => '1.21.0',
+    getLoginItemSettings: () => ({ openAtLogin: Boolean(state.loginItem) }),
+    setLoginItemSettings: (options) => {
+      state.loginItem = options.openAtLogin;
+    },
   },
-  dialog: { showErrorBox: () => {} },
+  dialog: {
+    showErrorBox: () => {},
+    showMessageBox: (options) => {
+      state.dialogs.push(options);
+      return Promise.resolve({ response: 0 });
+    },
+  },
   BrowserWindow: FakeWindow,
   Tray: FakeTray,
   Menu: {
@@ -274,6 +288,25 @@ test('the tray and the hotkeys drive the page', async () => {
     'ChallengeLock — Abrams · Сложная',
     'the tray shows the contract',
   );
+});
+
+test('the tray exposes diagnostics and autostart', async () => {
+  await listening();
+  const menu = () => state.tray.menu.items.filter((item) => item.label);
+
+  const about = menu().find((item) => item.label === 'О приложении');
+  assert.ok(about, 'the tray offers About');
+  about.click();
+  const detail = state.dialogs.at(-1).detail;
+  assert.match(detail, /Версия: 1\.21\.0/);
+  assert.match(detail, /Порт: 47821/);
+  assert.match(detail, /Данные: C:\/user-data/);
+
+  const autostart = menu().find((item) => item.label === 'Запускать с Windows');
+  assert.ok(autostart, 'the tray offers autostart');
+  assert.equal(autostart.checked, false);
+  autostart.click();
+  assert.equal(state.loginItem, true, 'autostart is registered');
 });
 
 test('the game probe is reachable from the page', async () => {

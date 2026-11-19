@@ -57,6 +57,21 @@ function tailLines(text, count = 40) {
     .slice(-Math.max(1, count));
 }
 
+// 1.21.0-style dotted versions, without pulling a semver dependency into the shell.
+function compareVersions(a, b) {
+  const left = String(a || '')
+    .split('.')
+    .map((part) => parseInt(part, 10) || 0);
+  const right = String(b || '')
+    .split('.')
+    .map((part) => parseInt(part, 10) || 0);
+  for (let index = 0; index < Math.max(left.length, right.length); index++) {
+    const diff = (left[index] || 0) - (right[index] || 0);
+    if (diff) return diff > 0 ? 1 : -1;
+  }
+  return 0;
+}
+
 module.exports = {
   GAME_FOLDERS,
   parseLibraryFolders,
@@ -66,4 +81,5 @@ module.exports = {
   logPathFor,
   describeLog,
   tailLines,
+  compareVersions,
 };

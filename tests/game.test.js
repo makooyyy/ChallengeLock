@@ -69,6 +69,15 @@ test('the install is the first candidate that exists', () => {
   );
 });
 
+test('versions compare without a semver dependency', () => {
+  assert.equal(game.compareVersions('1.21.0', '1.20.4'), 1);
+  assert.equal(game.compareVersions('1.20.4', '1.21.0'), -1);
+  assert.equal(game.compareVersions('1.21.0', '1.21.0'), 0);
+  assert.equal(game.compareVersions('2', '1.9.9'), 1);
+  assert.equal(game.compareVersions('', '0.0.1'), -1);
+  assert.equal(game.compareVersions('1.21', '1.21.0'), 0);
+});
+
 test('the log is described without reading it and tailed safely', () => {
   const fakeFs = {
     existsSync: (file) => file === 'C:\\Game\\game\\citadel\\console.log',
