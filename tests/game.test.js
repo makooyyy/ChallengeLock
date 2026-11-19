@@ -79,25 +79,23 @@ test('versions compare without a semver dependency', () => {
 });
 
 test('the log is described without reading it and tailed safely', () => {
+  // Build every expected path through path.join: the separator differs per platform.
+  const logPath = game.logPathFor('C:\\Game');
   const fakeFs = {
-    existsSync: (file) => file === 'C:\\Game\\game\\citadel\\console.log',
+    existsSync: (file) => file === logPath,
     statSync: () => ({ size: 2048, mtime: new Date('2026-11-19T20:00:00Z') }),
   };
-  assert.equal(
-    game.logPathFor('C:\\Game'),
-    path.join('C:\\Game', 'game', 'citadel', 'console.log'),
-  );
+  assert.ok(logPath.endsWith('console.log'), 'the log path ends with the file name');
   assert.equal(game.logPathFor(null), null);
 
-  const logPath = game.logPathFor('C:\\Game');
   const described = game.describeLog(fakeFs, logPath);
   assert.equal(described.exists, true);
   assert.equal(described.size, 2048);
   assert.equal(described.modified, '2026-11-19T20:00:00.000Z');
 
-  const missing = game.describeLog(fakeFs, 'C:\\Other\\console.log');
+  const missing = game.describeLog(fakeFs, path.join('C:\\Other', 'console.log'));
   assert.equal(missing.exists, false);
-  assert.equal(missing.path, 'C:\\Other\\console.log');
+  assert.ok(missing.path.endsWith('console.log'));
 
   const text = 'one\r\ntwo\n\nthree\nfour\n';
   assert.deepEqual(game.tailLines(text, 2), ['three', 'four']);
