@@ -289,7 +289,15 @@
     "importFailed": "Не удалось прочитать файл резервной копии.",
     "challengeFriend": "Вызвать друга",
     "friendCopied": "Ссылка-вызов скопирована: друг получит свой контракт",
-    "streak": "Серия"
+    "streak": "Серия",
+    "gameTitle": "Игра и лог",
+    "gameHint": "Приложение ищет установленный Deadlock и его console.log. Лог появляется, если добавить -condebug в параметры запуска игры в Steam.",
+    "gameFind": "Найти игру",
+    "gameSearching": "Ищу установку и лог…",
+    "gameNotFound": "Установка Deadlock не найдена. Проверенные пути:",
+    "gameNoLog": "Игра найдена, но console.log ещё нет — добавьте -condebug в параметры запуска и зайдите в матч.",
+    "gameLogFound": "Лог найден. Последние строки:",
+    "gameFailed": "Не удалось прочитать данные игры."
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -581,6 +589,14 @@
     "importFailed": "That backup file could not be read.",
     "challengeFriend": "Challenge a friend",
     "friendCopied": "Challenge link copied: your friend gets their own contract",
-    "streak": "Streak"
+    "streak": "Streak",
+    "gameTitle": "Game and log",
+    "gameHint": "The app looks for an installed Deadlock and its console.log. The log appears once you add -condebug to the game launch options in Steam.",
+    "gameFind": "Find the game",
+    "gameSearching": "Looking for the install and the log…",
+    "gameNotFound": "Deadlock is not installed here. Paths checked:",
+    "gameNoLog": "The game is installed, but there is no console.log yet — add -condebug to the launch options and play a match.",
+    "gameLogFound": "Log found. Last lines:",
+    "gameFailed": "Could not read the game data."
   }
 }

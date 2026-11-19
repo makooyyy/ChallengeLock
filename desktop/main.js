@@ -19,6 +19,8 @@ try {
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { execFile } = require('child_process');
+const game = require('./game.js');
 
 // A fixed port keeps the page origin stable. Chromium keys localStorage, the Service
 // Worker cache and the theme by origin, so the previous random port wiped every
@@ -298,6 +300,89 @@ function registerShortcuts() {
 // while the window is hidden behind the game.
 ipcMain.on('desktop:contract', (_event, text) => {
   if (tray && typeof text === 'string') tray.setToolTip('ChallengeLock — ' + text.slice(0, 120));
+});
+
+const GAME_LOG_TAIL_BYTES = 64 * 1024;
+
+function readTextFile(file) {
+  try {
+    return fs.readFileSync(file, 'utf8');
+  } catch {
+    return null;
+  }
+}
+
+// The last block is enough for a preview and keeps a multi-megabyte log cheap.
+function readTail(file, bytes = GAME_LOG_TAIL_BYTES) {
+  const fd = fs.openSync(file, 'r');
+  try {
+    const size = fs.fstatSync(fd).size;
+    const start = Math.max(0, size - bytes);
+    const buffer = Buffer.alloc(size - start);
+    fs.readSync(fd, buffer, 0, buffer.length, start);
+    return buffer.toString('utf8');
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+function steamPathFromRegistry() {
+  if (process.platform !== 'win32') return Promise.resolve(null);
+  return new Promise((resolve) => {
+    try {
+      execFile(
+        'reg',
+        ['query', 'HKCU\\Software\\Valve\\Steam', '/v', 'SteamPath'],
+        { windowsHide: true },
+        (error, stdout) => resolve(error ? null : game.decodeRegPath(stdout)),
+      );
+    } catch {
+      // Some environments refuse to spawn at all: the probe just finds no Steam.
+      resolve(null);
+    }
+  });
+}
+
+async function probeGame() {
+  const steamPath = await steamPathFromRegistry();
+  const libraries = steamPath
+    ? game.parseLibraryFolders(
+        readTextFile(path.join(steamPath, 'steamapps', 'libraryfolders.vdf')),
+      )
+    : [];
+  const candidates = game.candidateInstalls(steamPath, libraries);
+  const install = game.findInstall((directory) => fs.existsSync(directory), candidates);
+  return {
+    steamPath,
+    libraries,
+    candidates,
+    install,
+    log: game.describeLog(fs, game.logPathFor(install)),
+  };
+}
+
+ipcMain.handle('desktop:game', async () => {
+  try {
+    return await probeGame();
+  } catch (error) {
+    return {
+      error: String((error && error.message) || error),
+      candidates: [],
+      install: null,
+      log: { exists: false, path: null },
+    };
+  }
+});
+
+ipcMain.handle('desktop:game-log', async (_event, count) => {
+  try {
+    const info = await probeGame();
+    if (!info.log || !info.log.exists) return { lines: [], log: info.log };
+    const wanted = Math.min(Math.max(Number(count) || 40, 1), 200);
+    return { lines: game.tailLines(readTail(info.log.path), wanted), log: info.log };
+  } catch (error) {
+    return { lines: [], error: String((error && error.message) || error) };
+  }
 });
 
 // The fixed port is the normal path. If another process already holds it, fall back

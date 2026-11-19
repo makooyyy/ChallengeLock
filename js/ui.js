@@ -494,8 +494,38 @@ function viewCustom() {
     )
     .join(
       '',
-    )}</div><p class="search-empty" id="hero-search-empty" hidden>${t('noSearchResults')}</p></div>`;
+    )}</div><p class="search-empty" id="hero-search-empty" hidden>${t('noSearchResults')}</p></div>` +
+    gameCard();
   updateHeroSearch();
+}
+// Desktop only: where the game lives and what its console log says. This panel is the
+// ground truth we need before the shell can close contracts by itself.
+function gameCard() {
+  if (!desktop?.game) return '';
+  return `<div class="card"><div class="section-heading"><div><h2>${t('gameTitle')}</h2><p>${t('gameHint')}</p></div>${icon('search', 20)}</div><button id="game-probe">${icon('search', 14)}${t('gameFind')}</button><div id="game-result" class="game-result" aria-live="polite"></div></div>`;
+}
+async function probeGameDesktop() {
+  const box = $('#game-result');
+  if (!box || !desktop?.game) return;
+  box.textContent = t('gameSearching');
+  try {
+    const info = await desktop.game();
+    if (!info || !info.install) {
+      box.innerHTML =
+        `<p>${t('gameNotFound')}</p>` +
+        (info?.candidates || []).map((candidate) => `<code>${esc(candidate)}</code>`).join('');
+      return;
+    }
+    const tail = await desktop.gameLog(40);
+    const lines = tail?.lines || [];
+    box.innerHTML =
+      `<p>${esc(info.install)}</p>` +
+      `<p>${esc(info.log?.exists ? t('gameLogFound') : t('gameNoLog'))}</p>` +
+      (lines.length ? `<pre class="game-log">${esc(lines.join('\n'))}</pre>` : '');
+  } catch (error) {
+    console.error(error);
+    box.textContent = t('gameFailed');
+  }
 }
 function viewHistory() {
   const p = $('#p-history'),
@@ -688,6 +718,7 @@ function bind() {
     if (b.id === 'cp') return png();
     if (b.id === 'cf') return friendChallenge();
     if (b.id === 'export-data') return exportData();
+    if (b.id === 'game-probe') return probeGameDesktop();
     if (b.id === 'import-data') {
       $('#import-file')?.click();
       return;

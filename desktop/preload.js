@@ -12,4 +12,7 @@ contextBridge.exposeInMainWorld('challengeLockDesktop', {
   reportContract: (text) => {
     if (typeof text === 'string') ipcRenderer.send('desktop:contract', text);
   },
+  // Where the game is installed and what its console log says.
+  game: () => ipcRenderer.invoke('desktop:game'),
+  gameLog: (count) => ipcRenderer.invoke('desktop:game-log', count),
 });

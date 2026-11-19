@@ -134,6 +134,10 @@ const fakeElectron = {
     on: (channel, handler) => {
       state.ipc[channel] = handler;
     },
+    handle: (channel, handler) => {
+      state.ipcHandlers = state.ipcHandlers || {};
+      state.ipcHandlers[channel] = handler;
+    },
   },
   nativeImage: {
     createFromPath: () => ({ isEmpty: () => false, resize: () => ({ resized: true }) }),
@@ -270,4 +274,17 @@ test('the tray and the hotkeys drive the page', async () => {
     'ChallengeLock — Abrams · Сложная',
     'the tray shows the contract',
   );
+});
+
+test('the game probe is reachable from the page', async () => {
+  await listening();
+  const handlers = state.ipcHandlers || {};
+  assert.equal(typeof handlers['desktop:game'], 'function', 'the shell exposes the probe');
+  assert.equal(typeof handlers['desktop:game-log'], 'function', 'and the log tail');
+
+  const info = await handlers['desktop:game']();
+  assert.ok(Array.isArray(info.candidates), 'candidates are always reported');
+  assert.ok('install' in info, 'install is either a path or null');
+  const tail = await handlers['desktop:game-log'](5);
+  assert.ok(Array.isArray(tail.lines), 'the tail is an array even without a log');
 });
