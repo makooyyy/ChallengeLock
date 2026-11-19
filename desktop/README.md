@@ -12,6 +12,11 @@ npm run doctor   # проверка окружения, если приложе�
 npm run build    # NSIS-установщик в desktop/dist
 ```
 
+> **PowerShell.** Если `npm` падает с «выполнение сценариев отключено в этой системе», это политика
+> PowerShell, а не проект: он запускает `npm.ps1`. Либо вызывайте `npm.cmd` (`npm.cmd install`,
+> `npm.cmd start`), либо разрешите локальные скрипты один раз без прав администратора:
+> `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`.
+
 `npm run build` собирает установщик и обновляет `latest.yml` для автообновления.
 Публикация — workflow `.github/workflows/desktop-release.yml` по тегу `v*`.
 
