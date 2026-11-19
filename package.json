@@ -8,12 +8,15 @@
     "test:browser": "node tests/browser.mjs",
     "check:sw": "node scripts/check-sw.mjs",
     "check:catalog": "node scripts/sync-catalog.mjs --check",
-    "check": "npm run check:sw && npm run format:check && npm test",
+    "check": "npm run check:sw && npm run lint && npm run format:check && npm test",
+    "lint": "eslint .",
     "sync:catalog": "node scripts/sync-catalog.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
     "prettier": "^3.6.2"
   },
   "engines": {

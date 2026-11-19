@@ -9,9 +9,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: windows-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: desktop
@@ -23,11 +28,45 @@ jobs:
           cache: npm
           cache-dependency-path: desktop/package-lock.json
       - run: npm ci
-      - run: npm run build
+      - name: Copy web assets
+        run: npm run prebuild
+      - name: Build installer
+        run: npx electron-builder --win nsis --publish never
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
-      - name: Upload latest.yml
-        run: gh release upload ${{ github.ref_name }} dist/latest.yml --clobber
+      - name: Generate latest.yml when the builder did not
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'dist/latest.yml')) {
+            node scripts/generate-latest-yml.js
+          }
+      - name: Verify release artifacts
+        shell: pwsh
+        run: |
+          $exe = @(Get-ChildItem -Path 'dist' -Filter '*.exe' -File)
+          $blockmap = @(Get-ChildItem -Path 'dist' -Filter '*.blockmap' -File)
+          $latest = Get-Item -Path 'dist/latest.yml' -ErrorAction SilentlyContinue
+          if ($exe.Count -eq 0) {
+            throw 'dist/*.exe is missing: the installer was not built.'
+          }
+          if ($blockmap.Count -eq 0) {
+            throw 'dist/*.blockmap is missing: differential update data was not built.'
+          }
+          if ($null -eq $latest) {
+            throw 'dist/latest.yml is missing: electron-builder did not emit the auto-update manifest.'
+          }
+          Write-Host 'Verified release artifacts:'
+          @($exe) + @($blockmap) + @($latest) | Select-Object Name, Length | Format-Table -AutoSize
+      - name: Publish release assets
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" != refs/tags/* ]]; then
+            echo "::error::Desktop releases must run for a tag, got ${GITHUB_REF}."
+            exit 1
+          fi
+          if ! gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" --notes "Desktop release ${GITHUB_REF_NAME}."
+          fi
+          gh release upload "${GITHUB_REF_NAME}" dist/*.exe dist/*.blockmap dist/latest.yml --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
