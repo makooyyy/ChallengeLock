@@ -1,22 +1,35 @@
 # ChallengeLock Desktop
 
-Desktop wrapper (Electron) for the ChallengeLock web app.
+Electron-обёртка над тем же статическим приложением. Код веба не дублируется: при сборке
+папка проекта копируется в `web/`, и обёртка раздаёт её со своего локального сервера.
 
-## Development
+## Запуск и сборка
 
 ```bash
 npm install
-npm start
+npm start        # запуск из исходников (берёт web-файлы из родительской папки)
+npm run build    # NSIS-установщик в desktop/dist
 ```
 
-The app serves the parent web project over a local HTTP server and opens it in an Electron window.
+`npm run build` собирает установщик и обновляет `latest.yml` для автообновления.
+Публикация — workflow `.github/workflows/desktop-release.yml` по тегу `v*`.
 
-## Build (Windows portable)
+## Почему фиксированный порт
 
-```bash
-npm run build
-```
+Сервер слушает `127.0.0.1:47821`. Origin страницы — часть ключа, под которым Chromium
+хранит `localStorage` и кэш Service Worker. Пока порт был случайным (`listen(0)`), каждый
+запуск получал новый origin, а значит пустую историю, сброшенные настройки и заново
+скачанный офлайн-кэш. Фиксированный порт делает origin стабильным и сохраняет данные
+между запусками.
 
-Output: `dist/ChallengeLock.exe`.
+Если порт занят другим процессом, приложение откатывается на случайный: работать оно
+будет, но этот запуск начнётся с чистого профиля (в консоль печатается предупреждение).
 
-Before building, web assets are copied from the parent folder into `web/`.
+Данные профиля лежат в `%APPDATA%\ChallengeLock` (WebKit-хранилище Electron).
+
+## Поведение
+
+- Внешние ссылки открываются в системном браузере, а не в новом окне без адресной строки.
+- Второй запуск не создаёт второй профиль: окно первого разворачивается.
+- F5 или Ctrl+R перезагружают страницу, F12 открывает DevTools (меню приложения отключено).
+- Автообновление — через `electron-updater`; веб-проверка релизов в обёртке отключена.

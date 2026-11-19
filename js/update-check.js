@@ -70,6 +70,8 @@ export function showUpdateBanner(version, url) {
 
 // Cheap, silent, and bounded: one request per day, and only for real installers.
 export async function checkForUpdates(siteVersion) {
+  // The desktop build ships electron-updater, which already notifies about releases.
+  if (globalThis.challengeLockDesktop?.isDesktop) return;
   if (!siteVersion || recentlyChecked()) return;
   markChecked();
   try {

@@ -9,6 +9,7 @@
 - Задания поддерживают `"active": false`: не выпадают в генерации, но остаются в истории и избранном.
 - PWA-ярлыки (`?tab=`, `?daily=1`), `preconnect` к CDN портретов, `theme-color` для светлой схемы.
 - Desktop: `activate` больше не вызывает `whenReady` повторно (устранён `ERR_SERVER_ALREADY_LISTEN`); Electron 45, electron-builder 26.
+- Desktop: локальный сервер слушает фиксированный порт `127.0.0.1:47821`. Раньше случайный порт менял origin, и Chromium на каждом запуске отдавал пустой `localStorage` — история, избранное и настройки терялись. Добавлены проверка заголовка `Host` (защита от DNS rebinding), открытие внешних ссылок в системном браузере, запрет навигации наружу, single-instance lock, F5/F12; удалён неиспользуемый `installer.iss`.
 - CI: браузерный сценарий на каждый PR, ежедневная сверка каталога, атомарная публикация релиза, Dependabot и `SECURITY.md`.
 - ESLint 9 (flat config) в `npm run check`; `no-undef` и `no-unused-vars` вычистили мёртвый код (`pick`, `I`, `emptyPanel`).
 

@@ -16,6 +16,7 @@
           "Уведомление о новой версии переведено, проверяется раз в сутки и не выдаёт сборку для Windows за обновление сайта.",
           "Понятные причины, если бросок не состоялся: занятый замок, недоступный герой или несовместимые категории.",
           "Дата контракта больше не перезаписывается при каждой загрузке, а снятые с генерации задания остаются в истории.",
+          "Десктопное приложение больше не начинает с чистого листа: локальный сервер слушает фиксированный порт, внешние ссылки открываются в браузере, второй запуск не создаёт второй профиль.",
           "Добавлены линтер, браузерные тесты в CI, ярлыки PWA и политика безопасности."
         ],
         "en": [
@@ -26,6 +27,7 @@
           "The new-version notice is translated, checked once a day, and no longer presents a Windows build as a site update.",
           "Clear reasons when a roll produces nothing: a busy lock, an unavailable hero or incompatible categories.",
           "A contract keeps its original date across reloads, and challenges retired from generation stay in history.",
+          "The desktop app stops starting from scratch: the local server uses a fixed port, external links open in your browser, and a second launch no longer creates a second profile.",
           "Added a linter, browser tests in CI, PWA shortcuts and a security policy."
         ]
       }
