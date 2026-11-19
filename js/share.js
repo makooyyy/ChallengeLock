@@ -48,13 +48,15 @@ export const linkFor = (x) =>
 export const setHash = (x) => {
   try {
     history.replaceState(null, '', hashFor(x));
-  } catch {}
+  } catch {
+    /* a blocked replaceState must never break sharing */
+  }
 };
 export async function copy(s) {
   try {
     await navigator.clipboard.writeText(s);
     return true;
-  } catch (e) {
+  } catch {
     const a = document.createElement('textarea');
     a.value = s;
     document.body.append(a);
@@ -62,7 +64,9 @@ export async function copy(s) {
     let ok = false;
     try {
       ok = document.execCommand('copy');
-    } catch (_) {}
+    } catch {
+      /* older browsers without clipboard access simply fail to copy */
+    }
     a.remove();
     return ok;
   }

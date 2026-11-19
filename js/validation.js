@@ -189,6 +189,7 @@ export function validateData(data, dict) {
   const heroIds = new Set(data.heroes.map((h) => h.id));
   for (const c of data.challenges)
     if (
+      (c.active !== undefined && typeof c.active !== 'boolean') ||
       (c.gameModes !== undefined &&
         (!Array.isArray(c.gameModes) ||
           !c.gameModes.length ||

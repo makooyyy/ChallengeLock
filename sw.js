@@ -2,7 +2,7 @@
 // CATALOG_VERSION is rewritten automatically by scripts/sync-catalog.mjs.
 const CATALOG_VERSION = '7df33ce9dbedca22';
 const PREFIX = 'challengelock:' + self.registration.scope + ':';
-const VERSION = PREFIX + 'v26:' + CATALOG_VERSION;
+const VERSION = PREFIX + 'v30:' + CATALOG_VERSION;
 const FILES = [
   './',
   'index.html',
@@ -13,6 +13,8 @@ const FILES = [
   'js/theme.js',
   'js/celebration.js',
   'js/ui.js',
+  'js/ui-kit.js',
+  'js/views/updates.js',
   'js/icons.js',
   'js/state.js',
   'js/rng.js',
@@ -28,6 +30,7 @@ const FILES = [
   'js/share.js',
   'js/i18n.js',
   'js/validation.js',
+  'js/update-check.js',
   'data/heroes.json',
   'data/items.json',
   'data/challenges.json',

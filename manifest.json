@@ -13,6 +13,44 @@
   "lang": "ru",
   "dir": "ltr",
   "categories": ["games", "entertainment", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Рулетка",
+      "short_name": "Рулетка",
+      "url": "./",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Вызов дня",
+      "short_name": "Вызов дня",
+      "url": "./?tab=roulette&daily=1",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "История",
+      "short_name": "История",
+      "url": "./?tab=history",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
   "icons": [
     {
       "src": "assets/icon-192.png",

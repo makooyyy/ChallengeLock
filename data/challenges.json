@@ -1739,6 +1739,738 @@
         "ranked"
       ],
       "verified": false
+    },
+    {
+      "id": "street_kill_streak",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Двойка подряд",
+        "en": "Two in a row"
+      },
+      "desc": {
+        "ru": "Получи два убийства подряд, не погибнув между ними.",
+        "en": "Get two kills in a row without dying in between."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": true
+    },
+    {
+      "id": "street_ult",
+      "cat": "ab",
+      "difficulty": 1,
+      "name": {
+        "ru": "Ульта наготове",
+        "en": "Ultimate ready"
+      },
+      "desc": {
+        "ru": "Примени ультимейт хотя бы один раз за матч.",
+        "en": "Use your ultimate at least once during the match."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": true
+    },
+    {
+      "id": "street_heavy_hit",
+      "cat": "gp",
+      "difficulty": 1,
+      "name": {
+        "ru": "Тяжёлый удар",
+        "en": "Heavy hit"
+      },
+      "desc": {
+        "ru": "Попади тяжёлой атакой по вражескому герою хотя бы один раз.",
+        "en": "Land a heavy melee attack on an enemy hero at least once."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": true
+    },
+    {
+      "id": "street_guardian_finish",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Последний по Guardian",
+        "en": "Guardian finisher"
+      },
+      "desc": {
+        "ru": "Добей вражеского Guardian последним ударом.",
+        "en": "Land the final hit on an enemy Guardian."
+      },
+      "tags": [
+        "objective"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": true
+    },
+    {
+      "id": "street_first_round_win",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Первый раунд",
+        "en": "First round"
+      },
+      "desc": {
+        "ru": "Выиграй первый раунд матча.",
+        "en": "Win the first round of the match."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": true
+    },
+    {
+      "id": "street_first_round_survive",
+      "cat": "ch",
+      "difficulty": 1,
+      "name": {
+        "ru": "Живой в дебюте",
+        "en": "Alive in the opener"
+      },
+      "desc": {
+        "ru": "Переживи первый раунд, не погибнув ни разу.",
+        "en": "Come through the first round without dying once."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": true
+    },
+    {
+      "id": "street_low_hp_kill",
+      "cat": "gp",
+      "difficulty": 1,
+      "name": {
+        "ru": "На грани",
+        "en": "A sliver of health"
+      },
+      "desc": {
+        "ru": "Убей героя, когда у тебя меньше 25% здоровья.",
+        "en": "Kill a hero while you are below 25% health."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": true
+    },
+    {
+      "id": "street_hero_damage",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Уличный урон",
+        "en": "Street damage"
+      },
+      "desc": {
+        "ru": "Нанеси не менее 2 000 урона вражеским героям за матч.",
+        "en": "Deal at least 2,000 damage to enemy heroes during the match."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": true
+    },
+    {
+      "id": "normal_teleporter",
+      "cat": "gp",
+      "difficulty": 1,
+      "name": {
+        "ru": "Прыжок по карте",
+        "en": "Map hop"
+      },
+      "desc": {
+        "ru": "Воспользуйся телепортом на карте хотя бы один раз.",
+        "en": "Use a map teleporter at least once."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "normal",
+        "ranked"
+      ],
+      "verified": true
+    },
+    {
+      "id": "normal_urn_pickup",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Курьер-стажёр",
+        "en": "Rookie courier"
+      },
+      "desc": {
+        "ru": "Подними урну хотя бы один раз.",
+        "en": "Pick up the urn at least once."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "normal_zip_ride",
+      "cat": "gp",
+      "difficulty": 1,
+      "name": {
+        "ru": "С ветерком",
+        "en": "Joyride"
+      },
+      "desc": {
+        "ru": "Прокатись на зиплайне хотя бы один раз.",
+        "en": "Take a zipline at least once."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "normal_respawn_strike",
+      "cat": "ch",
+      "difficulty": 1,
+      "name": {
+        "ru": "Быстрый ответ",
+        "en": "Quick answer"
+      },
+      "desc": {
+        "ru": "После возрождения получи убийство или содействие в течение 30 секунд.",
+        "en": "After respawning, earn a kill or assist within 30 seconds."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "map_early_impact",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Быстрый старт",
+        "en": "Fast start"
+      },
+      "desc": {
+        "ru": "В первые 5 минут матча получи убийство или содействие.",
+        "en": "Earn a kill or assist in the first 5 minutes of the match."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "normal",
+        "ranked"
+      ],
+      "verified": true
+    },
+    {
+      "id": "map_survive_10",
+      "cat": "ch",
+      "difficulty": 1,
+      "name": {
+        "ru": "Сухой старт",
+        "en": "Clean start"
+      },
+      "desc": {
+        "ru": "Не погибни до 10:00.",
+        "en": "Do not die before 10:00."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "normal",
+        "ranked"
+      ],
+      "verified": true
+    },
+    {
+      "id": "map_all_lanes",
+      "cat": "gp",
+      "difficulty": 1,
+      "name": {
+        "ru": "Экскурсия",
+        "en": "Sightseeing"
+      },
+      "desc": {
+        "ru": "Побывай на трёх разных линиях карты за матч.",
+        "en": "Visit three different lanes during the match."
+      },
+      "tags": [
+        "lane"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "normal",
+        "ranked"
+      ],
+      "verified": true
+    },
+    {
+      "id": "map_ability_hit",
+      "cat": "ab",
+      "difficulty": 1,
+      "name": {
+        "ru": "Попадание способностью",
+        "en": "Ability hit"
+      },
+      "desc": {
+        "ru": "Попади способностью по вражескому герою не менее трёх раз за матч.",
+        "en": "Hit an enemy hero with an ability at least three times during the match."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "normal",
+        "ranked"
+      ],
+      "verified": true
+    },
+    {
+      "id": "ranked_first_blood",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Первая кровь",
+        "en": "First blood"
+      },
+      "desc": {
+        "ru": "Получи первое убийство героя в матче.",
+        "en": "Get the first hero kill of the match."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": true
+    },
+    {
+      "id": "ranked_revenge",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Ответка",
+        "en": "Payback"
+      },
+      "desc": {
+        "ru": "Убей героя, который убил тебя в этом матче. Достаточно одного раза.",
+        "en": "Kill the hero who killed you during the match. Once is enough."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": true
+    },
+    {
+      "id": "team_ult_chain",
+      "cat": "tm",
+      "difficulty": 4,
+      "name": {
+        "ru": "Двойная ульта",
+        "en": "Double ultimate"
+      },
+      "desc": {
+        "ru": "Совместите два ультимейта по одному вражескому герою: оба должны попасть по нему в течение 3 секунд. Сделайте это дважды за матч.",
+        "en": "Land two ultimates on the same enemy hero within 3 seconds. Do it twice during the match."
+      },
+      "tags": [
+        "team"
+      ],
+      "conflicts": [
+        "s4"
+      ],
+      "heroes": "all",
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "team_trade_kill",
+      "cat": "tm",
+      "difficulty": 4,
+      "name": {
+        "ru": "Отомсти за друга",
+        "en": "Avenger"
+      },
+      "desc": {
+        "ru": "После смерти друга убей его убийцу в течение 15 секунд. Достаточно одного раза.",
+        "en": "After a friend dies, kill their killer within 15 seconds. Once is enough."
+      },
+      "tags": [
+        "team"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "team_save_ally",
+      "cat": "tm",
+      "difficulty": 3,
+      "name": {
+        "ru": "Прикрыть друга",
+        "en": "Cover your friend"
+      },
+      "desc": {
+        "ru": "Нанеси урон герою, который атакует друга, и переживите этот бой оба. Дважды за матч.",
+        "en": "Damage the hero attacking your friend, and both of you survive that fight. Do it twice during the match."
+      },
+      "tags": [
+        "team"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "team_first_structure",
+      "cat": "tm",
+      "difficulty": 3,
+      "name": {
+        "ru": "Первый снос",
+        "en": "First demolition"
+      },
+      "desc": {
+        "ru": "Помогите снести первую вражескую постройку в матче: урон должен нанести каждый из вас.",
+        "en": "Help take down the first enemy structure of the match: each of you has to deal damage to it."
+      },
+      "tags": [
+        "team",
+        "objective"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "team_quiet_start",
+      "cat": "ch",
+      "difficulty": 4,
+      "name": {
+        "ru": "Тихий старт",
+        "en": "Quiet start"
+      },
+      "desc": {
+        "ru": "До 10:00 ни один из вас не погибает.",
+        "en": "None of you dies before minute 10."
+      },
+      "tags": [
+        "team"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "team_clean_fight",
+      "cat": "tm",
+      "difficulty": 3,
+      "name": {
+        "ru": "Чистый бой",
+        "en": "Clean fight"
+      },
+      "desc": {
+        "ru": "Дважды выиграйте командный бой, в котором погиб хотя бы один враг и никто из вас.",
+        "en": "Win two team fights where at least one enemy dies and none of you do."
+      },
+      "tags": [
+        "team"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "team_even_contribution",
+      "cat": "tm",
+      "difficulty": 3,
+      "name": {
+        "ru": "Ровный вклад",
+        "en": "Even contribution"
+      },
+      "desc": {
+        "ru": "К концу матча у каждого из вас не менее 5 убийств или содействий.",
+        "en": "By the end of the match, each of you has at least 5 kills or assists."
+      },
+      "tags": [
+        "team"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "team_two_fronts",
+      "cat": "tm",
+      "difficulty": 4,
+      "name": {
+        "ru": "Два фронта",
+        "en": "Two fronts"
+      },
+      "desc": {
+        "ru": "Дважды за матч нанесите урон постройкам на разных линиях одновременно: ты и друг — каждый на своей.",
+        "en": "Twice during the match, damage structures on different lanes at the same time: you and a friend, each on your own."
+      },
+      "tags": [
+        "team",
+        "objective"
+      ],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "team",
+      "verified": true
+    },
+    {
+      "id": "bebop_hook",
+      "cat": "ab",
+      "difficulty": 2,
+      "name": {
+        "ru": "Три крючка",
+        "en": "Three hooks"
+      },
+      "desc": {
+        "ru": "Попади Hook не менее чем по трём разным вражеским героям за матч.",
+        "en": "Hook at least three different enemy heroes during the match."
+      },
+      "tags": [
+        "abil"
+      ],
+      "conflicts": [
+        "s3"
+      ],
+      "heroes": [
+        "bebop"
+      ],
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "haze_sleep_kill",
+      "cat": "ab",
+      "difficulty": 3,
+      "name": {
+        "ru": "Сонный приговор",
+        "en": "Sleep sentence"
+      },
+      "desc": {
+        "ru": "Усыпи героя Дротиком сна и убей его, пока он спит.",
+        "en": "Put a hero to sleep with Sleep Dagger and kill them before they wake up."
+      },
+      "tags": [
+        "abil"
+      ],
+      "conflicts": [
+        "s1"
+      ],
+      "heroes": [
+        "haze"
+      ],
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "infernus_ignite",
+      "cat": "ab",
+      "difficulty": 2,
+      "name": {
+        "ru": "Поджигатель",
+        "en": "Firestarter"
+      },
+      "desc": {
+        "ru": "Подожги трёх разных вражеских героев за матч.",
+        "en": "Set three different enemy heroes on fire during the match."
+      },
+      "tags": [
+        "abil"
+      ],
+      "conflicts": [],
+      "heroes": [
+        "infernus"
+      ],
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "lash_death_slam",
+      "cat": "ab",
+      "difficulty": 3,
+      "name": {
+        "ru": "Слэм в толпу",
+        "en": "Crowd slam"
+      },
+      "desc": {
+        "ru": "Попади Death Slam по двум вражеским героям за один прыжок.",
+        "en": "Hit two enemy heroes with a single Death Slam."
+      },
+      "tags": [
+        "abil"
+      ],
+      "conflicts": [
+        "s4"
+      ],
+      "heroes": [
+        "lash"
+      ],
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "seven_storm_cloud",
+      "cat": "ab",
+      "difficulty": 3,
+      "name": {
+        "ru": "Гроза на троих",
+        "en": "Storm for three"
+      },
+      "desc": {
+        "ru": "За один Storm Cloud нанеси урон не менее чем трём вражеским героям.",
+        "en": "Damage at least three enemy heroes with a single Storm Cloud."
+      },
+      "tags": [
+        "abil"
+      ],
+      "conflicts": [
+        "s4"
+      ],
+      "heroes": [
+        "seven"
+      ],
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "shiv_killing_blow",
+      "cat": "ab",
+      "difficulty": 3,
+      "name": {
+        "ru": "Добивающий удар",
+        "en": "Finishing blow"
+      },
+      "desc": {
+        "ru": "Добей двух героев ультимейтом Killing Blow за матч.",
+        "en": "Finish off two heroes with Killing Blow during the match."
+      },
+      "tags": [
+        "abil"
+      ],
+      "conflicts": [
+        "s4"
+      ],
+      "heroes": [
+        "shiv"
+      ],
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "vindicta_assassinate",
+      "cat": "ab",
+      "difficulty": 3,
+      "name": {
+        "ru": "Выстрел издалека",
+        "en": "Long shot"
+      },
+      "desc": {
+        "ru": "Убей героя Assassinate с расстояния не менее 40 метров.",
+        "en": "Kill a hero with Assassinate from at least 40 metres away."
+      },
+      "tags": [
+        "abil"
+      ],
+      "conflicts": [
+        "s4"
+      ],
+      "heroes": [
+        "vindicta"
+      ],
+      "mode": "solo",
+      "verified": true
+    },
+    {
+      "id": "abrams_wall_pin",
+      "cat": "gp",
+      "difficulty": 3,
+      "name": {
+        "ru": "К стене",
+        "en": "Into the wall"
+      },
+      "desc": {
+        "ru": "Впечатай вражеского героя в стену рывком Shoulder Charge.",
+        "en": "Slam an enemy hero into a wall with Shoulder Charge."
+      },
+      "tags": [
+        "abil"
+      ],
+      "conflicts": [
+        "s2"
+      ],
+      "heroes": [
+        "abrams"
+      ],
+      "mode": "solo",
+      "verified": true
     }
   ]
 }

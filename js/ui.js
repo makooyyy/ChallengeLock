@@ -6,39 +6,40 @@ import { applyTheme, toggleTheme } from './theme.js';
 import { showCelebration, closeCelebration, celebrationOpen } from './celebration.js';
 import { S, RT, persist as saveState, ALL_CATS } from './state.js';
 import { t, loc, setDict, setLang } from './i18n.js';
-import { roll, DIFF, restoreResult, resultKey, heroPool } from './roulette.js';
-import { newSeed, dailySeed, pick } from './rng.js';
-import { validateData, options, GAME_MODES } from './validation.js';
+import { rollDetailed, DIFF, restoreResult, resultKey, heroPool } from './roulette.js';
+import { newSeed, dailySeed } from './rng.js';
+import { validateData, normalizeState, options, GAME_MODES } from './validation.js';
 import { parseHash, linkFor, setHash, copy, drawCard } from './share.js';
+import { checkForUpdates } from './update-check.js';
+import { releasesOf, siteVersionOf, renderUpdates } from './views/updates.js';
+import {
+  $,
+  $$,
+  esc,
+  toast,
+  dia,
+  seg,
+  difficultyBadge,
+  intro,
+  mmss,
+  reduce,
+  ROMAN,
+  DIFF_COLOR,
+} from './ui-kit.js';
 
-const $ = (s, r = document) => r.querySelector(s),
-  $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const esc = (s) =>
-  String(s).replace(
-    /[&<>"]/g,
-    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
-  );
-const RC = { easy: '#8c82a9', mid: '#7662ad', hard: '#9d62c9', insane: '#d55479' };
-const ROM = ['I', 'II', 'III'];
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const H = (id) => RT.data.heroes.find((h) => h.id === id),
-  C = (id) => RT.data.challenges.find((c) => c.id === id),
-  I = (id) => RT.data.items.find((i) => i.id === id);
-const mmss = (ms) => {
-  const s = Math.floor(ms / 1000);
-  return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
-};
+  C = (id) => RT.data.challenges.find((c) => c.id === id);
 const DIFFS = Object.keys(DIFF);
+const TABS = ['roulette', 'build', 'ban', 'custom', 'history', 'updates'];
+// Why a roll produced nothing, phrased as an i18n key the player can act on.
+const ROLL_FAILURE = {
+  'no-heroes': 'noHeroes',
+  'locked-hero': 'lockedHeroGone',
+  'locked-condition': 'lockedConditionBlocked',
+  'no-conditions': 'noConditions',
+};
 
 /* ---------- helpers ---------- */
-let tt;
-function toast(m) {
-  const e = $('#toast');
-  e.textContent = m;
-  e.classList.add('on');
-  clearTimeout(tt);
-  tt = setTimeout(() => e.classList.remove('on'), 1800);
-}
 function persist() {
   if (!saveState()) toast(t('storageError'));
 }
@@ -94,16 +95,6 @@ function beep(f, d = 0.1) {
     console.warn(e);
   }
 }
-const dia = (h) =>
-  `<div class="dia" style="--c:${h.color}"><span>${esc(h.name[0])}</span>${h.icon ? `<img class="pic" src="${esc(h.icon)}" alt="" loading="lazy">` : ''}</div>`;
-const seg = (arr, cur, attr) =>
-  `<div class="seg" role="group" aria-label="${t(attr === 'diff' ? 'difficulty' : 'heroFilter')}">${arr.map(([v, l]) => `<button data-${attr}="${v}" class="${v == cur ? 'on' : ''}" aria-pressed="${v == cur}">${l}</button>`).join('')}</div>`;
-const difficultyBadge = (x) =>
-  `<span class="difficulty-badge" style="--difficulty-color:${RC[x.diff]}">${icon('spark', 11)} ${t('diff.' + x.diff)}</span>`;
-const intro = (title, description, action = '') =>
-  `<div class="page-intro"><div><div class="eyebrow">DEADLOCK / CHALLENGELOCK</div><h1>${title}</h1><p>${description}</p></div>${action}</div>`;
-const emptyPanel = (glyph, title, description) =>
-  `<div class="empty-panel">${icon(glyph)}<h2>${title}</h2><p>${description}</p></div>`;
 const activeHeroes = () => RT.data.heroes.filter((h) => h.active !== false);
 function setBusy(busy) {
   const board = $('.mach');
@@ -137,9 +128,8 @@ function paintHeader() {
 }
 
 /* ---------- version / changelog ---------- */
-const releases = () =>
-  Array.isArray(RT.data.changelog?.releases) ? RT.data.changelog.releases : [];
-const siteVersion = () => releases()[0]?.version || '';
+const releases = () => releasesOf(RT.data);
+const siteVersion = () => siteVersionOf(releases());
 
 // Footer chip: the current version doubles as the entry point to the changelog.
 function paintFooterVersion() {
@@ -149,16 +139,6 @@ function paintFooterVersion() {
   button.textContent = (version ? 'v' + version + ' · ' : '') + t('whatsNew');
   button.title = t('versionLabel') + (version ? ' ' + version : '');
 }
-
-const releaseDate = (iso) => {
-  const date = new Date(String(iso) + 'T00:00:00');
-  if (Number.isNaN(date.getTime())) return String(iso);
-  return new Intl.DateTimeFormat(S.lang === 'ru' ? 'ru-RU' : 'en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(date);
-};
 
 function applyStatic() {
   $$('[data-icon]').forEach((e) => (e.innerHTML = icon(e.dataset.icon)));
@@ -236,7 +216,7 @@ function viewRoulette() {
       'diff',
     )}</div>
     <div class="reel-stage"><div class="reel hero-reel" data-i="0"><div class="reel-title"><span>${t('yourHero')}</span>${icon('shield', 13)}</div><div class="strip"></div><button class="lk" data-lock="0" aria-label="${t('lock')} — ${t('hero')}"></button></div>
-    <div class="conditions">${[1, 2, 3].map((i) => `<div class="reel condition-reel" data-i="${i}"><div class="condition-top"><div class="reel-title"><span class="condition-number">0${i}</span><span>${t('cond')} ${ROM[i - 1]}</span></div><button class="lk" data-lock="${i}" aria-label="${t('lock')} — ${t('cond')} ${ROM[i - 1]}"></button></div><div class="strip"></div></div>`).join('')}</div></div>
+    <div class="conditions">${[1, 2, 3].map((i) => `<div class="reel condition-reel" data-i="${i}"><div class="condition-top"><div class="reel-title"><span class="condition-number">0${i}</span><span>${t('cond')} ${ROMAN[i - 1]}</span></div><button class="lk" data-lock="${i}" aria-label="${t('lock')} — ${t('cond')} ${ROMAN[i - 1]}"></button></div><div class="strip"></div></div>`).join('')}</div></div>
     <div class="filter-summary"><span>${icon('shield', 12)}${heroPool(RT.data.heroes, S).length} ${t('heroesCount')}</span><span class="sep">/</span><span>${S.cats.length} ${t('categoriesCount')}</span><button data-tab="custom">${t('configure')}${icon('arrow', 12)}</button></div>
     <div class="board-actions"><button class="spin" id="spin">${icon('shuffle')}<span id="spin-label">${t('spin')}</span><kbd>SPACE</kbd></button><button class="reroll-button" id="reroll">${icon('refresh', 17)}${t('reroll')}<small id="rr">${RT.rerolls}</small></button></div>
     <details class="board-options"><summary><span>${icon('settings', 14)}${t('extraSettings')}</span>${icon('chevron', 14)}</summary><div class="options-content"><label class="chk"><input type="checkbox" id="snd" ${S.sound ? 'checked' : ''}>${t('soundOn')}</label><label class="chk"><input type="checkbox" id="fsame" ${S.friend.same ? 'checked' : ''}>${t('sameHero')}</label><label class="chk">${t('player')}<input type="number" id="fpl" min="1" max="9" value="${S.friend.player}" class="num" ${S.friend.same ? 'disabled' : ''}></label><p class="keyboard-hint">${t('keys')}</p></div></details>
@@ -305,6 +285,7 @@ function paintContract() {
   <div class="contract-state">${icon(RT.finished ? 'check' : 'play', 12)}${t(RT.finished ? 'sessionClosed' : 'sessionActive')}</div><p class="contract-note">${t('contractHint')}</p>
   ${RT.finished ? `<div class="completion-status ${x.outcome === 'fail' ? 'failed' : ''}">${icon(x.outcome === 'done' ? 'check' : 'close', 17)}${t(x.outcome === 'done' ? 'completedStatus' : 'failedStatus')}</div>` : ''}
   <div class="result-actions"><button class="pb" id="done" ${RT.finished ? 'disabled' : ''}>${icon('check', 16)}${t('done')}</button><button class="pb o" id="failb" ${RT.finished ? 'disabled' : ''}>${icon('close', 15)}${t('fail')}</button></div>
+  <button class="pb friend-challenge" id="cf">${icon('shield', 15)}${t('challengeFriend')}</button>
   ${RT.finished ? `<button class="review-stamp" id="review-stamp">${icon('shield', 17)}${t('reviewStamp')}${icon('arrow', 15)}</button>` : ''}
   <div class="timer-row"><div class="timer-readout">${icon('clock', 17)}<b id="tm" class="mono-t">${mmss(RT.timer.ms)}</b></div><button class="timer-toggle" id="tgl" ${RT.finished ? 'disabled' : ''}>${icon(RT.timer.run ? 'clock' : 'play', 12)}${RT.timer.run ? t('pause') : t('start')}</button></div>
   <div class="share-actions"><button id="cl">${icon('link', 14)}${t('copyLink')}</button><button id="ct">${icon('copy', 14)}${t('copyText')}</button><button id="cp">${icon('download', 14)}${t('png')}</button></div>
@@ -328,26 +309,27 @@ async function doRoll(reroll, opt = {}) {
   const seed = reroll ? RT.seed : opt.seed || newSeed(),
     r = reroll ? RT.r + 1 : opt.r || 0;
   const locks = reroll ? RT.locks : [false, false, false, false];
-  let res;
+  let res,
+    reason = null;
   try {
-    res = opt.result
-      ? restoreResult(opt.result, RT.data.heroes, RT.data.challenges)
-      : roll({
-          seed,
-          r,
-          heroes: RT.data.heroes,
-          challenges: RT.data.challenges,
-          o: S,
-          locks,
-          prev: reroll ? RT.cur : null,
-          player: S.friend.player,
-          same: S.friend.same,
-        });
+    if (opt.result) res = restoreResult(opt.result, RT.data.heroes, RT.data.challenges);
+    else
+      ({ result: res, reason } = rollDetailed({
+        seed,
+        r,
+        heroes: RT.data.heroes,
+        challenges: RT.data.challenges,
+        o: S,
+        locks,
+        prev: reroll ? RT.cur : null,
+        player: S.friend.player,
+        same: S.friend.same,
+      }));
   } catch (e) {
     console.error(e);
     return toast(t('invalidLink'));
   }
-  if (!res) return toast(t(heroPool(RT.data.heroes, S).length ? 'noConditions' : 'noHeroes'));
+  if (!res) return toast(t(ROLL_FAILURE[reason] || 'noConditions'));
   RT.seed = seed;
   RT.r = r;
   RT.locks = locks;
@@ -376,7 +358,7 @@ async function doRoll(reroll, opt = {}) {
   setBusy(false);
   beep(res.diff === 'insane' ? 160 : 660, 0.18);
   if (res.diff === 'hard' || res.diff === 'insane') {
-    particles(RC[res.diff]);
+    particles(DIFF_COLOR[res.diff]);
     const m = $('.mach');
     if (!reduce && m) {
       m.classList.add('shake');
@@ -426,7 +408,7 @@ async function png() {
     hero: H(x.hero).name,
     lines: x.conds.map((id) => loc(C(id).name)),
     label: t('diff.' + x.diff),
-    color: RC[x.diff],
+    color: DIFF_COLOR[x.diff],
     foot: `${modeName(x)} · seed ${x.seed} · Deadlock Challenge Roulette`,
   });
   cv.toBlob((b) => {
@@ -437,6 +419,28 @@ async function png() {
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   });
+}
+
+// Same seed, another hero: the link hands the friend their own contract instead of
+// a copy of yours, which is the whole point of a duel between two players.
+async function friendChallenge() {
+  const x = RT.cur;
+  if (!x) return;
+  const o = options(x.opts || S);
+  for (const player of [2, 3, 4, 5, 6, 7, 8, 9]) {
+    const { result } = rollDetailed({
+      seed: x.seed,
+      r: x.r,
+      heroes: RT.data.heroes,
+      challenges: RT.data.challenges,
+      o,
+      same: false,
+      player,
+    });
+    if (result && result.hero !== x.hero)
+      return toast((await copy(linkFor(result))) ? t('friendCopied') : t('error'));
+  }
+  return toast(t('noConditions'));
 }
 
 /* ---------- BUILD ---------- */
@@ -492,10 +496,24 @@ function viewCustom() {
 }
 function viewHistory() {
   const p = $('#p-history'),
+    rtf = new Intl.RelativeTimeFormat(S.lang === 'ru' ? 'ru' : 'en', { numeric: 'auto' }),
+    // A contract keeps its date now, so the list can say when it happened.
+    when = (ts) => {
+      if (!Number.isFinite(ts)) return '';
+      const days = Math.round((ts - Date.now()) / 86400000);
+      return rtf.format(Math.abs(days) < 1 ? 0 : days, 'day');
+    },
     row = (x) =>
-      `<li><a href="${linkFor(x)}">${H(x.hero) ? dia(H(x.hero)) : ''}<div class="history-copy"><div class="fx" style="gap:6px"><b>${esc(H(x.hero)?.name || x.hero)}</b>${difficultyBadge(x)}</div><small class="history-mode">${modeName(x)}</small><small>${x.conds.map((id) => esc(loc(C(id)?.name || id))).join(' · ')}</small></div></a><span class="history-status ${x.outcome === 'fail' ? 'failed' : ''}">${x.outcome === 'done' ? '✓' : x.outcome === 'fail' ? '×' : t('pending')}</span></li>`;
+      `<li><a href="${linkFor(x)}">${H(x.hero) ? dia(H(x.hero)) : ''}<div class="history-copy"><div class="fx" style="gap:6px"><b>${esc(H(x.hero)?.name || x.hero)}</b>${difficultyBadge(x)}</div><small class="history-mode">${modeName(x)}${when(x.ts) ? ' · ' + esc(when(x.ts)) : ''}</small><small>${x.conds.map((id) => esc(loc(C(id)?.name || id))).join(' · ')}</small></div></a><span class="history-status ${x.outcome === 'fail' ? 'failed' : ''}">${x.outcome === 'done' ? '✓' : x.outcome === 'fail' ? '×' : t('pending')}</span></li>`;
   const total = S.stats.done + S.stats.fail;
   const rate = total ? Math.round((S.stats.done / total) * 100) : 0;
+  // Pending contracts do not break a run; the first failure does.
+  let streak = 0;
+  for (const x of S.history) {
+    if (!x.outcome) continue;
+    if (x.outcome !== 'done') break;
+    streak++;
+  }
   const heroCounts = new Map();
   for (const x of S.history)
     if (x.outcome === 'done') heroCounts.set(x.hero, (heroCounts.get(x.hero) || 0) + 1);
@@ -513,6 +531,7 @@ function viewHistory() {
       ['won', S.stats.done, 'check'],
       ['lost', S.stats.fail, 'close'],
       ['successRate', rate + '%', 'spark'],
+      ['streak', streak, 'shield'],
     ]
       .map(
         ([label, value, glyph]) =>
@@ -520,33 +539,58 @@ function viewHistory() {
       )
       .join(
         '',
-      )}</div><div class="card"><div class="section-heading"><h2>${t('topHeroes')}</h2>${icon('trophy', 18)}</div><ul class="hl">${topHeroesHtml}</ul></div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history', 18)}</div><ul class="hl">${S.history.map(row).join('') || `<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star', 18)}</div><ul class="hl">${S.favs.map(row).join('') || `<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
+      )}</div><div class="card"><div class="section-heading"><h2>${t('topHeroes')}</h2>${icon('trophy', 18)}</div><ul class="hl">${topHeroesHtml}</ul></div><div class="card"><div class="section-heading"><div><h2>${t('backupTitle')}</h2><p>${t('backupHint')}</p></div>${icon('download', 18)}</div><div class="backup-actions"><button id="export-data">${icon('download', 14)}${t('exportData')}</button><button id="import-data">${icon('refresh', 14)}${t('importData')}</button><input id="import-file" type="file" accept="application/json,.json" hidden></div></div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history', 18)}</div><ul class="hl">${S.history.map(row).join('') || `<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star', 18)}</div><ul class="hl">${S.favs.map(row).join('') || `<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
+}
+// Local-only data never leaves the browser on its own: give the player a file.
+function exportData() {
+  const payload = {
+    v: 1,
+    exportedAt: new Date().toISOString(),
+    history: S.history,
+    favs: S.favs,
+    stats: S.stats,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'challengelock-backup.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+async function importData(file) {
+  if (!file) return;
+  let parsed;
+  try {
+    parsed = JSON.parse(await file.text());
+  } catch (e) {
+    console.warn(e);
+    return toast(t('importFailed'));
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+    return toast(t('importFailed'));
+  if (!Array.isArray(parsed.history) && !Array.isArray(parsed.favs))
+    return toast(t('importFailed'));
+  const clean = normalizeState({ ...S, ...parsed }, S);
+  const dedupe = (list) => {
+    const seen = new Set();
+    return list.filter((x) => {
+      const key = resultKey(x);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+  S.history = dedupe(clean.history).slice(0, 50);
+  S.favs = dedupe(clean.favs).slice(0, 50);
+  S.stats = clean.stats;
+  persist();
+  show('history');
+  toast(`${t('importDone')} ${S.history.length} / ${S.favs.length}`);
 }
 
 /* ---------- UPDATES ---------- */
 function viewUpdates() {
-  const p = $('#p-updates');
-  const list = releases();
-  const version = siteVersion();
-  p.innerHTML =
-    intro(
-      t('updatesTitle'),
-      t('updatesIntro'),
-      version ? `<span class="version-pill">v${esc(version)}</span>` : '',
-    ) +
-    (list.length
-      ? `<div class="release-list">${list
-          .map(
-            (r, i) => `<article class="card release">
-      <div class="release-head"><span class="release-version">v${esc(r.version)}</span><time datetime="${esc(r.date)}">${esc(releaseDate(r.date))}</time>${
-        i === 0 ? `<span class="release-current">${t('currentVersion')}</span>` : ''
-      }</div>
-      <h2>${esc(loc(r.title))}</h2>
-      <ul>${(loc(r.items) || []).map((item) => `<li>${esc(item)}</li>`).join('')}</ul>
-    </article>`,
-          )
-          .join('')}</div>`
-      : `<div class="card"><p>${t('updatesEmpty')}</p></div>`);
+  renderUpdates($('#p-updates'), releases(), S.lang);
 }
 
 /* ---------- events ---------- */
@@ -639,6 +683,12 @@ function bind() {
     if (b.id === 'cl') return toast((await copy(linkFor(RT.cur))) ? t('copied') : t('error'));
     if (b.id === 'ct') return toast((await copy(resText(RT.cur))) ? t('copied') : t('error'));
     if (b.id === 'cp') return png();
+    if (b.id === 'cf') return friendChallenge();
+    if (b.id === 'export-data') return exportData();
+    if (b.id === 'import-data') {
+      $('#import-file')?.click();
+      return;
+    }
     if (d.hm) {
       S.heroMode = d.hm;
       applyHeroSel();
@@ -682,6 +732,9 @@ function bind() {
     } else if (i.id === 'fpl') {
       S.friend.player = Math.max(1, Math.min(9, +i.value || 1));
       persist();
+    } else if (i.id === 'import-file') {
+      importData(i.files?.[0]);
+      i.value = '';
     }
   });
   document.addEventListener('input', (e) => {
@@ -809,7 +862,13 @@ export async function boot() {
   applyStatic();
   persist();
   const h = parseHash();
-  h ? await fromHash(h) : show('roulette');
+  if (h) await fromHash(h);
+  else {
+    show(initialTab());
+    // A PWA shortcut for the daily challenge opens the app with the roll already made.
+    if (new URLSearchParams(location.search).has('daily'))
+      await doRoll(false, { seed: dailySeed() });
+  }
   restoreTimer();
   const notice = document.createElement('p');
   notice.id = 'data-notice';
@@ -817,8 +876,15 @@ export async function boot() {
   $('#foot').before(notice);
   paintCatalog();
   if ('serviceWorker' in navigator) {
+    // The first claim of a fresh visit is not an update: the page just came from the
+    // network, so reloading it would restart the boot for no reason.
+    let controlled = !!navigator.serviceWorker.controller;
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!controlled) {
+        controlled = true;
+        return;
+      }
       if (refreshing) return;
       refreshing = true;
       window.location.reload();
@@ -838,67 +904,16 @@ export async function boot() {
       })
       .catch(() => {});
   }
-  checkForUpdates();
+  checkForUpdates(siteVersion());
 }
 
-async function checkForUpdates() {
-  const APP_VERSION = RT.data?.changelog?.releases?.[0]?.version || '1.0.1';
+// PWA shortcuts and bookmarked sections arrive as ?tab=<name>; a shared result
+// hash still wins because it carries the contract itself.
+function initialTab() {
   try {
-    const r = await fetch('https://api.github.com/repos/makooyyy/ChallengeLock/releases/latest');
-    if (!r.ok) return;
-    const data = await r.json();
-    const latest = String(data.tag_name || '').replace(/^v/, '');
-    if (!latest || !isNewerVersion(latest, APP_VERSION)) return;
-    showUpdateBanner(
-      latest,
-      data.html_url || 'https://github.com/makooyyy/ChallengeLock/releases/latest',
-    );
-  } catch (e) {
-    console.warn(e);
+    const tab = new URLSearchParams(location.search).get('tab');
+    return TABS.includes(tab) ? tab : 'roulette';
+  } catch {
+    return 'roulette';
   }
-}
-
-function isNewerVersion(latest, current) {
-  const a = latest.split('.').map((n) => parseInt(n, 10) || 0);
-  const b = current.split('.').map((n) => parseInt(n, 10) || 0);
-  for (let i = 0; i < Math.max(a.length, b.length); i++) {
-    if ((a[i] || 0) > (b[i] || 0)) return true;
-    if ((a[i] || 0) < (b[i] || 0)) return false;
-  }
-  return false;
-}
-
-function showUpdateBanner(version, url) {
-  if (document.getElementById('update-banner')) return;
-  const safeVersion = String(version).replace(
-    /[&<>"]/g,
-    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
-  );
-  const safeUrl = /^https:\/\/github\.com\/makooyyy\/ChallengeLock\//.test(String(url))
-    ? String(url)
-    : 'https://github.com/makooyyy/ChallengeLock/releases/latest';
-  const b = document.createElement('div');
-  b.id = 'update-banner';
-  b.style.cssText =
-    'position:fixed;top:0;left:0;right:0;z-index:9999;background:#3475fa;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.2)';
-  const text = document.createElement('span');
-  text.textContent = 'Доступна новая версия ' + safeVersion;
-  const actions = document.createElement('span');
-  const link = document.createElement('a');
-  link.href = safeUrl;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  link.style.cssText = 'color:#fff;font-weight:700;margin-right:12px;text-decoration:underline;';
-  link.textContent = 'Скачать';
-  const close = document.createElement('button');
-  close.id = 'update-close';
-  close.type = 'button';
-  close.setAttribute('aria-label', 'Закрыть уведомление об обновлении');
-  close.style.cssText =
-    'background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;line-height:1;';
-  close.textContent = '×';
-  close.onclick = () => b.remove();
-  actions.append(link, close);
-  b.append(text, actions);
-  document.body.prepend(b);
 }

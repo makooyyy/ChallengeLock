@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # Root web app: only tooling (prettier, eslint, ...).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: development
+
+  # Electron wrapper: keep the electron ecosystem together and the rest of
+  # the dev tooling in a single PR.
+  - package-ecosystem: npm
+    directory: /desktop
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      electron:
+        patterns:
+          - electron
+          - electron-*
+      dev-dependencies:
+        dependency-type: development
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

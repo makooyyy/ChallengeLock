@@ -10,6 +10,7 @@
     />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#101217" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f5f9" />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://assets-bucket.deadlock-api.com; font-src 'self'; connect-src 'self' https://api.github.com; manifest-src 'self'"
@@ -49,6 +50,8 @@
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
     <link rel="manifest" href="manifest.json" />
     <script src="js/theme-boot.js"></script>
+    <link rel="preconnect" href="https://assets-bucket.deadlock-api.com" crossorigin />
+    <link rel="dns-prefetch" href="https://assets-bucket.deadlock-api.com" />
     <link
       rel="preload"
       href="assets/fonts/manrope-latin.woff2"

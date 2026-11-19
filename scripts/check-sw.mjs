@@ -8,7 +8,6 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const rel = (p) => p.split(path.sep).join('/');
 const errors = [];
 
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
