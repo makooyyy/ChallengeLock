@@ -1375,7 +1375,7 @@ select,
 }
 .stat {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
 }
 .stat .card {
@@ -6424,6 +6424,21 @@ input {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
+}
+
+/* The social hook: one seed, a different hero for the friend. */
+.friend-challenge {
+  display: flex;
+  width: 100%;
+  margin-top: 10px;
+  justify-content: center;
+  background: transparent;
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.friend-challenge:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-color: var(--accent);
 }
 
 /* Desktop release notice. Sits above the app, so it owns its own surface. */

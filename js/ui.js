@@ -285,6 +285,7 @@ function paintContract() {
   <div class="contract-state">${icon(RT.finished ? 'check' : 'play', 12)}${t(RT.finished ? 'sessionClosed' : 'sessionActive')}</div><p class="contract-note">${t('contractHint')}</p>
   ${RT.finished ? `<div class="completion-status ${x.outcome === 'fail' ? 'failed' : ''}">${icon(x.outcome === 'done' ? 'check' : 'close', 17)}${t(x.outcome === 'done' ? 'completedStatus' : 'failedStatus')}</div>` : ''}
   <div class="result-actions"><button class="pb" id="done" ${RT.finished ? 'disabled' : ''}>${icon('check', 16)}${t('done')}</button><button class="pb o" id="failb" ${RT.finished ? 'disabled' : ''}>${icon('close', 15)}${t('fail')}</button></div>
+  <button class="pb friend-challenge" id="cf">${icon('shield', 15)}${t('challengeFriend')}</button>
   ${RT.finished ? `<button class="review-stamp" id="review-stamp">${icon('shield', 17)}${t('reviewStamp')}${icon('arrow', 15)}</button>` : ''}
   <div class="timer-row"><div class="timer-readout">${icon('clock', 17)}<b id="tm" class="mono-t">${mmss(RT.timer.ms)}</b></div><button class="timer-toggle" id="tgl" ${RT.finished ? 'disabled' : ''}>${icon(RT.timer.run ? 'clock' : 'play', 12)}${RT.timer.run ? t('pause') : t('start')}</button></div>
   <div class="share-actions"><button id="cl">${icon('link', 14)}${t('copyLink')}</button><button id="ct">${icon('copy', 14)}${t('copyText')}</button><button id="cp">${icon('download', 14)}${t('png')}</button></div>
@@ -420,6 +421,28 @@ async function png() {
   });
 }
 
+// Same seed, another hero: the link hands the friend their own contract instead of
+// a copy of yours, which is the whole point of a duel between two players.
+async function friendChallenge() {
+  const x = RT.cur;
+  if (!x) return;
+  const o = options(x.opts || S);
+  for (const player of [2, 3, 4, 5, 6, 7, 8, 9]) {
+    const { result } = rollDetailed({
+      seed: x.seed,
+      r: x.r,
+      heroes: RT.data.heroes,
+      challenges: RT.data.challenges,
+      o,
+      same: false,
+      player,
+    });
+    if (result && result.hero !== x.hero)
+      return toast((await copy(linkFor(result))) ? t('friendCopied') : t('error'));
+  }
+  return toast(t('noConditions'));
+}
+
 /* ---------- BUILD ---------- */
 function viewBuild() {
   renderBuilder();
@@ -473,10 +496,24 @@ function viewCustom() {
 }
 function viewHistory() {
   const p = $('#p-history'),
+    rtf = new Intl.RelativeTimeFormat(S.lang === 'ru' ? 'ru' : 'en', { numeric: 'auto' }),
+    // A contract keeps its date now, so the list can say when it happened.
+    when = (ts) => {
+      if (!Number.isFinite(ts)) return '';
+      const days = Math.round((ts - Date.now()) / 86400000);
+      return rtf.format(Math.abs(days) < 1 ? 0 : days, 'day');
+    },
     row = (x) =>
-      `<li><a href="${linkFor(x)}">${H(x.hero) ? dia(H(x.hero)) : ''}<div class="history-copy"><div class="fx" style="gap:6px"><b>${esc(H(x.hero)?.name || x.hero)}</b>${difficultyBadge(x)}</div><small class="history-mode">${modeName(x)}</small><small>${x.conds.map((id) => esc(loc(C(id)?.name || id))).join(' · ')}</small></div></a><span class="history-status ${x.outcome === 'fail' ? 'failed' : ''}">${x.outcome === 'done' ? '✓' : x.outcome === 'fail' ? '×' : t('pending')}</span></li>`;
+      `<li><a href="${linkFor(x)}">${H(x.hero) ? dia(H(x.hero)) : ''}<div class="history-copy"><div class="fx" style="gap:6px"><b>${esc(H(x.hero)?.name || x.hero)}</b>${difficultyBadge(x)}</div><small class="history-mode">${modeName(x)}${when(x.ts) ? ' · ' + esc(when(x.ts)) : ''}</small><small>${x.conds.map((id) => esc(loc(C(id)?.name || id))).join(' · ')}</small></div></a><span class="history-status ${x.outcome === 'fail' ? 'failed' : ''}">${x.outcome === 'done' ? '✓' : x.outcome === 'fail' ? '×' : t('pending')}</span></li>`;
   const total = S.stats.done + S.stats.fail;
   const rate = total ? Math.round((S.stats.done / total) * 100) : 0;
+  // Pending contracts do not break a run; the first failure does.
+  let streak = 0;
+  for (const x of S.history) {
+    if (!x.outcome) continue;
+    if (x.outcome !== 'done') break;
+    streak++;
+  }
   const heroCounts = new Map();
   for (const x of S.history)
     if (x.outcome === 'done') heroCounts.set(x.hero, (heroCounts.get(x.hero) || 0) + 1);
@@ -494,6 +531,7 @@ function viewHistory() {
       ['won', S.stats.done, 'check'],
       ['lost', S.stats.fail, 'close'],
       ['successRate', rate + '%', 'spark'],
+      ['streak', streak, 'shield'],
     ]
       .map(
         ([label, value, glyph]) =>
@@ -645,6 +683,7 @@ function bind() {
     if (b.id === 'cl') return toast((await copy(linkFor(RT.cur))) ? t('copied') : t('error'));
     if (b.id === 'ct') return toast((await copy(resText(RT.cur))) ? t('copied') : t('error'));
     if (b.id === 'cp') return png();
+    if (b.id === 'cf') return friendChallenge();
     if (b.id === 'export-data') return exportData();
     if (b.id === 'import-data') {
       $('#import-file')?.click();

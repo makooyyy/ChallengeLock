@@ -4,11 +4,14 @@
       "version": "1.21.0",
       "date": "2026-11-19",
       "title": {
-        "ru": "Резервные копии, честные уведомления и порядок в проверках",
-        "en": "Backups, honest notices and a tighter pipeline"
+        "ru": "Больше заданий, вызов другу и честные уведомления",
+        "en": "More challenges, duels with friends, honest notices"
       },
       "items": {
         "ru": [
+          "Заданий стало заметно больше: лёгкие, уличные, командные и под конкретных героев — рулетка больше не зацикливается на четырёх вариантах.",
+          "Кнопка «Вызвать друга» копирует ссылку-вызов: тот же seed, но у друга свой герой и те же условия.",
+          "В истории появилась серия побед — сколько контрактов закрыто подряд.",
           "Историю и избранное можно сохранить в файл и восстановить из него — очистка данных браузера больше не стирает контракты.",
           "Уведомление о новой версии переведено, проверяется раз в сутки и не выдаёт сборку для Windows за обновление сайта.",
           "Понятные причины, если бросок не состоялся: занятый замок, недоступный герой или несовместимые категории.",
@@ -16,6 +19,9 @@
           "Добавлены линтер, браузерные тесты в CI, ярлыки PWA и политика безопасности."
         ],
         "en": [
+          "Noticeably more challenges: easy, street, team and hero-specific ones — the roulette no longer loops over four options.",
+          "A “Challenge a friend” button copies a duel link: the same seed, but your friend gets their own hero and the same conditions.",
+          "History now tracks your win streak — how many contracts you closed in a row.",
           "History and favourites can be saved to a file and restored from it — clearing site data no longer wipes your contracts.",
           "The new-version notice is translated, checked once a day, and no longer presents a Windows build as a site update.",
           "Clear reasons when a roll produces nothing: a busy lock, an unavailable hero or incompatible categories.",

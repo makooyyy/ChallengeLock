@@ -286,7 +286,10 @@
     "exportData": "Скачать копию",
     "importData": "Загрузить копию",
     "importDone": "Загружено контрактов:",
-    "importFailed": "Не удалось прочитать файл резервной копии."
+    "importFailed": "Не удалось прочитать файл резервной копии.",
+    "challengeFriend": "Вызвать друга",
+    "friendCopied": "Ссылка-вызов скопирована: друг получит свой контракт",
+    "streak": "Серия"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -575,6 +578,9 @@
     "exportData": "Download a copy",
     "importData": "Load a copy",
     "importDone": "Contracts restored:",
-    "importFailed": "That backup file could not be read."
+    "importFailed": "That backup file could not be read.",
+    "challengeFriend": "Challenge a friend",
+    "friendCopied": "Challenge link copied: your friend gets their own contract",
+    "streak": "Streak"
   }
 }
