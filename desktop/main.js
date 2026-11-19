@@ -2,7 +2,7 @@ const { app, BrowserWindow, Menu } = require('electron');
 let autoUpdater = null;
 try {
   autoUpdater = require('electron-updater').autoUpdater;
-} catch (e) {
+} catch {
   autoUpdater = null;
 }
 const http = require('http');
@@ -71,6 +71,34 @@ const server = http.createServer((req, res) => {
 });
 
 let mainWindow = null;
+let serverPort = null;
+
+function createWindow() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+    return mainWindow;
+  }
+  if (!serverPort) return null;
+  mainWindow = new BrowserWindow({
+    width: 1280,
+    height: 820,
+    minWidth: 900,
+    minHeight: 600,
+    title: 'ChallengeLock',
+    backgroundColor: '#101217',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  mainWindow.loadURL(`http://127.0.0.1:${serverPort}/index.html`);
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+  return mainWindow;
+}
 
 app.whenReady().then(() => {
   if (autoUpdater) {
@@ -79,33 +107,23 @@ app.whenReady().then(() => {
     autoUpdater.checkForUpdatesAndNotify().catch(() => {});
   }
   Menu.setApplicationMenu(null);
+  // The local HTTP server is started exactly once; window recreation never re-listens.
   server.listen(0, '127.0.0.1', () => {
-    const port = server.address().port;
-    mainWindow = new BrowserWindow({
-      width: 1280,
-      height: 820,
-      minWidth: 900,
-      minHeight: 600,
-      title: 'ChallengeLock',
-      backgroundColor: '#101217',
-      webPreferences: {
-        preload: path.join(__dirname, 'preload.js'),
-        contextIsolation: true,
-        nodeIntegration: false,
-      },
-    });
-    mainWindow.loadURL(`http://127.0.0.1:${port}/index.html`);
-    mainWindow.on('closed', () => {
-      mainWindow = null;
-    });
+    serverPort = server.address().port;
+    createWindow();
   });
 });
 
 app.on('window-all-closed', () => {
-  server.close();
-  app.quit();
+  // Windows/Linux: quit as before. macOS keeps the app (and the single server)
+  // alive so the dock icon can re-open a window through `activate`.
+  if (process.platform !== 'darwin') {
+    server.close();
+    app.quit();
+  }
 });
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) app.whenReady();
+  // macOS: re-create the window without calling app.whenReady() again.
+  if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
