@@ -1,6 +1,22 @@
 {
   "releases": [
     {
+      "version": "1.23.2",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Исправление загрузки оверлея",
+        "en": "Overlay loading fix"
+      },
+      "items": {
+        "ru": [
+          "Исправлена загрузка overlay.html в собранном приложении."
+        ],
+        "en": [
+          "Fixed overlay.html loading in the packaged app."
+        ]
+      }
+    },
+    {
       "version": "1.23.1",
       "date": "2026-11-20",
       "title": {

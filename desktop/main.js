@@ -378,7 +378,12 @@ function createOverlayWindow() {
   if (typeof overlayWindow.setOpacity === 'function')
     overlayWindow.setOpacity(Math.min(1, Math.max(0.35, Number(overlaySettings.opacity) || 0.92)));
   if (typeof overlayWindow.loadFile === 'function')
-    overlayWindow.loadFile(path.join(__dirname, 'overlay.html'));
+    overlayWindow.loadFile(path.join(__dirname, 'overlay.html')).catch((error) => {
+      log('overlay failed to load: ' + String((error && error.message) || error));
+    });
+  overlayWindow.webContents.on('did-fail-load', (_event, code, description, url) => {
+    log('overlay did-fail-load ' + code + ' ' + description + ' ' + url);
+  });
   overlayWindow.on('closed', () => {
     overlayWindow = null;
   });
