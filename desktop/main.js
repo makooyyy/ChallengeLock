@@ -186,6 +186,7 @@ function createWindow() {
     minWidth: 360,
     minHeight: 320,
     title: 'ChallengeLock',
+    frame: false,
     backgroundColor: '#101217',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -297,6 +298,7 @@ const DEFAULT_OVERLAY_SETTINGS = {
   showConditions: true,
   showTimer: true,
   showStatus: true,
+  showBuild: true,
   lockPosition: false,
 };
 
@@ -332,6 +334,7 @@ function saveOverlaySettings(settings) {
 
 let overlaySettings = loadOverlaySettings();
 let overlayContract = null;
+let overlayBuild = null;
 
 function overlayBounds(position = overlaySettings.position) {
   const area = screen.getPrimaryDisplay().workArea;
@@ -404,10 +407,14 @@ function createOverlayWindow() {
   overlayWindow.on('closed', () => {
     overlayWindow = null;
   });
-  if (overlayContract) {
+  if (overlayContract || overlayBuild) {
     overlayWindow.webContents.on('did-finish-load', () => {
       if (overlayWindow && !overlayWindow.isDestroyed())
-        overlayWindow.webContents.send('desktop:overlay', overlayContract);
+        overlayWindow.webContents.send('desktop:overlay', {
+          contract: overlayContract,
+          build: overlayBuild,
+          settings: overlaySettings,
+        });
     });
   }
   applyOverlayClickThrough();
@@ -425,7 +432,11 @@ function showOverlay() {
   const win = createOverlayWindow();
   if (!win) return;
   win.show();
-  if (overlayContract) win.webContents.send('desktop:overlay', overlayContract);
+  win.webContents.send('desktop:overlay', {
+    contract: overlayContract,
+    build: overlayBuild,
+    settings: overlaySettings,
+  });
 }
 
 function hideOverlay() {
@@ -450,6 +461,7 @@ function setOverlayContract(contract) {
   if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible())
     overlayWindow.webContents.send('desktop:overlay', {
       contract: overlayContract,
+      build: overlayBuild,
       settings: overlaySettings,
     });
 }
@@ -630,7 +642,16 @@ let matchContract = null;
 ipcMain.on('desktop:contract', (_event, text) => {
   activeContract =
     text && typeof text.key === 'string' && typeof text.label === 'string'
-      ? { key: text.key, label: text.label }
+      ? {
+          key: text.key,
+          label: text.label,
+          hero: text.hero,
+          difficulty: text.difficulty,
+          conditions: Array.isArray(text.conditions) ? text.conditions : [],
+          mode: text.mode,
+          timer: text.timer,
+          outcome: text.outcome,
+        }
       : null;
   contractActive = !!activeContract;
   if (matchContract && matchContract.key !== activeContract?.key) matchContract = null;
@@ -796,11 +817,34 @@ async function probeGame() {
 
 ipcMain.handle('desktop:compact-state', () => compact);
 ipcMain.on('desktop:compact-toggle', () => toggleCompact());
+ipcMain.on('desktop:window-minimize', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.minimize();
+});
+ipcMain.on('desktop:window-maximize', () => {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  if (mainWindow.isMaximized()) mainWindow.unmaximize();
+  else mainWindow.maximize();
+});
+ipcMain.on('desktop:window-close', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.close();
+});
+ipcMain.handle('desktop:window-is-maximized', () =>
+  Boolean(mainWindow && !mainWindow.isDestroyed() && mainWindow.isMaximized()),
+);
 ipcMain.handle('desktop:overlay-state', () => ({ ...overlaySettings, contract: overlayContract }));
 ipcMain.on('desktop:overlay-toggle', () => toggleOverlay());
 ipcMain.on('desktop:timer', (_event, value) => {
   if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible())
     overlayWindow.webContents.send('desktop:overlay-timer', value);
+});
+ipcMain.on('desktop:build', (_event, build) => {
+  overlayBuild = build && typeof build === 'object' ? build : null;
+  if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible())
+    overlayWindow.webContents.send('desktop:overlay', {
+      contract: overlayContract,
+      build: overlayBuild,
+      settings: overlaySettings,
+    });
 });
 ipcMain.handle('desktop:overlay-settings', (_event, settings) => {
   overlaySettings = { ...overlaySettings, ...settings };
@@ -818,6 +862,7 @@ ipcMain.handle('desktop:overlay-settings', (_event, settings) => {
     }
     overlayWindow.webContents.send('desktop:overlay', {
       contract: overlayContract,
+      build: overlayBuild,
       settings: overlaySettings,
     });
   }

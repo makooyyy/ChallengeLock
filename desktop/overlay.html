@@ -121,6 +121,28 @@
         color: #cfe0ff;
         font-weight: 700;
       }
+      .build-next {
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: rgba(91, 140, 255, 0.12);
+        border: 1px solid rgba(91, 140, 255, 0.22);
+      }
+      .build-label {
+        display: block;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+      .build-next b {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
+      .build-next small {
+        color: var(--muted);
+      }
       .empty {
         display: grid;
         place-items: center;
@@ -164,7 +186,9 @@
         const showConditions = settings.showConditions !== false;
         const showTimer = settings.showTimer !== false;
         const showStatus = settings.showStatus !== false;
+        const showBuild = settings.showBuild !== false;
         status.hidden = !showStatus;
+        const build = payload && payload.build ? payload.build : null;
         content.innerHTML = `
           ${
             showHero
@@ -181,6 +205,15 @@
             showConditions
               ? `<div class="conditions">
             ${conditions.map((item) => `<div class="condition">${escapeHtml(item)}</div>`).join('')}
+          </div>`
+              : ''
+          }
+          ${
+            showBuild && build && build.nextItem
+              ? `<div class="build-next">
+            <span class="build-label">Следующий предмет</span>
+            <b>${escapeHtml(build.nextItem)}</b>
+            <small>${escapeHtml(String(build.nextCost || 0))} душ · ${escapeHtml(String(build.spent || 0))}/${escapeHtml(String(build.budget || 0))}</small>
           </div>`
               : ''
           }

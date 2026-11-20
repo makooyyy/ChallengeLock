@@ -13,6 +13,10 @@ contextBridge.exposeInMainWorld('challengeLockDesktop', {
     if (text === null || (text && typeof text.key === 'string' && typeof text.label === 'string'))
       ipcRenderer.send('desktop:contract', text);
   },
+  reportBuild: (build) => {
+    if (build === null || (build && typeof build === 'object'))
+      ipcRenderer.send('desktop:build', build);
+  },
   reportTimer: (value) => {
     if (typeof value === 'string') ipcRenderer.send('desktop:timer', value);
   },
@@ -27,6 +31,10 @@ contextBridge.exposeInMainWorld('challengeLockDesktop', {
   },
   compactState: () => ipcRenderer.invoke('desktop:compact-state'),
   toggleCompact: () => ipcRenderer.send('desktop:compact-toggle'),
+  minimizeWindow: () => ipcRenderer.send('desktop:window-minimize'),
+  maximizeWindow: () => ipcRenderer.send('desktop:window-maximize'),
+  closeWindow: () => ipcRenderer.send('desktop:window-close'),
+  isWindowMaximized: () => ipcRenderer.invoke('desktop:window-is-maximized'),
   onOverlay: (callback) => {
     if (typeof callback === 'function')
       ipcRenderer.on('desktop:overlay', (_event, value) => callback(value));

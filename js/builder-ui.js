@@ -58,6 +58,23 @@ export function renderBuilder() {
  <label class="chk lab-keep"><input type="checkbox" id="build-keep" ${s.keepHero ? 'checked' : ''}>${t('keepHero')}</label><button class="spin" id="rb">${icon('shuffle', 18)}${t(b ? 'rebuild' : 'createBuild')}</button><button class="ghost" id="build-import">${icon('download', 18)}${t('importGame')}</button><p class="lab-help">${t('buildMethod')}</p></section>
  <section class="lab-result" aria-live="polite">${b ? result(b, stale) : `<div class="lab-empty"><div class="lab-empty-icon">${icon('layers', 36)}</div><span class="eyebrow">BUILD LAB</span><h2>${t('labEmptyTitle')}</h2><p>${t('labEmptyText')}</p><div class="lab-preview-items">${[1, 2, 3].map((n) => `<span>${String(n).padStart(2, '0')}${icon('layers', 24)}</span>`).join('')}</div>`}</section></div>`;
   restoreFocus();
+  const desktopApi = window.challengeLockDesktop;
+  if (desktopApi?.reportBuild) {
+    if (!RT.build) {
+      desktopApi.reportBuild(null);
+    } else {
+      const nextId =
+        RT.build.items.find((id) => !RT.build.purchased.includes(id)) || RT.build.items[0];
+      const next = nextId ? item(nextId) : null;
+      desktopApi.reportBuild({
+        hero: hero(RT.build.hero)?.name || RT.build.hero,
+        nextItem: next?.name || null,
+        nextCost: next?.cost || 0,
+        budget: RT.build.budget,
+        spent: RT.build.spent,
+      });
+    }
+  }
 }
 function result(b, stale) {
   const h = hero(b.hero),

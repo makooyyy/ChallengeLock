@@ -37,6 +37,12 @@ export const RT = {
     autoShow: true,
     autoHide: false,
     position: 'top-right',
+    showHero: true,
+    showConditions: true,
+    showTimer: true,
+    showStatus: true,
+    showBuild: true,
+    lockPosition: false,
   },
 };
 export const persist = () => save(S);

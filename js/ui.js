@@ -544,6 +544,7 @@ function overlayCard() {
       <label class="chk"><input type="checkbox" id="overlay-show-timer" ${s.showTimer !== false ? 'checked' : ''}>${t('overlayShowTimer')}</label>
       <label class="chk"><input type="checkbox" id="overlay-show-status" ${s.showStatus !== false ? 'checked' : ''}>${t('overlayShowStatus')}</label>
       <label class="chk"><input type="checkbox" id="overlay-lock" ${s.lockPosition ? 'checked' : ''}>${t('overlayLock')}</label>
+      <label class="chk"><input type="checkbox" id="overlay-show-build" ${s.showBuild !== false ? 'checked' : ''}>${t('overlayShowBuild')}</label>
     </div></div>`;
 }
 // Desktop only: where the game lives and what its console log says. This panel is the
@@ -838,7 +839,8 @@ function bind() {
       i.id === 'overlay-show-conditions' ||
       i.id === 'overlay-show-timer' ||
       i.id === 'overlay-show-status' ||
-      i.id === 'overlay-lock'
+      i.id === 'overlay-lock' ||
+      i.id === 'overlay-show-build'
     ) {
       const settings = {
         clickThrough: $('#overlay-clickthrough')?.checked ?? RT.overlay.clickThrough,
@@ -850,6 +852,7 @@ function bind() {
         showTimer: $('#overlay-show-timer')?.checked ?? RT.overlay.showTimer,
         showStatus: $('#overlay-show-status')?.checked ?? RT.overlay.showStatus,
         lockPosition: $('#overlay-lock')?.checked ?? RT.overlay.lockPosition,
+        showBuild: $('#overlay-show-build')?.checked ?? RT.overlay.showBuild,
       };
       RT.overlay = { ...RT.overlay, ...settings };
       desktop?.setOverlaySettings?.(settings);
