@@ -689,6 +689,10 @@ function bind() {
     if (d.tab) return show(d.tab);
     if (RT.busy) return;
     if ((await builderClick(b, toast, persist)) || (await banClick(b, toast, persist))) return;
+    if (b.id === 'overlay-toggle') {
+      desktop?.toggleOverlay?.();
+      return;
+    }
     if (b.id === 'theme') {
       toggleTheme();
       persist();

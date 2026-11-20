@@ -1,6 +1,22 @@
 {
   "releases": [
     {
+      "version": "1.23.1",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Исправление оверлея",
+        "en": "Overlay fix"
+      },
+      "items": {
+        "ru": [
+          "Исправлена кнопка показа оверлея: теперь окно открывается корректно."
+        ],
+        "en": [
+          "Fixed the overlay show button: the window now opens correctly."
+        ]
+      }
+    },
+    {
       "version": "1.23.0",
       "date": "2026-11-20",
       "title": {
