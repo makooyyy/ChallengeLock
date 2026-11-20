@@ -294,6 +294,8 @@ const DEFAULT_OVERLAY_SETTINGS = {
   autoHide: false,
   position: 'top-right',
   bounds: null,
+  width: null,
+  height: null,
   showHero: true,
   showConditions: true,
   showTimer: true,
@@ -338,8 +340,8 @@ let overlayBuild = null;
 
 function overlayBounds(position = overlaySettings.position) {
   const area = screen.getPrimaryDisplay().workArea;
-  const width = OVERLAY.width;
-  const height = OVERLAY.height;
+  const width = Math.max(260, Number(overlaySettings.width) || OVERLAY.width);
+  const height = Math.max(160, Number(overlaySettings.height) || OVERLAY.height);
   const margin = OVERLAY.margin;
   const positions = {
     'top-left': { x: area.x + margin, y: area.y + margin },
@@ -849,16 +851,15 @@ ipcMain.on('desktop:build', (_event, build) => {
 });
 ipcMain.handle('desktop:overlay-settings', (_event, settings) => {
   overlaySettings = { ...overlaySettings, ...settings };
+  if (Number.isFinite(settings.width)) overlaySettings.width = settings.width;
+  if (Number.isFinite(settings.height)) overlaySettings.height = settings.height;
   saveOverlaySettings(overlaySettings);
   if (overlayWindow && !overlayWindow.isDestroyed()) {
     overlayWindow.setOpacity(Math.min(1, Math.max(0.35, Number(overlaySettings.opacity) || 0.92)));
     applyOverlayClickThrough();
-    if (
-      overlaySettings.position &&
-      overlaySettings.position !== 'custom' &&
-      typeof overlayWindow.setBounds === 'function'
-    ) {
-      const bounds = overlayBounds(overlaySettings.position);
+    if (typeof overlayWindow.setBounds === 'function') {
+      const bounds =
+        overlaySettings.bounds || overlayBounds(overlaySettings.position || 'top-right');
       overlayWindow.setBounds(bounds);
     }
     overlayWindow.webContents.send('desktop:overlay', {

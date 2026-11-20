@@ -536,6 +536,9 @@ function overlayCard() {
       <button id="overlay-toggle" class="pb">${icon('play', 16)}${t('overlayToggle')}</button>
       <label class="lab-field">${t('overlayOpacity')}<input type="range" id="overlay-opacity" min="0.35" max="1" step="0.01" value="${s.opacity ?? 0.92}"></label>
       <label class="lab-field">${t('overlayPosition')}<select id="overlay-position">${positions.map((p) => `<option value="${p}" ${p === s.position ? 'selected' : ''}>${p}</option>`).join('')}</select></label>
+      <label class="lab-field">${t('overlayWidth')}<input type="number" id="overlay-width" min="260" max="900" value="${s.width || 360}"></label>
+      <label class="lab-field">${t('overlayHeight')}<input type="number" id="overlay-height" min="160" max="700" value="${s.height || 220}"></label>
+      <button id="overlay-reset" class="ghost">${t('overlayReset')}</button>
       <label class="chk"><input type="checkbox" id="overlay-clickthrough" ${s.clickThrough ? 'checked' : ''}>${t('overlayClickThrough')}</label>
       <label class="chk"><input type="checkbox" id="overlay-autoshow" ${s.autoShow ? 'checked' : ''}>${t('overlayAutoShow')}</label>
       <label class="chk"><input type="checkbox" id="overlay-autohide" ${s.autoHide ? 'checked' : ''}>${t('overlayAutoHide')}</label>
@@ -705,6 +708,23 @@ function bind() {
       desktop?.toggleOverlay?.();
       return;
     }
+    if (b.id === 'overlay-reset') {
+      RT.overlay = {
+        ...RT.overlay,
+        bounds: null,
+        position: 'top-right',
+        width: null,
+        height: null,
+      };
+      desktop?.setOverlaySettings?.({
+        resetPosition: true,
+        position: 'top-right',
+        width: null,
+        height: null,
+      });
+      viewCustom();
+      return;
+    }
     if (b.id === 'theme') {
       toggleTheme();
       persist();
@@ -840,7 +860,10 @@ function bind() {
       i.id === 'overlay-show-timer' ||
       i.id === 'overlay-show-status' ||
       i.id === 'overlay-lock' ||
-      i.id === 'overlay-show-build'
+      i.id === 'overlay-show-build' ||
+      i.id === 'overlay-width' ||
+      i.id === 'overlay-height' ||
+      i.id === 'overlay-reset'
     ) {
       const settings = {
         clickThrough: $('#overlay-clickthrough')?.checked ?? RT.overlay.clickThrough,
@@ -853,6 +876,9 @@ function bind() {
         showStatus: $('#overlay-show-status')?.checked ?? RT.overlay.showStatus,
         lockPosition: $('#overlay-lock')?.checked ?? RT.overlay.lockPosition,
         showBuild: $('#overlay-show-build')?.checked ?? RT.overlay.showBuild,
+        width: Number($('#overlay-width')?.value) || RT.overlay.width,
+        height: Number($('#overlay-height')?.value) || RT.overlay.height,
+        resetPosition: i.id === 'overlay-reset',
       };
       RT.overlay = { ...RT.overlay, ...settings };
       desktop?.setOverlaySettings?.(settings);

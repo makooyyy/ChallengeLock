@@ -1,6 +1,26 @@
 {
   "releases": [
     {
+      "version": "1.23.8",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Свободное расположение и размер оверлея",
+        "en": "Free overlay position and size"
+      },
+      "items": {
+        "ru": [
+          "Оверлей можно перетаскивать в любое место и менять размер.",
+          "Добавлены настройки ширины, высоты и сброса позиции.",
+          "Позиция и размер сохраняются между запусками."
+        ],
+        "en": [
+          "Overlay can be dragged anywhere and resized.",
+          "Added width, height and reset settings.",
+          "Position and size are saved between sessions."
+        ]
+      }
+    },
+    {
       "version": "1.23.7",
       "date": "2026-11-20",
       "title": {
