@@ -541,9 +541,11 @@ function overlayCard() {
     <div class="overlay-controls">
       <button id="overlay-toggle" class="pb">${icon('play', 16)}${t('overlayToggle')}</button>
       <label class="lab-field">${t('overlayOpacity')}<input type="range" id="overlay-opacity" min="0.35" max="1" step="0.01" value="${s.opacity ?? 0.92}"></label>
-      <label class="lab-field">${t('overlayPosition')}<select id="overlay-position">${positions.map((p) => `<option value="${p}" ${p === s.position ? 'selected' : ''}>${p}</option>`).join('')}</select></label>
-      <label class="lab-field">${t('overlayWidth')}<input type="number" id="overlay-width" min="260" max="900" value="${s.width || 360}"></label>
-      <label class="lab-field">${t('overlayHeight')}<input type="number" id="overlay-height" min="160" max="700" value="${s.height || 220}"></label>
+      <div class="overlay-position-grid">
+        ${positions.map((p) => `<button type="button" class="overlay-pos ${p === s.position ? 'on' : ''}" data-overlay-pos="${p}" aria-pressed="${p === s.position}">${t('pos.' + p)}</button>`).join('')}
+      </div>
+      <label class="lab-field">${t('overlaySize')}<input type="range" id="overlay-size" min="70" max="160" step="1" value="${Math.round(((s.width || 360) / 360) * 100)}"></label>
+      <div class="overlay-size-readout">${s.width || 360} × ${s.height || 220}</div>
       <button id="overlay-reset" class="ghost">${t('overlayReset')}</button>
       <label class="chk"><input type="checkbox" id="overlay-clickthrough" ${s.clickThrough ? 'checked' : ''}>${t('overlayClickThrough')}</label>
       <label class="chk"><input type="checkbox" id="overlay-autoshow" ${s.autoShow ? 'checked' : ''}>${t('overlayAutoShow')}</label>
@@ -712,6 +714,13 @@ function bind() {
     if ((await builderClick(b, toast, persist)) || (await banClick(b, toast, persist))) return;
     if (b.id === 'overlay-toggle') {
       desktop?.toggleOverlay?.();
+      return;
+    }
+    if (b.dataset.overlayPos) {
+      const pos = b.dataset.overlayPos;
+      RT.overlay = { ...RT.overlay, position: pos, bounds: null };
+      desktop?.setOverlaySettings?.({ position: pos, resetPosition: true });
+      viewCustom();
       return;
     }
     if (b.id === 'overlay-reset') {
@@ -896,6 +905,14 @@ function bind() {
       const opacity = Number(i.value);
       RT.overlay.opacity = opacity;
       desktop?.setOverlaySettings?.({ opacity });
+    } else if (i.id === 'overlay-size') {
+      const scale = Number(i.value) / 100;
+      const width = Math.round(360 * scale);
+      const height = Math.round(220 * scale);
+      RT.overlay = { ...RT.overlay, width, height, bounds: null };
+      desktop?.setOverlaySettings?.({ width, height, bounds: null });
+      const readout = document.querySelector('.overlay-size-readout');
+      if (readout) readout.textContent = width + ' × ' + height;
     }
   });
   document.addEventListener('input', (e) => {

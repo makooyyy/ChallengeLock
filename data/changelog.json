@@ -1,6 +1,26 @@
 {
   "releases": [
     {
+      "version": "1.23.11",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Удобный выбор расположения и размера оверлея",
+        "en": "Convenient overlay position and size selection"
+      },
+      "items": {
+        "ru": [
+          "Добавлен визуальный выбор расположения оверлея.",
+          "Размер изменяется ползунком с сохранением пропорций.",
+          "Позиция и размер сохраняются между запусками."
+        ],
+        "en": [
+          "Added visual overlay position selection.",
+          "Size changes via slider preserving proportions.",
+          "Position and size saved between sessions."
+        ]
+      }
+    },
+    {
       "version": "1.23.10",
       "date": "2026-11-20",
       "title": {
