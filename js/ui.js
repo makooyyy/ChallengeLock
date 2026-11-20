@@ -273,7 +273,15 @@ function paintReels(res, animate) {
 function paintContract() {
   desktop?.reportContract?.(
     RT.cur && !RT.finished
-      ? { key: resultKey(RT.cur), label: `${H(RT.cur.hero).name} · ${t('diff.' + RT.cur.diff)}` }
+      ? {
+          key: resultKey(RT.cur),
+          label: `${H(RT.cur.hero).name} · ${t('diff.' + RT.cur.diff)}`,
+          hero: H(RT.cur.hero)?.name || RT.cur.hero,
+          difficulty: t('diff.' + RT.cur.diff),
+          conditions: RT.cur.conds.map((id) => t('cond.' + id) || loc(C(id)?.name || id)),
+          mode: modeName(RT.cur),
+          timer: mmss(RT.timer.ms),
+        }
       : null,
   );
   const el = $('#contract');
@@ -355,7 +363,15 @@ async function doRoll(reroll, opt = {}) {
   desktop?.reportContract?.(
     RT.finished
       ? null
-      : { key: resultKey(res), label: `${H(res.hero).name} · ${t('diff.' + res.diff)}` },
+      : {
+          key: resultKey(res),
+          label: `${H(res.hero).name} · ${t('diff.' + res.diff)}`,
+          hero: H(res.hero)?.name || res.hero,
+          difficulty: t('diff.' + res.diff),
+          conditions: res.conds.map((id) => t('cond.' + id) || loc(C(id)?.name || id)),
+          mode: modeName(res),
+          timer: mmss(RT.timer.ms),
+        },
   );
   show('roulette');
   RT.busy = true;
@@ -407,6 +423,7 @@ setInterval(() => {
     T.ms = Date.now() - T.t0;
     const e = $('#tm');
     if (e) e.textContent = mmss(T.ms);
+    desktop?.reportTimer?.(mmss(T.ms));
   }
 }, 250);
 async function png() {
@@ -506,8 +523,23 @@ function viewCustom() {
     .join(
       '',
     )}</div><p class="search-empty" id="hero-search-empty" hidden>${t('noSearchResults')}</p></div>` +
-    gameCard();
+    gameCard() +
+    overlayCard();
   updateHeroSearch();
+}
+function overlayCard() {
+  if (!desktop?.overlayState) return '';
+  const s = RT.overlay || {};
+  const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'];
+  return `<div class="card"><div class="section-heading"><div><h2>${t('overlayTitle')}</h2><p>${t('overlayHint')}</p></div>${icon('layers', 20)}</div>
+    <div class="overlay-controls">
+      <button id="overlay-toggle" class="pb">${icon('play', 16)}${t('overlayToggle')}</button>
+      <label class="lab-field">${t('overlayOpacity')}<input type="range" id="overlay-opacity" min="0.35" max="1" step="0.01" value="${s.opacity ?? 0.92}"></label>
+      <label class="lab-field">${t('overlayPosition')}<select id="overlay-position">${positions.map((p) => `<option value="${p}" ${p === s.position ? 'selected' : ''}>${p}</option>`).join('')}</select></label>
+      <label class="chk"><input type="checkbox" id="overlay-clickthrough" ${s.clickThrough ? 'checked' : ''}>${t('overlayClickThrough')}</label>
+      <label class="chk"><input type="checkbox" id="overlay-autoshow" ${s.autoShow ? 'checked' : ''}>${t('overlayAutoShow')}</label>
+      <label class="chk"><input type="checkbox" id="overlay-autohide" ${s.autoHide ? 'checked' : ''}>${t('overlayAutoHide')}</label>
+    </div></div>`;
 }
 // Desktop only: where the game lives and what its console log says. This panel is the
 // ground truth we need before the shell can close contracts by itself.
@@ -780,6 +812,30 @@ function bind() {
     } else if (i.id === 'import-file') {
       importData(i.files?.[0]);
       i.value = '';
+    } else if (i.id === 'overlay-toggle') {
+      desktop?.toggleOverlay?.();
+    } else if (
+      i.id === 'overlay-clickthrough' ||
+      i.id === 'overlay-autoshow' ||
+      i.id === 'overlay-autohide' ||
+      i.id === 'overlay-position'
+    ) {
+      const settings = {
+        clickThrough: $('#overlay-clickthrough')?.checked ?? RT.overlay.clickThrough,
+        autoShow: $('#overlay-autoshow')?.checked ?? RT.overlay.autoShow,
+        autoHide: $('#overlay-autohide')?.checked ?? RT.overlay.autoHide,
+        position: $('#overlay-position')?.value ?? RT.overlay.position,
+      };
+      RT.overlay = { ...RT.overlay, ...settings };
+      desktop?.setOverlaySettings?.(settings);
+    }
+  });
+  document.addEventListener('input', (e) => {
+    const i = e.target;
+    if (i.id === 'overlay-opacity') {
+      const opacity = Number(i.value);
+      RT.overlay.opacity = opacity;
+      desktop?.setOverlaySettings?.({ opacity });
     }
   });
   document.addEventListener('input', (e) => {
@@ -972,6 +1028,9 @@ export async function boot() {
   };
   desktop?.onCompact?.(applyCompact);
   desktop?.compactState?.().then(applyCompact);
+  desktop?.overlayState?.().then((state) => {
+    if (state) RT.overlay = { ...RT.overlay, ...state };
+  });
   if (desktop) {
     const exit = document.createElement('button');
     exit.className = 'compact-exit';

@@ -30,6 +30,14 @@ export const RT = {
   ban: null,
   heroSearch: '',
   pendingHash: null,
+  overlay: {
+    visible: false,
+    opacity: 0.92,
+    clickThrough: false,
+    autoShow: true,
+    autoHide: false,
+    position: 'top-right',
+  },
 };
 export const persist = () => save(S);
 export const ALL_CATS = CATS;

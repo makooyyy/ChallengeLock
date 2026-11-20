@@ -13,6 +13,9 @@ contextBridge.exposeInMainWorld('challengeLockDesktop', {
     if (text === null || (text && typeof text.key === 'string' && typeof text.label === 'string'))
       ipcRenderer.send('desktop:contract', text);
   },
+  reportTimer: (value) => {
+    if (typeof value === 'string') ipcRenderer.send('desktop:timer', value);
+  },
   // The shell asks the outcome question when a match ends in the game log.
   onOutcome: (callback) => {
     if (typeof callback !== 'function') return;
@@ -24,6 +27,17 @@ contextBridge.exposeInMainWorld('challengeLockDesktop', {
   },
   compactState: () => ipcRenderer.invoke('desktop:compact-state'),
   toggleCompact: () => ipcRenderer.send('desktop:compact-toggle'),
+  onOverlay: (callback) => {
+    if (typeof callback === 'function')
+      ipcRenderer.on('desktop:overlay', (_event, value) => callback(value));
+  },
+  onOverlayTimer: (callback) => {
+    if (typeof callback === 'function')
+      ipcRenderer.on('desktop:overlay-timer', (_event, value) => callback(value));
+  },
+  overlayState: () => ipcRenderer.invoke('desktop:overlay-state'),
+  toggleOverlay: () => ipcRenderer.send('desktop:overlay-toggle'),
+  setOverlaySettings: (settings) => ipcRenderer.invoke('desktop:overlay-settings', settings),
   // Where the game is installed and what its console log says.
   game: () => ipcRenderer.invoke('desktop:game'),
   gameLog: (count) => ipcRenderer.invoke('desktop:game-log', count),

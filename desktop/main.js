@@ -71,8 +71,11 @@ const PORT = Number(process.env.CHALLENGELOCK_PORT) || 47821;
 
 // Compact mode: a small always-on-top window you can park next to the game.
 const COMPACT = { width: 430, height: 580, margin: 24 };
+const OVERLAY = { width: 360, height: 220, margin: 16 };
 const SPIN_ACCELERATOR = 'Control+Alt+R';
 const COMPACT_ACCELERATOR = 'Control+Alt+O';
+const OVERLAY_ACCELERATOR = 'Control+Alt+P';
+const OVERLAY_CLICKTHROUGH_ACCELERATOR = 'Control+Alt+Space';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -149,6 +152,7 @@ const server = http.createServer((req, res) => {
 });
 
 let mainWindow = null;
+let overlayWindow = null;
 let serverPort = null;
 let tray = null;
 let quitting = false;
@@ -280,6 +284,151 @@ function toggleCompact() {
   return compact;
 }
 
+const OVERLAY_SETTINGS_FILE = 'overlay.json';
+const DEFAULT_OVERLAY_SETTINGS = {
+  visible: false,
+  opacity: 0.92,
+  clickThrough: false,
+  autoShow: true,
+  autoHide: false,
+  position: 'top-right',
+};
+
+function overlaySettingsPath() {
+  try {
+    return path.join(app.getPath('userData'), OVERLAY_SETTINGS_FILE);
+  } catch {
+    return null;
+  }
+}
+
+function loadOverlaySettings() {
+  const file = overlaySettingsPath();
+  if (!file || !fs.existsSync(file)) return { ...DEFAULT_OVERLAY_SETTINGS };
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
+    return { ...DEFAULT_OVERLAY_SETTINGS, ...parsed };
+  } catch {
+    return { ...DEFAULT_OVERLAY_SETTINGS };
+  }
+}
+
+function saveOverlaySettings(settings) {
+  const file = overlaySettingsPath();
+  if (!file) return;
+  try {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, JSON.stringify(settings, null, 2));
+  } catch {
+    // Settings are optional; the overlay still works with defaults.
+  }
+}
+
+let overlaySettings = loadOverlaySettings();
+let overlayContract = null;
+
+function overlayBounds(position = overlaySettings.position) {
+  const area = screen.getPrimaryDisplay().workArea;
+  const width = OVERLAY.width;
+  const height = OVERLAY.height;
+  const margin = OVERLAY.margin;
+  const positions = {
+    'top-left': { x: area.x + margin, y: area.y + margin },
+    'top-right': { x: area.x + area.width - width - margin, y: area.y + margin },
+    'bottom-left': { x: area.x + margin, y: area.y + area.height - height - margin },
+    'bottom-right': {
+      x: area.x + area.width - width - margin,
+      y: area.y + area.height - height - margin,
+    },
+    center: {
+      x: area.x + Math.round((area.width - width) / 2),
+      y: area.y + Math.round((area.height - height) / 2),
+    },
+  };
+  return { ...(positions[position] || positions['top-right']), width, height };
+}
+
+function createOverlayWindow() {
+  if (overlayWindow && !overlayWindow.isDestroyed()) {
+    overlayWindow.show();
+    overlayWindow.focus();
+    return overlayWindow;
+  }
+  overlayWindow = new BrowserWindow({
+    ...overlayBounds(),
+    transparent: true,
+    frame: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: true,
+    movable: true,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    hasShadow: false,
+    backgroundColor: '#00000000',
+    title: 'ChallengeLock Overlay',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  overlayWindow.setAlwaysOnTop?.(true, 'screen-saver');
+  if (typeof overlayWindow.setOpacity === 'function')
+    overlayWindow.setOpacity(Math.min(1, Math.max(0.35, Number(overlaySettings.opacity) || 0.92)));
+  if (typeof overlayWindow.loadFile === 'function')
+    overlayWindow.loadFile(path.join(__dirname, 'overlay.html'));
+  overlayWindow.on('closed', () => {
+    overlayWindow = null;
+  });
+  if (overlayContract) {
+    overlayWindow.webContents.on('did-finish-load', () => {
+      if (overlayWindow && !overlayWindow.isDestroyed())
+        overlayWindow.webContents.send('desktop:overlay', overlayContract);
+    });
+  }
+  applyOverlayClickThrough();
+  return overlayWindow;
+}
+
+function applyOverlayClickThrough() {
+  if (!overlayWindow || overlayWindow.isDestroyed()) return;
+  if (typeof overlayWindow.setIgnoreMouseEvents === 'function')
+    overlayWindow.setIgnoreMouseEvents(Boolean(overlaySettings.clickThrough), { forward: true });
+}
+
+function showOverlay() {
+  if (!process.versions.electron) return;
+  const win = createOverlayWindow();
+  if (!win) return;
+  win.show();
+  if (overlayContract) win.webContents.send('desktop:overlay', overlayContract);
+}
+
+function hideOverlay() {
+  if (overlayWindow && !overlayWindow.isDestroyed()) overlayWindow.hide();
+}
+
+function toggleOverlay() {
+  if (!process.versions.electron) return overlaySettings.visible;
+  if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()) {
+    hideOverlay();
+    overlaySettings.visible = false;
+  } else {
+    overlaySettings.visible = true;
+    showOverlay();
+  }
+  saveOverlaySettings(overlaySettings);
+  return overlaySettings.visible;
+}
+
+function setOverlayContract(contract) {
+  overlayContract = contract && typeof contract.key === 'string' ? contract : null;
+  if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible())
+    overlayWindow.webContents.send('desktop:overlay', overlayContract);
+}
+
 function openDataFolder() {
   Promise.resolve(shell.openPath(app.getPath('userData'))).catch(() => {});
 }
@@ -373,6 +522,13 @@ function buildTrayMenu() {
       accelerator: COMPACT_ACCELERATOR,
       click: () => toggleCompact(),
     },
+    {
+      label: 'Оверлей',
+      type: 'checkbox',
+      checked: Boolean(overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()),
+      accelerator: OVERLAY_ACCELERATOR,
+      click: () => toggleOverlay(),
+    },
     { type: 'separator' },
     { label: 'Открыть папку данных', click: openDataFolder },
     {
@@ -417,8 +573,28 @@ function registerShortcuts() {
     failed.push(SPIN_ACCELERATOR);
   if (!globalShortcut.register(COMPACT_ACCELERATOR, () => toggleCompact()))
     failed.push(COMPACT_ACCELERATOR);
+  if (!globalShortcut.register(OVERLAY_ACCELERATOR, () => toggleOverlay()))
+    failed.push(OVERLAY_ACCELERATOR);
+  if (
+    !globalShortcut.register(OVERLAY_CLICKTHROUGH_ACCELERATOR, () => {
+      overlaySettings.clickThrough = !overlaySettings.clickThrough;
+      saveOverlaySettings(overlaySettings);
+      applyOverlayClickThrough();
+    })
+  )
+    failed.push(OVERLAY_CLICKTHROUGH_ACCELERATOR);
   if (failed.length) log('hotkeys already taken: ' + failed.join(', '));
-  else log('hotkeys ' + SPIN_ACCELERATOR + ' and ' + COMPACT_ACCELERATOR);
+  else
+    log(
+      'hotkeys ' +
+        SPIN_ACCELERATOR +
+        ', ' +
+        COMPACT_ACCELERATOR +
+        ', ' +
+        OVERLAY_ACCELERATOR +
+        ' and ' +
+        OVERLAY_CLICKTHROUGH_ACCELERATOR,
+    );
 }
 
 // The renderer reports what it rolled, so the tray tooltip shows the current contract
@@ -436,6 +612,7 @@ ipcMain.on('desktop:contract', (_event, text) => {
   if (tray && contractActive)
     tray.setToolTip('ChallengeLock — ' + activeContract.label.slice(0, 120));
   else if (tray && !contractActive) tray.setToolTip('ChallengeLock');
+  setOverlayContract(activeContract);
 });
 
 // Match watching: the game rewrites console.log on every launch, so the reader keeps
@@ -510,12 +687,18 @@ function watchTick() {
     if (!event) continue;
     if (event.type === 'start') {
       matchContract = activeContract ? { ...activeContract } : null;
+      if (overlaySettings.autoShow) showOverlay();
       log('match started');
     } else if (event.type === 'end') {
       log('match ended in state ' + event.state);
       const contract = matchContract;
       matchContract = null;
       promptMatchResult(contract);
+      if (overlaySettings.autoHide) {
+        setTimeout(() => {
+          if (overlayWindow && !overlayWindow.isDestroyed()) hideOverlay();
+        }, 10000).unref?.();
+      }
     } else log('unrecognised game state after GameInProgress: ' + event.state);
   }
 }
@@ -588,6 +771,26 @@ async function probeGame() {
 
 ipcMain.handle('desktop:compact-state', () => compact);
 ipcMain.on('desktop:compact-toggle', () => toggleCompact());
+ipcMain.handle('desktop:overlay-state', () => ({ ...overlaySettings, contract: overlayContract }));
+ipcMain.on('desktop:overlay-toggle', () => toggleOverlay());
+ipcMain.on('desktop:timer', (_event, value) => {
+  if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible())
+    overlayWindow.webContents.send('desktop:overlay-timer', value);
+});
+ipcMain.handle('desktop:overlay-settings', (_event, settings) => {
+  overlaySettings = { ...overlaySettings, ...settings };
+  saveOverlaySettings(overlaySettings);
+  if (overlayWindow && !overlayWindow.isDestroyed()) {
+    overlayWindow.setOpacity(Math.min(1, Math.max(0.35, Number(overlaySettings.opacity) || 0.92)));
+    applyOverlayClickThrough();
+    if (overlaySettings.position && typeof overlayWindow.setBounds === 'function') {
+      const bounds = overlayBounds(overlaySettings.position);
+      overlayWindow.setBounds(bounds);
+    }
+    overlayWindow.webContents.send('desktop:overlay', overlayContract);
+  }
+  return overlaySettings;
+});
 ipcMain.handle('desktop:game', async () => {
   try {
     return await probeGame();

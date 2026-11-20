@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChallengeLock Overlay</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: rgba(12, 16, 24, 0.78);
+        --line: rgba(255, 255, 255, 0.12);
+        --text: #f5f7fb;
+        --muted: #a8b0bf;
+        --accent: #5b8cff;
+        --danger: #ff6b6b;
+        --ok: #4ade80;
+        --radius: 16px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+        font-family: 'Manrope', 'Segoe UI', sans-serif;
+        color: var(--text);
+        user-select: none;
+      }
+      .overlay {
+        width: 100%;
+        height: 100%;
+        padding: 12px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+      }
+      .drag {
+        -webkit-app-region: drag;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .title {
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .hero {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .hero-badge {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #5b8cff, #7c5cff);
+        font-weight: 800;
+        font-size: 15px;
+      }
+      .hero-name {
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.1;
+      }
+      .difficulty {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .conditions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 2px;
+      }
+      .condition {
+        font-size: 12px;
+        line-height: 1.35;
+        padding: 6px 8px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .timer {
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .status {
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: rgba(91, 140, 255, 0.18);
+        color: #cfe0ff;
+        font-weight: 700;
+      }
+      .empty {
+        display: grid;
+        place-items: center;
+        height: 100%;
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="overlay" id="overlay">
+      <div class="drag">
+        <span class="title">ChallengeLock</span>
+        <span class="status" id="status">Ожидание</span>
+      </div>
+      <div id="content" class="empty">Нет активного контракта</div>
+    </div>
+    <script>
+      const content = document.getElementById('content');
+      const status = document.getElementById('status');
+      function render(data) {
+        if (!data || !data.key) {
+          content.className = 'empty';
+          content.textContent = 'Нет активного контракта';
+          status.textContent = 'Ожидание';
+          return;
+        }
+        content.className = '';
+        const hero = data.hero || '—';
+        const difficulty = data.difficulty || '';
+        const conditions = Array.isArray(data.conditions) ? data.conditions : [];
+        content.innerHTML = `
+          <div class="hero">
+            <div class="hero-badge">${escapeHtml(hero.slice(0, 1).toUpperCase())}</div>
+            <div>
+              <div class="hero-name">${escapeHtml(hero)}</div>
+              <div class="difficulty">${escapeHtml(difficulty)}</div>
+            </div>
+          </div>
+          <div class="conditions">
+            ${conditions.map((item) => `<div class="condition">${escapeHtml(item)}</div>`).join('')}
+          </div>
+          <div class="footer">
+            <span class="timer" id="timer">${escapeHtml(data.timer || '00:00')}</span>
+            <span>${escapeHtml(data.mode || '')}</span>
+          </div>
+        `;
+        status.textContent =
+          data.outcome === 'done' ? 'Выполнено' : data.outcome === 'fail' ? 'Провал' : 'Активен';
+      }
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+      if (
+        window.challengeLockDesktop &&
+        typeof window.challengeLockDesktop.onOverlay === 'function'
+      ) {
+        window.challengeLockDesktop.onOverlay(render);
+      }
+      if (
+        window.challengeLockDesktop &&
+        typeof window.challengeLockDesktop.onOverlayTimer === 'function'
+      ) {
+        window.challengeLockDesktop.onOverlayTimer((value) => {
+          const timer = document.getElementById('timer');
+          if (timer) timer.textContent = value;
+        });
+      }
+    </script>
+  </body>
+</html>

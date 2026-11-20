@@ -1,6 +1,26 @@
 {
   "releases": [
     {
+      "version": "1.23.0",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Оверлей поверх игры",
+        "en": "In-game overlay"
+      },
+      "items": {
+        "ru": [
+          "Добавлен прозрачный оверлей поверх игры: герой, условия, таймер и статус контракта.",
+          "Настройки оверлея: прозрачность, позиция, click-through, автопоказ и автоскрытие.",
+          "Горячие клавиши для показа, скрытия и переключения click-through."
+        ],
+        "en": [
+          "Added a transparent in-game overlay: hero, conditions, timer and contract status.",
+          "Overlay settings: opacity, position, click-through, auto-show and auto-hide.",
+          "Hotkeys to show, hide and toggle click-through."
+        ]
+      }
+    },
+    {
       "version": "1.22.0",
       "date": "2026-11-20",
       "title": {

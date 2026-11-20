@@ -268,7 +268,12 @@ test('the tray and the hotkeys drive the page', async () => {
   await listening();
   const [window] = state.windows;
 
-  assert.deepEqual([...state.shortcuts.keys()].sort(), ['Control+Alt+O', 'Control+Alt+R']);
+  assert.deepEqual([...state.shortcuts.keys()].sort(), [
+    'Control+Alt+O',
+    'Control+Alt+P',
+    'Control+Alt+R',
+    'Control+Alt+Space',
+  ]);
   assert.ok(state.tray.icon, 'the tray gets an icon');
   assert.equal(state.tray.tooltip, 'ChallengeLock');
 
