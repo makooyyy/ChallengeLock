@@ -815,6 +815,7 @@ async function probeGame() {
   };
 }
 
+ipcMain.handle('desktop:app-version', () => app.getVersion());
 ipcMain.handle('desktop:compact-state', () => compact);
 ipcMain.on('desktop:compact-toggle', () => toggleCompact());
 ipcMain.on('desktop:window-minimize', () => {

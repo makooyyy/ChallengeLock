@@ -1,6 +1,24 @@
 {
   "releases": [
     {
+      "version": "1.23.7",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Версия в шапке и проверка обновления",
+        "en": "Version in title bar and update check"
+      },
+      "items": {
+        "ru": [
+          "В кастомной шапке отображается версия приложения.",
+          "Улучшена диагностика обновлений."
+        ],
+        "en": [
+          "App version shown in custom title bar.",
+          "Improved update diagnostics."
+        ]
+      }
+    },
+    {
       "version": "1.23.6",
       "date": "2026-11-20",
       "title": {

@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('challengeLockDesktop', {
   platform: process.platform,
   isDesktop: true,
+  appVersion: () => ipcRenderer.invoke('desktop:app-version'),
   // Global hotkey asks the page for a new contract.
   onSpin: (callback) => {
     if (typeof callback !== 'function') return;

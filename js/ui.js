@@ -939,7 +939,13 @@ function fromHash(h) {
 
 /* ---------- boot ---------- */
 export async function boot() {
-  if (desktop) document.body.classList.add('desktop');
+  if (desktop) {
+    document.body.classList.add('desktop');
+    desktop.appVersion?.().then((version) => {
+      const brand = document.querySelector('.titlebar-brand');
+      if (brand && version) brand.textContent = 'ChallengeLock ' + version;
+    });
+  }
   applyTheme();
   try {
     const j = (u) =>
