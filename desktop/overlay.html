@@ -45,11 +45,16 @@
       }
       .drag {
         -webkit-app-region: drag;
+        cursor: move;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
         margin-bottom: 4px;
+      }
+      body[data-locked='true'] .drag {
+        -webkit-app-region: no-drag;
+        cursor: default;
       }
       .title {
         font-size: 11px;
@@ -137,30 +142,50 @@
     <script>
       const content = document.getElementById('content');
       const status = document.getElementById('status');
-      function render(data) {
+      function render(payload) {
+        const data = payload && payload.contract ? payload.contract : payload;
+        const settings = (payload && payload.settings) || {};
+        document.body.dataset.locked = settings.lockPosition ? 'true' : 'false';
+        document.body.style.opacity = String(
+          Math.min(1, Math.max(0.35, Number(settings.opacity) || 0.92)),
+        );
         if (!data || !data.key) {
           content.className = 'empty';
           content.textContent = 'Нет активного контракта';
           status.textContent = 'Ожидание';
+          status.hidden = settings.showStatus === false ? true : false;
           return;
         }
         content.className = '';
         const hero = data.hero || '—';
         const difficulty = data.difficulty || '';
         const conditions = Array.isArray(data.conditions) ? data.conditions : [];
+        const showHero = settings.showHero !== false;
+        const showConditions = settings.showConditions !== false;
+        const showTimer = settings.showTimer !== false;
+        const showStatus = settings.showStatus !== false;
+        status.hidden = !showStatus;
         content.innerHTML = `
-          <div class="hero">
+          ${
+            showHero
+              ? `<div class="hero">
             <div class="hero-badge">${escapeHtml(hero.slice(0, 1).toUpperCase())}</div>
             <div>
               <div class="hero-name">${escapeHtml(hero)}</div>
               <div class="difficulty">${escapeHtml(difficulty)}</div>
             </div>
-          </div>
-          <div class="conditions">
+          </div>`
+              : ''
+          }
+          ${
+            showConditions
+              ? `<div class="conditions">
             ${conditions.map((item) => `<div class="condition">${escapeHtml(item)}</div>`).join('')}
-          </div>
+          </div>`
+              : ''
+          }
           <div class="footer">
-            <span class="timer" id="timer">${escapeHtml(data.timer || '00:00')}</span>
+            ${showTimer ? `<span class="timer" id="timer">${escapeHtml(data.timer || '00:00')}</span>` : ''}
             <span>${escapeHtml(data.mode || '')}</span>
           </div>
         `;

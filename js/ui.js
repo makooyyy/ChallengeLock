@@ -539,6 +539,11 @@ function overlayCard() {
       <label class="chk"><input type="checkbox" id="overlay-clickthrough" ${s.clickThrough ? 'checked' : ''}>${t('overlayClickThrough')}</label>
       <label class="chk"><input type="checkbox" id="overlay-autoshow" ${s.autoShow ? 'checked' : ''}>${t('overlayAutoShow')}</label>
       <label class="chk"><input type="checkbox" id="overlay-autohide" ${s.autoHide ? 'checked' : ''}>${t('overlayAutoHide')}</label>
+      <label class="chk"><input type="checkbox" id="overlay-show-hero" ${s.showHero !== false ? 'checked' : ''}>${t('overlayShowHero')}</label>
+      <label class="chk"><input type="checkbox" id="overlay-show-conditions" ${s.showConditions !== false ? 'checked' : ''}>${t('overlayShowConditions')}</label>
+      <label class="chk"><input type="checkbox" id="overlay-show-timer" ${s.showTimer !== false ? 'checked' : ''}>${t('overlayShowTimer')}</label>
+      <label class="chk"><input type="checkbox" id="overlay-show-status" ${s.showStatus !== false ? 'checked' : ''}>${t('overlayShowStatus')}</label>
+      <label class="chk"><input type="checkbox" id="overlay-lock" ${s.lockPosition ? 'checked' : ''}>${t('overlayLock')}</label>
     </div></div>`;
 }
 // Desktop only: where the game lives and what its console log says. This panel is the
@@ -822,13 +827,23 @@ function bind() {
       i.id === 'overlay-clickthrough' ||
       i.id === 'overlay-autoshow' ||
       i.id === 'overlay-autohide' ||
-      i.id === 'overlay-position'
+      i.id === 'overlay-position' ||
+      i.id === 'overlay-show-hero' ||
+      i.id === 'overlay-show-conditions' ||
+      i.id === 'overlay-show-timer' ||
+      i.id === 'overlay-show-status' ||
+      i.id === 'overlay-lock'
     ) {
       const settings = {
         clickThrough: $('#overlay-clickthrough')?.checked ?? RT.overlay.clickThrough,
         autoShow: $('#overlay-autoshow')?.checked ?? RT.overlay.autoShow,
         autoHide: $('#overlay-autohide')?.checked ?? RT.overlay.autoHide,
         position: $('#overlay-position')?.value ?? RT.overlay.position,
+        showHero: $('#overlay-show-hero')?.checked ?? RT.overlay.showHero,
+        showConditions: $('#overlay-show-conditions')?.checked ?? RT.overlay.showConditions,
+        showTimer: $('#overlay-show-timer')?.checked ?? RT.overlay.showTimer,
+        showStatus: $('#overlay-show-status')?.checked ?? RT.overlay.showStatus,
+        lockPosition: $('#overlay-lock')?.checked ?? RT.overlay.lockPosition,
       };
       RT.overlay = { ...RT.overlay, ...settings };
       desktop?.setOverlaySettings?.(settings);

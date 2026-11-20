@@ -292,6 +292,12 @@ const DEFAULT_OVERLAY_SETTINGS = {
   autoShow: true,
   autoHide: false,
   position: 'top-right',
+  bounds: null,
+  showHero: true,
+  showConditions: true,
+  showTimer: true,
+  showStatus: true,
+  lockPosition: false,
 };
 
 function overlaySettingsPath() {
@@ -354,8 +360,9 @@ function createOverlayWindow() {
     overlayWindow.focus();
     return overlayWindow;
   }
+  const bounds = overlaySettings.bounds || overlayBounds(overlaySettings.position);
   overlayWindow = new BrowserWindow({
-    ...overlayBounds(),
+    ...bounds,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -377,6 +384,16 @@ function createOverlayWindow() {
   overlayWindow.setAlwaysOnTop?.(true, 'screen-saver');
   if (typeof overlayWindow.setOpacity === 'function')
     overlayWindow.setOpacity(Math.min(1, Math.max(0.35, Number(overlaySettings.opacity) || 0.92)));
+  const saveBounds = () => {
+    if (!overlayWindow || overlayWindow.isDestroyed()) return;
+    overlaySettings.bounds = overlayWindow.getBounds();
+    overlaySettings.position = 'custom';
+    saveOverlaySettings(overlaySettings);
+  };
+  if (typeof overlayWindow.on === 'function') {
+    overlayWindow.on('moved', saveBounds);
+    overlayWindow.on('resized', saveBounds);
+  }
   if (typeof overlayWindow.loadFile === 'function')
     overlayWindow.loadFile(path.join(__dirname, 'overlay.html')).catch((error) => {
       log('overlay failed to load: ' + String((error && error.message) || error));
@@ -431,7 +448,10 @@ function toggleOverlay() {
 function setOverlayContract(contract) {
   overlayContract = contract && typeof contract.key === 'string' ? contract : null;
   if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible())
-    overlayWindow.webContents.send('desktop:overlay', overlayContract);
+    overlayWindow.webContents.send('desktop:overlay', {
+      contract: overlayContract,
+      settings: overlaySettings,
+    });
 }
 
 function openDataFolder() {
@@ -788,11 +808,18 @@ ipcMain.handle('desktop:overlay-settings', (_event, settings) => {
   if (overlayWindow && !overlayWindow.isDestroyed()) {
     overlayWindow.setOpacity(Math.min(1, Math.max(0.35, Number(overlaySettings.opacity) || 0.92)));
     applyOverlayClickThrough();
-    if (overlaySettings.position && typeof overlayWindow.setBounds === 'function') {
+    if (
+      overlaySettings.position &&
+      overlaySettings.position !== 'custom' &&
+      typeof overlayWindow.setBounds === 'function'
+    ) {
       const bounds = overlayBounds(overlaySettings.position);
       overlayWindow.setBounds(bounds);
     }
-    overlayWindow.webContents.send('desktop:overlay', overlayContract);
+    overlayWindow.webContents.send('desktop:overlay', {
+      contract: overlayContract,
+      settings: overlaySettings,
+    });
   }
   return overlaySettings;
 });

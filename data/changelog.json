@@ -1,6 +1,26 @@
 {
   "releases": [
     {
+      "version": "1.23.3",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Больше настроек оверлея",
+        "en": "More overlay settings"
+      },
+      "items": {
+        "ru": [
+          "Добавлены настройки отображения: герой, условия, таймер, статус.",
+          "Оверлей можно перетаскивать мышью, позиция сохраняется.",
+          "Добавлены автопоказ, автоскрытие и блокировка перемещения."
+        ],
+        "en": [
+          "Added display settings: hero, conditions, timer, status.",
+          "Overlay can be dragged with the mouse; position is saved.",
+          "Added auto-show, auto-hide and position lock."
+        ]
+      }
+    },
+    {
       "version": "1.23.2",
       "date": "2026-11-20",
       "title": {
