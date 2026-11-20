@@ -1,6 +1,28 @@
 {
   "releases": [
     {
+      "version": "1.23.13",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Исправления игрового оверлея",
+        "en": "In-game overlay fixes"
+      },
+      "items": {
+        "ru": [
+          "Условия доступны полностью благодаря прокрутке и увеличенному размеру по умолчанию.",
+          "Исправлены скрытие блоков, настройки отображения, сброс позиции и изменение размера.",
+          "Оверлей сохраняет результат челленджа и показывает завершение покупок билда.",
+          "Добавлены переводы настроек и проверки оверлея."
+        ],
+        "en": [
+          "Conditions remain accessible with scrolling and a taller default window.",
+          "Fixed hidden sections, visibility settings, position reset and resizing.",
+          "Overlay keeps challenge outcomes and displays completed build purchases.",
+          "Added settings translations and overlay regression tests."
+        ]
+      }
+    },
+    {
       "version": "1.23.12",
       "date": "2026-11-20",
       "title": {

@@ -393,3 +393,21 @@ test('watcher preserves appended state lines and never closes a replacement cont
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('overlay retains completed results and resets saved custom placement', () => {
+  const update = state.ipcHandlers['desktop:overlay-settings'];
+  const snapshot = state.ipcHandlers['desktop:overlay-state'];
+  update(null, { bounds: { x: 100, y: 200, width: 360, height: 220 }, position: 'custom' });
+  update(null, { width: 450, height: 550 });
+  assert.deepEqual(snapshot().bounds, { x: 100, y: 200, width: 450, height: 550 });
+  update(null, { position: 'bottom-left', resetPosition: true });
+  assert.equal(snapshot().bounds, null);
+  assert.equal(snapshot().position, 'bottom-left');
+  state.ipc['desktop:contract'](null, { key: 'finished', label: 'Rem', outcome: 'done' });
+  assert.equal(snapshot().contract.outcome, 'done');
+  assert.equal(state.tray.tooltip, 'ChallengeLock');
+  state.ipc['desktop:timer'](null, '03:21');
+  assert.equal(snapshot().contract.timer, '03:21');
+  state.ipc['desktop:build'](null, { complete: true, items: ['a'], purchased: ['a'] });
+  assert.equal(snapshot().build.complete, true);
+});

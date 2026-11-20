@@ -71,7 +71,7 @@ const PORT = Number(process.env.CHALLENGELOCK_PORT) || 47821;
 
 // Compact mode: a small always-on-top window you can park next to the game.
 const COMPACT = { width: 430, height: 580, margin: 24 };
-const OVERLAY = { width: 360, height: 220, margin: 16 };
+const OVERLAY = { width: 360, height: 440, margin: 16 };
 const SPIN_ACCELERATOR = 'Control+Alt+R';
 const COMPACT_ACCELERATOR = 'Control+Alt+O';
 const OVERLAY_ACCELERATOR = 'Control+Alt+P';
@@ -361,13 +361,15 @@ function overlayBounds(position = overlaySettings.position) {
 
 function createOverlayWindow() {
   if (overlayWindow && !overlayWindow.isDestroyed()) {
-    overlayWindow.show();
-    overlayWindow.focus();
+    overlayWindow.showInactive?.();
     return overlayWindow;
   }
   const bounds = overlaySettings.bounds || overlayBounds(overlaySettings.position);
   overlayWindow = new BrowserWindow({
     ...bounds,
+    show: false,
+    minWidth: 260,
+    minHeight: 160,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -409,7 +411,7 @@ function createOverlayWindow() {
   overlayWindow.on('closed', () => {
     overlayWindow = null;
   });
-  if (overlayContract || overlayBuild) {
+  {
     overlayWindow.webContents.on('did-finish-load', () => {
       if (overlayWindow && !overlayWindow.isDestroyed())
         overlayWindow.webContents.send('desktop:overlay', {
@@ -433,7 +435,7 @@ function showOverlay() {
   if (!process.versions.electron) return;
   const win = createOverlayWindow();
   if (!win) return;
-  win.show();
+  win.showInactive?.();
   win.webContents.send('desktop:overlay', {
     contract: overlayContract,
     build: overlayBuild,
@@ -642,7 +644,7 @@ let contractActive = false;
 let activeContract = null;
 let matchContract = null;
 ipcMain.on('desktop:contract', (_event, text) => {
-  activeContract =
+  const reportedContract =
     text && typeof text.key === 'string' && typeof text.label === 'string'
       ? {
           key: text.key,
@@ -653,14 +655,19 @@ ipcMain.on('desktop:contract', (_event, text) => {
           mode: text.mode,
           timer: text.timer,
           outcome: text.outcome,
+          lang: text.lang,
         }
+      : null;
+  activeContract =
+    reportedContract && !['done', 'fail'].includes(reportedContract.outcome)
+      ? reportedContract
       : null;
   contractActive = !!activeContract;
   if (matchContract && matchContract.key !== activeContract?.key) matchContract = null;
   if (tray && contractActive)
     tray.setToolTip('ChallengeLock — ' + activeContract.label.slice(0, 120));
   else if (tray && !contractActive) tray.setToolTip('ChallengeLock');
-  setOverlayContract(activeContract);
+  setOverlayContract(reportedContract);
 });
 
 // Match watching: the game rewrites console.log on every launch, so the reader keeps
@@ -834,9 +841,14 @@ ipcMain.on('desktop:window-close', () => {
 ipcMain.handle('desktop:window-is-maximized', () =>
   Boolean(mainWindow && !mainWindow.isDestroyed() && mainWindow.isMaximized()),
 );
-ipcMain.handle('desktop:overlay-state', () => ({ ...overlaySettings, contract: overlayContract }));
+ipcMain.handle('desktop:overlay-state', () => ({
+  ...overlaySettings,
+  contract: overlayContract,
+  build: overlayBuild,
+}));
 ipcMain.on('desktop:overlay-toggle', () => toggleOverlay());
 ipcMain.on('desktop:timer', (_event, value) => {
+  if (overlayContract) overlayContract.timer = value;
   if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible())
     overlayWindow.webContents.send('desktop:overlay-timer', value);
 });
@@ -850,7 +862,21 @@ ipcMain.on('desktop:build', (_event, build) => {
     });
 });
 ipcMain.handle('desktop:overlay-settings', (_event, settings) => {
+  const previousBounds = overlaySettings.bounds;
   overlaySettings = { ...overlaySettings, ...settings };
+  if (
+    !settings.resetPosition &&
+    previousBounds &&
+    (Number.isFinite(settings.width) || Number.isFinite(settings.height))
+  ) {
+    overlaySettings.bounds = {
+      ...previousBounds,
+      width: Math.max(260, Number(settings.width) || previousBounds.width),
+      height: Math.max(160, Number(settings.height) || previousBounds.height),
+    };
+  }
+  if (settings.resetPosition) overlaySettings.bounds = null;
+  delete overlaySettings.resetPosition;
   if (Number.isFinite(settings.width)) overlaySettings.width = settings.width;
   if (Number.isFinite(settings.height)) overlaySettings.height = settings.height;
   saveOverlaySettings(overlaySettings);

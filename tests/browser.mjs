@@ -466,6 +466,99 @@ try {
     await compactPage.screenshot({ path: process.env.COMPACT_SCREENSHOT });
   await compactPage.locator('.compact-exit').click();
   assert(await compactPage.locator('.studio-intro').isVisible());
+  assert.equal(await compactPage.evaluate(() => window.__contract.outcome), 'done');
+  // Exercise the actual overlay document, including CSS hidden/overflow behavior.
+  const overlayPage = await desk.newPage();
+  await overlayPage.setViewportSize({ width: 360, height: 220 });
+  await overlayPage.addInitScript(() => {
+    window.challengeLockDesktop = {
+      onOverlay: (fn) => (window.__overlay = fn),
+      onOverlayTimer: (fn) => (window.__timer = fn),
+    };
+  });
+  overlayPage.on('pageerror', (e) => errors.push(e.message));
+  await overlayPage.goto(origin + '/desktop/overlay.html');
+  const contract = {
+    key: 'overlay-test',
+    hero: 'Rem',
+    lang: 'ru',
+    timer: '02:15',
+    conditions: Array.from({ length: 3 }, (_, i) => ({
+      name: 'Условие ' + i,
+      desc: 'В каждом сыгранном раунде получи хотя бы одно убийство или содействие.',
+    })),
+  };
+  await overlayPage.evaluate((contract) => window.__overlay({ contract, settings: {} }), contract);
+  assert(await overlayPage.locator('#build').isHidden());
+  assert.equal(await overlayPage.locator('.condition').count(), 3);
+  assert(
+    await overlayPage.evaluate(() => {
+      const el = document.querySelector('.content');
+      el.scrollTop = el.scrollHeight;
+      const last = document.querySelector('.condition:last-child').getBoundingClientRect();
+      return (
+        el.clientHeight > 80 &&
+        el.scrollTop > 0 &&
+        last.bottom <= el.getBoundingClientRect().bottom + 1
+      );
+    }),
+  );
+  await overlayPage.evaluate(
+    (contract) =>
+      window.__overlay({
+        contract,
+        settings: { showHero: false, showConditions: false, showTimer: false, showStatus: false },
+      }),
+    contract,
+  );
+  for (const selector of ['.header', '#conditions', '#timer', '#status', '#build'])
+    assert(await overlayPage.locator(selector).isHidden(), selector);
+  for (const outcome of ['done', 'fail']) {
+    await overlayPage.evaluate((contract) => window.__overlay({ contract, settings: {} }), {
+      ...contract,
+      outcome,
+    });
+    assert.equal(
+      await overlayPage.locator('#status').textContent(),
+      outcome === 'done' ? 'Выполнено' : 'Провал',
+    );
+  }
+  await overlayPage.evaluate(() =>
+    window.__overlay({
+      contract: null,
+      build: { complete: true, items: ['a'], purchased: ['a'], lang: 'en' },
+      settings: {},
+    }),
+  );
+  assert(await overlayPage.locator('#build').isVisible());
+  assert.equal(await overlayPage.locator('#build-name').textContent(), 'Build complete');
+  await overlayPage.evaluate(() =>
+    window.__overlay({
+      contract: null,
+      build: { nextItem: 'Item' },
+      settings: { showBuild: false },
+    }),
+  );
+  assert(await overlayPage.locator('#build').isHidden());
+  await compactPage.evaluate(async () => {
+    const { RT } = await import('/js/state.js');
+    const { renderBuilder } = await import('/js/builder-ui.js');
+    const { buildSettings } = await import('/js/build-config.js');
+    const { makeBuild } = await import('/js/builds.js');
+    RT.build = makeBuild(
+      'overlay-complete',
+      RT.data.heroes,
+      RT.data.items,
+      8000,
+      { excluded: [], only: [] },
+      buildSettings(),
+    );
+    window.challengeLockDesktop.reportBuild = (build) => (window.__reportedBuild = build);
+    RT.build.purchased = [...RT.build.items];
+    renderBuilder();
+  });
+  assert.equal(await compactPage.evaluate(() => window.__reportedBuild.complete), true);
+  assert.equal(await compactPage.evaluate(() => window.__reportedBuild.nextItem), null);
   await desk.close();
   assert.deepEqual(errors, []);
   console.log(

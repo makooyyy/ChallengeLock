@@ -272,7 +272,7 @@ function paintReels(res, animate) {
 }
 function paintContract() {
   desktop?.reportContract?.(
-    RT.cur && !RT.finished
+    RT.cur
       ? {
           key: resultKey(RT.cur),
           label: `${H(RT.cur.hero).name} · ${t('diff.' + RT.cur.diff)}`,
@@ -284,6 +284,8 @@ function paintContract() {
           }),
           mode: modeName(RT.cur),
           timer: mmss(RT.timer.ms),
+          outcome: RT.cur?.outcome,
+          lang: S.lang,
         }
       : null,
   );
@@ -377,6 +379,8 @@ async function doRoll(reroll, opt = {}) {
           }),
           mode: modeName(res),
           timer: mmss(RT.timer.ms),
+          outcome: RT.cur?.outcome,
+          lang: S.lang,
         },
   );
   show('roulette');
@@ -418,8 +422,7 @@ function finish(o) {
   persist();
   paintContract();
   paintHeader();
-  // Nothing is in play any more: the shell should not ask about the next match.
-  desktop?.reportContract?.(null);
+  // paintContract reports the final result; the shell excludes it from match tracking.
   beep(o === 'done' ? 880 : 140, 0.2);
   showCelebration(x, H(x.hero), RT.data.challenges);
 }
@@ -545,7 +548,7 @@ function overlayCard() {
         ${positions.map((p) => `<button type="button" class="overlay-pos ${p === s.position ? 'on' : ''}" data-overlay-pos="${p}" aria-pressed="${p === s.position}">${t('pos.' + p)}</button>`).join('')}
       </div>
       <label class="lab-field">${t('overlaySize')}<input type="range" id="overlay-size" min="70" max="160" step="1" value="${Math.round(((s.width || 360) / 360) * 100)}"></label>
-      <div class="overlay-size-readout">${s.width || 360} × ${s.height || 220}</div>
+      <div class="overlay-size-readout">${s.width || 360} × ${s.height || 440}</div>
       <button id="overlay-reset" class="ghost">${t('overlayReset')}</button>
       <label class="chk"><input type="checkbox" id="overlay-clickthrough" ${s.clickThrough ? 'checked' : ''}>${t('overlayClickThrough')}</label>
       <label class="chk"><input type="checkbox" id="overlay-autoshow" ${s.autoShow ? 'checked' : ''}>${t('overlayAutoShow')}</label>
@@ -719,7 +722,7 @@ function bind() {
     if (b.dataset.overlayPos) {
       const pos = b.dataset.overlayPos;
       RT.overlay = { ...RT.overlay, position: pos, bounds: null };
-      desktop?.setOverlaySettings?.({ position: pos, resetPosition: true });
+      desktop?.setOverlaySettings?.({ position: pos, bounds: null, resetPosition: true });
       viewCustom();
       return;
     }
@@ -733,6 +736,7 @@ function bind() {
       };
       desktop?.setOverlaySettings?.({
         resetPosition: true,
+        bounds: null,
         position: 'top-right',
         width: null,
         height: null,
@@ -908,9 +912,9 @@ function bind() {
     } else if (i.id === 'overlay-size') {
       const scale = Number(i.value) / 100;
       const width = Math.round(360 * scale);
-      const height = Math.round(220 * scale);
+      const height = Math.round(440 * scale);
       RT.overlay = { ...RT.overlay, width, height, bounds: null };
-      desktop?.setOverlaySettings?.({ width, height, bounds: null });
+      desktop?.setOverlaySettings?.({ width, height });
       const readout = document.querySelector('.overlay-size-readout');
       if (readout) readout.textContent = width + ' × ' + height;
     }

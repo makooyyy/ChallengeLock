@@ -63,14 +63,15 @@ export function renderBuilder() {
     if (!RT.build) {
       desktopApi.reportBuild(null);
     } else {
-      const nextId =
-        RT.build.items.find((id) => !RT.build.purchased.includes(id)) || RT.build.items[0];
+      const nextId = RT.build.items.find((id) => !RT.build.purchased.includes(id));
       const next = nextId ? item(nextId) : null;
       desktopApi.reportBuild({
         hero: hero(RT.build.hero)?.name || RT.build.hero,
         nextItem: next?.name || null,
+        complete: RT.build.items.length > 0 && !nextId,
+        lang: S.lang,
         nextCost: next?.cost || 0,
-        nextTier: next ? 'Тир ' + next.tier : null,
+        nextTier: next ? (S.lang === 'en' ? 'Tier ' : 'Тир ') + next.tier : null,
         budget: RT.build.budget,
         spent: RT.build.spent,
         items: RT.build.items,

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.23.13 — 2026-11-20
+
+- Fix overlay scrolling, visibility controls, saved positioning and build completion.
+- Preserve challenge outcomes without reactivating match tracking.
+- Include overlay translations and browser regression coverage.
+
 ## 2026-11-20 — оверлей поверх игры
 
 - Добавлен прозрачный оверлей поверх игры: герой, условия, таймер и статус контракта.
