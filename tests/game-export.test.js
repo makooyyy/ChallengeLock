@@ -191,3 +191,23 @@ test('imports standard compressed frames and preserves four active items', () =>
     decodeGameBuild(zstdCompressSync(Buffer.alloc(16001)).toString('base64'), heroes, items),
   );
 });
+
+test('imports a build with more active items than the generator offers', () => {
+  const active = items.filter((i) => i.active !== false && i.isActive && i.tier === 4).slice(0, 6);
+  assert.equal(active.length, 6, 'the catalog must have six active tier-4 items');
+  const b = makeBuild('import-six', heroes, items, 64000, options(), {
+    stage: 'full',
+    maxActive: 6,
+    locked: active.map((i) => i.id),
+  });
+  assert(b, 'a six-active build can be generated');
+
+  for (const code of [
+    gameBuildCode(b, heroes, items),
+    zstdCompressSync(encodeGameBuild(b, heroes, items)).toString('base64'),
+  ]) {
+    const restored = decodeGameBuild(code, heroes, items);
+    assert.deepEqual(restored.items, b.items);
+    assert.equal(restored.settings.maxActive, 6, 'the active count survives the round-trip');
+  }
+});

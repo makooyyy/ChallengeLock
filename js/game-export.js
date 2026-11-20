@@ -287,8 +287,9 @@ export function decodeGameBuild(code, heroes, items) {
   const spent = list.reduce((sum, item) => sum + item.cost, 0);
   if (!budgetMatch) budget = Math.max(800, spent);
   const active = list.filter((item) => item.isActive).length;
-  const maxActive = [0, 1, 2, 4].find((n) => n >= active);
-  if (maxActive === undefined) throw new Error('Too many active items');
+  // Keep whatever the game build uses instead of snapping it to our generator's buckets.
+  if (active > 12) throw new Error('Too many active items');
+  const maxActive = active;
   const settings = buildSettings({
     stage,
     budget: Number.isSafeInteger(budget) ? budget : BUILD_STAGES[stage].budget,

@@ -15,7 +15,9 @@ export function buildSettings(x = {}) {
         : base.budget,
     heroId: typeof x.heroId === 'string' && /^[a-z0-9_-]{1,100}$/.test(x.heroId) ? x.heroId : '',
     focus: ['balanced', 'weapon', 'vitality', 'spirit'].includes(x.focus) ? x.focus : 'balanced',
-    maxActive: [0, 1, 2, 4].includes(x.maxActive) ? x.maxActive : 2,
+    // The generator offers 0/1/2/4, but imported game builds may carry more actives.
+    maxActive:
+      Number.isInteger(x.maxActive) && x.maxActive >= 0 && x.maxActive <= 12 ? x.maxActive : 2,
     maxItems:
       Number.isInteger(x.maxItems) && x.maxItems >= 1 && x.maxItems <= base.slots
         ? x.maxItems
