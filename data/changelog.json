@@ -1,6 +1,26 @@
 {
   "releases": [
     {
+      "version": "1.23.9",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Исправление шапки окна",
+        "en": "Title bar fix"
+      },
+      "items": {
+        "ru": [
+          "Убраны лишние кнопки из кастомной шапки.",
+          "Надпись контекста перенесена в основную панель.",
+          "Выровнены кнопки управления окном."
+        ],
+        "en": [
+          "Removed extra buttons from custom title bar.",
+          "Context label moved to main panel.",
+          "Window controls aligned."
+        ]
+      }
+    },
+    {
       "version": "1.23.8",
       "date": "2026-11-20",
       "title": {
