@@ -1,6 +1,24 @@
 {
   "releases": [
     {
+      "version": "1.23.12",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Оверлей без тёмного фона",
+        "en": "Overlay without dark background"
+      },
+      "items": {
+        "ru": [
+          "Убран тёмный квадратный фон вокруг оверлея.",
+          "Остался только синий округлый фон карточки."
+        ],
+        "en": [
+          "Removed dark square background around overlay.",
+          "Only blue rounded card background remains."
+        ]
+      }
+    },
+    {
       "version": "1.23.11",
       "date": "2026-11-20",
       "title": {
