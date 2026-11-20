@@ -278,7 +278,10 @@ function paintContract() {
           label: `${H(RT.cur.hero).name} · ${t('diff.' + RT.cur.diff)}`,
           hero: H(RT.cur.hero)?.name || RT.cur.hero,
           difficulty: t('diff.' + RT.cur.diff),
-          conditions: RT.cur.conds.map((id) => t('cond.' + id) || loc(C(id)?.name || id)),
+          conditions: RT.cur.conds.map((id) => {
+            const c = C(id);
+            return { name: loc(c?.name || id), desc: loc(c?.desc || '') };
+          }),
           mode: modeName(RT.cur),
           timer: mmss(RT.timer.ms),
         }
@@ -368,7 +371,10 @@ async function doRoll(reroll, opt = {}) {
           label: `${H(res.hero).name} · ${t('diff.' + res.diff)}`,
           hero: H(res.hero)?.name || res.hero,
           difficulty: t('diff.' + res.diff),
-          conditions: res.conds.map((id) => t('cond.' + id) || loc(C(id)?.name || id)),
+          conditions: res.conds.map((id) => {
+            const c = C(id);
+            return { name: loc(c?.name || id), desc: loc(c?.desc || '') };
+          }),
           mode: modeName(res),
           timer: mmss(RT.timer.ms),
         },

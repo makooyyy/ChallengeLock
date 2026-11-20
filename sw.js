@@ -2,7 +2,7 @@
 // CATALOG_VERSION is rewritten automatically by scripts/sync-catalog.mjs.
 const CATALOG_VERSION = '7df33ce9dbedca22';
 const PREFIX = 'challengelock:' + self.registration.scope + ':';
-const VERSION = PREFIX + 'v47:' + CATALOG_VERSION;
+const VERSION = PREFIX + 'v48:' + CATALOG_VERSION;
 const FILES = [
   './',
   'index.html',

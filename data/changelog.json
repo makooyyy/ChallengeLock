@@ -1,6 +1,28 @@
 {
   "releases": [
     {
+      "version": "1.23.10",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Оверлей показывает челлендж и предмет билда",
+        "en": "Overlay shows challenge and build item"
+      },
+      "items": {
+        "ru": [
+          "Оверлей теперь отображает текущий челлендж.",
+          "Добавлен показ следующего предмета из билда.",
+          "Расширены настройки отображения оверлея.",
+          "Оверлей можно свободно перемещать и менять размер."
+        ],
+        "en": [
+          "Overlay now displays the current challenge.",
+          "Added next build item display.",
+          "Extended overlay display settings.",
+          "Overlay can be freely moved and resized."
+        ]
+      }
+    },
+    {
       "version": "1.23.9",
       "date": "2026-11-20",
       "title": {

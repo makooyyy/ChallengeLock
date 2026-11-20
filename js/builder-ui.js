@@ -70,8 +70,11 @@ export function renderBuilder() {
         hero: hero(RT.build.hero)?.name || RT.build.hero,
         nextItem: next?.name || null,
         nextCost: next?.cost || 0,
+        nextTier: next ? 'Тир ' + next.tier : null,
         budget: RT.build.budget,
         spent: RT.build.spent,
+        items: RT.build.items,
+        purchased: RT.build.purchased,
       });
     }
   }

@@ -4,17 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ChallengeLock Overlay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
         color-scheme: dark;
-        --bg: rgba(12, 16, 24, 0.78);
-        --line: rgba(255, 255, 255, 0.12);
-        --text: #f5f7fb;
-        --muted: #a8b0bf;
-        --accent: #5b8cff;
-        --danger: #ff6b6b;
-        --ok: #4ade80;
-        --radius: 16px;
       }
       * {
         box-sizing: border-box;
@@ -26,93 +24,242 @@
         height: 100%;
         overflow: hidden;
         background: transparent;
-        font-family: 'Manrope', 'Segoe UI', sans-serif;
-        color: var(--text);
+        font-family: Inter, 'Segoe UI', system-ui, sans-serif;
+        color: #f2f5fb;
         user-select: none;
       }
-      .overlay {
+      .overlay-root {
         width: 100%;
         height: 100%;
+        padding: 8px;
+        background: #060a14;
+      }
+      .card {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        background: linear-gradient(180deg, #101a30 0%, #0b1120 60%);
+        border: 1px solid #243252;
+        border-radius: 16px;
         padding: 12px;
-        background: var(--bg);
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        backdrop-filter: blur(12px);
         display: flex;
         flex-direction: column;
-        gap: 8px;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+        gap: 10px;
+        overflow: hidden;
+        box-shadow:
+          0 0 0 1px #0b1120,
+          0 12px 32px rgba(0, 0, 0, 0.5);
       }
       .drag {
         -webkit-app-region: drag;
         cursor: move;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin-bottom: 4px;
       }
       body[data-locked='true'] .drag {
         -webkit-app-region: no-drag;
         cursor: default;
       }
-      .title {
-        font-size: 11px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--muted);
-        font-weight: 700;
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
       }
-      .hero {
+      .hero-badge {
+        flex: 0 0 auto;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #2f6fed, #1c3f8f);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 19px;
+        color: #fff;
+      }
+      .hero-info {
+        flex: 1 1 0%;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+      .hero-name {
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1.1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hero-meta {
+        font-size: 12px;
+        color: #8ea0c2;
+      }
+      .difficulty {
+        color: #ff9f86;
+        font-weight: 600;
+      }
+      .counter {
+        flex: 0 0 auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        font-weight: 600;
+        color: #9db8ee;
+        background: #16233f;
+        border: 1px solid #2a3a5e;
+        border-radius: 8px;
+        padding: 5px 9px;
+      }
+      .conditions {
+        background: #0f182b;
+        border: 1px solid #1d2943;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .condition {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 10px 12px;
+        border-bottom: 1px solid #1d2943;
+      }
+      .condition:last-child {
+        border-bottom: 0;
+      }
+      .condition-check {
+        flex: 0 0 auto;
+        width: 18px;
+        height: 18px;
+        box-sizing: border-box;
+        border: 2px solid #3a4c74;
+        border-radius: 5px;
+        margin-top: 1px;
+      }
+      .condition-body {
+        flex: 1 1 0%;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+      .condition-head {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+      .condition-index {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        color: #6f9bf5;
+      }
+      .condition-name {
+        font-size: 14px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .condition-desc {
+        font-size: 12px;
+        line-height: 1.35;
+        color: #a9b6d0;
+      }
+      .build {
+        background: linear-gradient(135deg, #16284d, #0f1b36);
+        border: 1px solid #2f4478;
+        border-radius: 12px;
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .build-row {
         display: flex;
         align-items: center;
         gap: 10px;
       }
-      .hero-badge {
-        width: 34px;
-        height: 34px;
+      .build-icon {
+        flex: 0 0 auto;
+        width: 40px;
+        height: 40px;
         border-radius: 10px;
-        display: grid;
-        place-items: center;
-        background: linear-gradient(135deg, #5b8cff, #7c5cff);
-        font-weight: 800;
-        font-size: 15px;
+        background: #2f6fed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      .hero-name {
-        font-size: 15px;
-        font-weight: 700;
-        line-height: 1.1;
+      .build-icon svg {
+        width: 22px;
+        height: 22px;
       }
-      .difficulty {
-        font-size: 11px;
-        color: var(--muted);
-      }
-      .conditions {
+      .build-info {
+        flex: 1 1 0%;
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        margin-top: 2px;
+        gap: 2px;
+        min-width: 0;
       }
-      .condition {
-        font-size: 12px;
-        line-height: 1.35;
-        padding: 6px 8px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.05);
+      .build-label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        color: #8ea0c2;
+      }
+      .build-name {
+        font-size: 15px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .build-meta {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .build-cost {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+        font-weight: 600;
+        color: #9db8ee;
+      }
+      .build-tier {
+        font-size: 11px;
+        color: #8ea0c2;
+      }
+      .build-progress {
+        display: flex;
+        gap: 3px;
+        aria-hidden: true;
+      }
+      .build-bar {
+        flex: 1 1 0%;
+        height: 3px;
+        border-radius: 2px;
+        background: #26365c;
+      }
+      .build-bar.filled {
+        background: #2f6fed;
       }
       .footer {
-        margin-top: auto;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
         font-size: 11px;
-        color: var(--muted);
+        color: #8ea0c2;
+        margin-top: auto;
       }
       .timer {
+        font-family: 'JetBrains Mono', monospace;
         font-variant-numeric: tabular-nums;
-        font-weight: 700;
-        color: var(--text);
+        font-weight: 600;
+        color: #f2f5fb;
       }
       .status {
         padding: 3px 8px;
@@ -121,110 +268,85 @@
         color: #cfe0ff;
         font-weight: 700;
       }
-      .build-next {
-        padding: 8px 10px;
-        border-radius: 10px;
-        background: rgba(91, 140, 255, 0.12);
-        border: 1px solid rgba(91, 140, 255, 0.22);
-      }
-      .build-label {
-        display: block;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--muted);
-        margin-bottom: 2px;
-      }
-      .build-next b {
-        display: block;
-        font-size: 13px;
-        margin-bottom: 2px;
-      }
-      .build-next small {
-        color: var(--muted);
-      }
       .empty {
         display: grid;
         place-items: center;
         height: 100%;
         text-align: center;
-        color: var(--muted);
+        color: #8ea0c2;
         font-size: 12px;
       }
     </style>
   </head>
   <body>
-    <div class="overlay" id="overlay">
-      <div class="drag">
-        <span class="title">ChallengeLock</span>
-        <span class="status" id="status">Ожидание</span>
-      </div>
-      <div id="content" class="empty">Нет активного контракта</div>
-    </div>
-    <script>
-      const content = document.getElementById('content');
-      const status = document.getElementById('status');
-      function render(payload) {
-        const data = payload && payload.contract ? payload.contract : payload;
-        const settings = (payload && payload.settings) || {};
-        document.body.dataset.locked = settings.lockPosition ? 'true' : 'false';
-        document.body.style.opacity = String(
-          Math.min(1, Math.max(0.35, Number(settings.opacity) || 0.92)),
-        );
-        if (!data || !data.key) {
-          content.className = 'empty';
-          content.textContent = 'Нет активного контракта';
-          status.textContent = 'Ожидание';
-          status.hidden = settings.showStatus === false ? true : false;
-          return;
-        }
-        content.className = '';
-        const hero = data.hero || '—';
-        const difficulty = data.difficulty || '';
-        const conditions = Array.isArray(data.conditions) ? data.conditions : [];
-        const showHero = settings.showHero !== false;
-        const showConditions = settings.showConditions !== false;
-        const showTimer = settings.showTimer !== false;
-        const showStatus = settings.showStatus !== false;
-        const showBuild = settings.showBuild !== false;
-        status.hidden = !showStatus;
-        const build = payload && payload.build ? payload.build : null;
-        content.innerHTML = `
-          ${
-            showHero
-              ? `<div class="hero">
-            <div class="hero-badge">${escapeHtml(hero.slice(0, 1).toUpperCase())}</div>
-            <div>
-              <div class="hero-name">${escapeHtml(hero)}</div>
-              <div class="difficulty">${escapeHtml(difficulty)}</div>
+    <div class="overlay-root">
+      <div class="card">
+        <div class="header drag">
+          <div class="hero-badge" id="hero-badge">S</div>
+          <div class="hero-info">
+            <div class="hero-name" id="hero-name">Silver</div>
+            <div class="hero-meta" id="hero-meta">
+              Уличная стычка · <span class="difficulty" id="difficulty">Сложная</span>
             </div>
-          </div>`
-              : ''
-          }
-          ${
-            showConditions
-              ? `<div class="conditions">
-            ${conditions.map((item) => `<div class="condition">${escapeHtml(item)}</div>`).join('')}
-          </div>`
-              : ''
-          }
-          ${
-            showBuild && build && build.nextItem
-              ? `<div class="build-next">
-            <span class="build-label">Следующий предмет</span>
-            <b>${escapeHtml(build.nextItem)}</b>
-            <small>${escapeHtml(String(build.nextCost || 0))} душ · ${escapeHtml(String(build.spent || 0))}/${escapeHtml(String(build.budget || 0))}</small>
-          </div>`
-              : ''
-          }
-          <div class="footer">
-            ${showTimer ? `<span class="timer" id="timer">${escapeHtml(data.timer || '00:00')}</span>` : ''}
-            <span>${escapeHtml(data.mode || '')}</span>
           </div>
-        `;
-        status.textContent =
-          data.outcome === 'done' ? 'Выполнено' : data.outcome === 'fail' ? 'Провал' : 'Активен';
-      }
+          <div class="counter" id="counter">0/2</div>
+        </div>
+
+        <div class="conditions" id="conditions"></div>
+
+        <div class="build" id="build" hidden>
+          <div class="build-row">
+            <div class="build-icon">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#fff"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                role="img"
+                aria-label="Иконка предмета"
+              >
+                <rect x="8" y="3" width="8" height="18" rx="1.5"></rect>
+                <path d="M8 8h8M8 12h8M8 16h8"></path>
+              </svg>
+            </div>
+            <div class="build-info">
+              <div class="build-label">Следующий предмет</div>
+              <div class="build-name" id="build-name">Basic Magazine</div>
+            </div>
+            <div class="build-meta">
+              <div class="build-cost" id="build-cost">500</div>
+              <div class="build-tier" id="build-tier">Тир I</div>
+            </div>
+          </div>
+          <div class="build-progress" id="build-progress" aria-hidden="true"></div>
+        </div>
+
+        <div class="footer">
+          <span class="timer" id="timer">00:00</span>
+          <span class="status" id="status">Активен</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const heroBadge = document.getElementById('hero-badge');
+      const heroName = document.getElementById('hero-name');
+      const heroMeta = document.getElementById('hero-meta');
+      const difficulty = document.getElementById('difficulty');
+      const counter = document.getElementById('counter');
+      const conditionsEl = document.getElementById('conditions');
+      const buildEl = document.getElementById('build');
+      const buildName = document.getElementById('build-name');
+      const buildCost = document.getElementById('build-cost');
+      const buildTier = document.getElementById('build-tier');
+      const buildProgress = document.getElementById('build-progress');
+      const timerEl = document.getElementById('timer');
+      const statusEl = document.getElementById('status');
+
       function escapeHtml(value) {
         return String(value)
           .replace(/&/g, '&amp;')
@@ -232,6 +354,73 @@
           .replace(/>/g, '&gt;')
           .replace(/"/g, '&quot;');
       }
+
+      function render(payload) {
+        const data = payload && payload.contract ? payload.contract : payload;
+        const settings = (payload && payload.settings) || {};
+        document.body.dataset.locked = settings.lockPosition ? 'true' : 'false';
+        document.body.style.opacity = String(
+          Math.min(1, Math.max(0.35, Number(settings.opacity) || 0.92)),
+        );
+
+        if (!data || !data.key) {
+          heroName.textContent = '—';
+          heroMeta.innerHTML = '';
+          conditionsEl.innerHTML = '';
+          counter.textContent = '0/0';
+          buildEl.hidden = true;
+          statusEl.textContent = 'Ожидание';
+          timerEl.textContent = '00:00';
+          return;
+        }
+
+        const hero = data.hero || '—';
+        const diff = data.difficulty || '';
+        const mode = data.mode || '';
+        const conditions = Array.isArray(data.conditions) ? data.conditions : [];
+        const completed = 0;
+
+        heroBadge.textContent = hero.slice(0, 1).toUpperCase();
+        heroName.textContent = hero;
+        heroMeta.innerHTML = `${escapeHtml(mode)} · <span class="difficulty">${escapeHtml(diff)}</span>`;
+        counter.textContent = `${completed}/${conditions.length}`;
+        conditionsEl.innerHTML = conditions
+          .map(
+            (item, index) => `
+            <div class="condition">
+              <div class="condition-check"></div>
+              <div class="condition-body">
+                <div class="condition-head">
+                  <span class="condition-index">${index === 0 ? 'I' : index === 1 ? 'II' : index === 2 ? 'III' : index + 1}</span>
+                  <span class="condition-name">${escapeHtml(typeof item === 'string' ? item : item.name || '')}</span>
+                </div>
+                ${typeof item === 'object' && item.desc ? `<div class="condition-desc">${escapeHtml(item.desc)}</div>` : ''}
+              </div>
+            </div>`,
+          )
+          .join('');
+
+        const build = payload && payload.build ? payload.build : null;
+        const showBuild = settings.showBuild !== false;
+        if (showBuild && build && build.nextItem) {
+          buildEl.hidden = false;
+          buildName.textContent = build.nextItem;
+          buildCost.textContent = build.nextCost || 0;
+          buildTier.textContent = build.nextTier || '';
+          const total = Math.max(1, (build.items && build.items.length) || 1);
+          const filled = Math.min(total, (build.purchased && build.purchased.length) || 0);
+          buildProgress.innerHTML = Array.from({ length: total }, (_, i) => {
+            return `<div class="build-bar${i < filled ? ' filled' : ''}"></div>`;
+          }).join('');
+        } else {
+          buildEl.hidden = true;
+        }
+
+        statusEl.textContent =
+          data.outcome === 'done' ? 'Выполнено' : data.outcome === 'fail' ? 'Провал' : 'Активен';
+        timerEl.textContent = data.timer || '00:00';
+      }
+
       if (
         window.challengeLockDesktop &&
         typeof window.challengeLockDesktop.onOverlay === 'function'
