@@ -1,6 +1,26 @@
 {
   "releases": [
     {
+      "version": "1.23.4",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Новый дизайн и кастомная шапка",
+        "en": "New design and custom title bar"
+      },
+      "items": {
+        "ru": [
+          "Убрана полоса прокрутки, добавлена кастомная шапка окна.",
+          "Кнопки закрыть/свернуть/развернуть в стиле приложения.",
+          "Улучшена визуальная часть интерфейса."
+        ],
+        "en": [
+          "Removed scrollbar, added custom window title bar.",
+          "Close/minimize/maximize buttons in app style.",
+          "Improved overall visual design."
+        ]
+      }
+    },
+    {
       "version": "1.23.3",
       "date": "2026-11-20",
       "title": {

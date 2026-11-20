@@ -69,6 +69,37 @@
     <link rel="stylesheet" href="css/app.css" />
   </head>
   <body>
+    <div class="titlebar" id="titlebar" aria-hidden="true">
+      <div class="titlebar-drag">
+        <span class="titlebar-brand">ChallengeLock</span>
+      </div>
+      <div class="titlebar-controls">
+        <button
+          type="button"
+          class="titlebar-button"
+          data-window-action="minimize"
+          aria-label="Свернуть"
+        >
+          —
+        </button>
+        <button
+          type="button"
+          class="titlebar-button"
+          data-window-action="maximize"
+          aria-label="Развернуть"
+        >
+          □
+        </button>
+        <button
+          type="button"
+          class="titlebar-button close"
+          data-window-action="close"
+          aria-label="Закрыть"
+        >
+          ×
+        </button>
+      </div>
+    </div>
     <a class="skip-link" href="#main" data-i18n="skipContent">К содержимому</a>
     <div id="boot" class="boot" aria-busy="true" aria-label="Загрузка / Loading">
       <div class="sk"></div>

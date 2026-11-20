@@ -690,6 +690,12 @@ function bind() {
     }
     const b = e.target.closest('button');
     if (!b) return;
+    if (b.dataset.windowAction) {
+      if (b.dataset.windowAction === 'minimize') desktop?.minimizeWindow?.();
+      if (b.dataset.windowAction === 'maximize') desktop?.maximizeWindow?.();
+      if (b.dataset.windowAction === 'close') desktop?.closeWindow?.();
+      return;
+    }
     const d = b.dataset;
     if (d.tab) return show(d.tab);
     if (RT.busy) return;
@@ -930,6 +936,7 @@ function fromHash(h) {
 
 /* ---------- boot ---------- */
 export async function boot() {
+  if (desktop) document.body.classList.add('desktop');
   applyTheme();
   try {
     const j = (u) =>
