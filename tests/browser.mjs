@@ -427,6 +427,46 @@ try {
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   if (process.env.EXPORT_SCREENSHOT) await page.screenshot({ path: process.env.EXPORT_SCREENSHOT });
   await page.locator('#game-export-dialog [data-export-close]').first().click();
+  // Desktop compact mode has its own match-first layout and rejects stale outcomes.
+  const desk = await browser.newContext({
+    viewport: { width: 430, height: 580 },
+    reducedMotion: 'reduce',
+  });
+  await desk.addInitScript(() => {
+    window.challengeLockDesktop = {
+      isDesktop: true,
+      reportContract: (c) => (window.__contract = c),
+      onSpin: (f) => (window.__spin = f),
+      onOutcome: (f) => (window.__outcome = f),
+      onCompact: (f) => (window.__compact = f),
+      compactState: async () => true,
+      toggleCompact: () => window.__compact(false),
+    };
+  });
+  const compactPage = await desk.newPage();
+  compactPage.on('pageerror', (e) => errors.push(e.message));
+  await compactPage.goto(origin + '/#seed=compact&d=insane&r=0');
+  await compactPage.waitForSelector('html.desktop-compact');
+  assert(await compactPage.locator('.hero-display').isVisible());
+  assert(await compactPage.locator('.studio-intro').isHidden());
+  assert((await compactPage.locator('.hero-display').boundingBox()).y < 180);
+  assert((await compactPage.locator('.condition-result').first().boundingBox()).y < 260);
+  assert(await compactPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await compactPage.evaluate(() => window.__outcome({ key: 'stale', outcome: 'done' }));
+  assert.equal(
+    await compactPage.evaluate(async () => (await import('/js/state.js')).RT.finished),
+    false,
+  );
+  await compactPage.evaluate(() =>
+    window.__outcome({ key: window.__contract.key, outcome: 'done' }),
+  );
+  assert(await compactPage.locator('#completion-dialog').isVisible());
+  await compactPage.keyboard.press('Escape');
+  if (process.env.COMPACT_SCREENSHOT)
+    await compactPage.screenshot({ path: process.env.COMPACT_SCREENSHOT });
+  await compactPage.locator('.compact-exit').click();
+  assert(await compactPage.locator('.studio-intro').isVisible());
+  await desk.close();
   assert.deepEqual(errors, []);
   console.log(
     'PASS browser: deep links, history, locks, clean-session replay, duplicate completion, hash changes, failed-roll transaction, empty builds/bans, corrupt storage, malformed links, language, mobile, offline PWA, cache isolation; no page errors.',

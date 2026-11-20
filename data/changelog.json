@@ -1,6 +1,30 @@
 {
   "releases": [
     {
+      "version": "1.22.0",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Надёжный помощник для матча",
+        "en": "A more reliable match companion"
+      },
+      "items": {
+        "ru": [
+          "Исправлено чтение игрового журнала: новые строки не теряются, старые матчи не вызывают уведомления.",
+          "Результат матча привязан к выбранному челленджу; смена задания защищает новый контракт от старого результата.",
+          "Импорт поддерживает сжатые Zstandard-коды, до четырёх активных предметов и обычные названия игровых сборок.",
+          "Генератор пересобирает комбинацию предметов для максимального расхода бюджета, сохраняя закрепления и ограничения.",
+          "Режим «Поверх игры» показывает героя, условия, таймер и результат без большого заголовка и настроек."
+        ],
+        "en": [
+          "Game log reading preserves appended lines and does not replay historical matches.",
+          "Match results are bound to the selected challenge; changing it protects the new contract from stale results.",
+          "Import supports compressed Zstandard codes, up to four active items and ordinary game build names.",
+          "Build generation rearranges items to maximize budget use while preserving pins and constraints.",
+          "Compact mode shows the hero, conditions, timer and outcome without the large intro or setup panels."
+        ]
+      }
+    },
+    {
       "version": "1.21.0",
       "date": "2026-11-19",
       "title": {

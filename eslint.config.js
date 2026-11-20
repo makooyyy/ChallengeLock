@@ -13,7 +13,7 @@ const coreRules = {
 export default [
   {
     // Generated/installed content is not linted.
-    ignores: ['node_modules/', 'data/', 'assets/', 'desktop/dist/', 'desktop/web/'],
+    ignores: ['js/vendor/', 'node_modules/', 'data/', 'assets/', 'desktop/dist/', 'desktop/web/'],
   },
   js.configs.recommended,
   {

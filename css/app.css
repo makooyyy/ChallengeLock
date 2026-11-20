@@ -6517,3 +6517,154 @@ input {
   background: transparent;
   border-color: transparent;
 }
+/* A dedicated match companion, independent of the normal mobile layout. */
+.compact-exit {
+  display: none;
+}
+.desktop-compact .compact-exit {
+  display: inline-flex;
+  position: fixed;
+  right: 10px;
+  top: 8px;
+  z-index: 40;
+  min-height: 30px;
+  padding: 4px 9px;
+  font-size: 10px;
+}
+.desktop-compact .rail,
+.desktop-compact .app-header,
+.desktop-compact .studio-intro,
+.desktop-compact .session-toolbar,
+.desktop-compact .mode-picker,
+.desktop-compact .foot,
+.desktop-compact .board-toolbar,
+.desktop-compact .filter-summary,
+.desktop-compact .board-options {
+  display: none;
+}
+.desktop-compact .d {
+  display: block;
+  min-height: 100dvh;
+}
+.desktop-compact .pad {
+  padding: 45px 10px 12px;
+}
+.desktop-compact .panel {
+  gap: 8px;
+}
+.desktop-compact .roulette-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.desktop-compact .mach {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  width: 100%;
+  overflow: visible;
+}
+.desktop-compact .board-actions {
+  padding: 0 0 8px;
+  gap: 6px;
+}
+.desktop-compact .board-actions button {
+  min-height: 34px;
+  padding: 6px 9px;
+  font-size: 11px;
+}
+.desktop-compact .board-actions kbd {
+  display: none;
+}
+.desktop-compact .mach .reel-stage {
+  padding: 0;
+}
+.desktop-compact .mach .hero-reel > .reel-title,
+.desktop-compact .mach .hero-reel > .lk,
+.desktop-compact .mach .hero-display p,
+.desktop-compact .condition-top .lk {
+  display: none;
+}
+.desktop-compact .mach .hero-display {
+  min-height: 80px;
+  padding: 10px 14px;
+  gap: 12px;
+}
+.desktop-compact .mach .hero-avatar {
+  width: 56px;
+  height: 60px;
+  flex-basis: 56px;
+}
+.desktop-compact .mach .hero-display h3 {
+  font-size: 23px;
+}
+.desktop-compact .mach .hero-context {
+  margin-top: 5px;
+}
+.desktop-compact .mach .conditions .condition-reel {
+  padding: 11px 0 12px 32px;
+}
+.desktop-compact .mach .condition-top {
+  min-height: 15px;
+}
+.desktop-compact .mach .condition-number {
+  top: 12px;
+  width: 24px;
+  height: 25px;
+}
+.desktop-compact .mach .condition-result {
+  padding-top: 4px;
+}
+.desktop-compact .mach .condition-result h3 {
+  font-size: 14px;
+}
+.desktop-compact .mach .condition-result p {
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 5px;
+}
+.desktop-compact .paper {
+  width: 100%;
+  position: sticky;
+  bottom: 0;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+  z-index: 20;
+  box-shadow: var(--shadow);
+}
+.desktop-compact .paper > * {
+  display: none;
+  margin: 0;
+}
+.desktop-compact .paper .result-actions,
+.desktop-compact .paper .timer-row,
+.desktop-compact .paper .review-stamp,
+.desktop-compact .paper .contract-empty {
+  display: flex;
+  grid-column: 1;
+  grid-row: auto;
+}
+.desktop-compact .paper.finished .result-actions {
+  display: none;
+}
+.desktop-compact .paper .result-actions button {
+  min-height: 35px;
+  font-size: 11px;
+}
+.desktop-compact .paper .timer-row {
+  padding: 0;
+  border: 0;
+  justify-content: space-between;
+}
+.desktop-compact .paper .timer-toggle {
+  min-height: 30px;
+  padding: 4px 10px;
+}
+.desktop-compact .paper #cf {
+  display: none;
+}
+.desktop-compact #toast {
+  bottom: 100px;
+}

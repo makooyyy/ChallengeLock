@@ -10,3 +10,6 @@ assets/*.svg
 # Install state.
 node_modules/
 package-lock.json
+
+# Unmodified MIT dependency.
+js/vendor/

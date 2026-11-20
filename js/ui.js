@@ -271,6 +271,11 @@ function paintReels(res, animate) {
   return Promise.all(promises);
 }
 function paintContract() {
+  desktop?.reportContract?.(
+    RT.cur && !RT.finished
+      ? { key: resultKey(RT.cur), label: `${H(RT.cur.hero).name} · ${t('diff.' + RT.cur.diff)}` }
+      : null,
+  );
   const el = $('#contract');
   if (!el) return;
   const x = RT.cur;
@@ -347,7 +352,11 @@ async function doRoll(reroll, opt = {}) {
   RT.timer = { ms: 0, run: false, t0: 0 };
   persist();
   setHash(res);
-  desktop?.reportContract?.(`${H(res.hero).name} · ${t('diff.' + res.diff)}`);
+  desktop?.reportContract?.(
+    RT.finished
+      ? null
+      : { key: resultKey(res), label: `${H(res.hero).name} · ${t('diff.' + res.diff)}` },
+  );
   show('roulette');
   RT.busy = true;
   setBusy(true);
@@ -388,7 +397,7 @@ function finish(o) {
   paintContract();
   paintHeader();
   // Nothing is in play any more: the shell should not ask about the next match.
-  desktop?.reportContract?.('');
+  desktop?.reportContract?.(null);
   beep(o === 'done' ? 880 : 140, 0.2);
   showCelebration(x, H(x.hero), RT.data.challenges);
 }
@@ -945,9 +954,31 @@ export async function boot() {
     if (!RT.busy) doRoll(false);
   });
   // The shell detected a finished match and the player picked the outcome.
-  desktop?.onOutcome?.((outcome) => {
-    if (RT.cur && !RT.finished) finish(outcome === 'fail' ? 'fail' : 'done');
+  desktop?.onOutcome?.((event) => {
+    if (
+      RT.cur &&
+      !RT.finished &&
+      event?.key === resultKey(RT.cur) &&
+      ['done', 'fail'].includes(event.outcome)
+    )
+      finish(event.outcome);
   });
+  const applyCompact = (value) => {
+    document.documentElement.classList.toggle('desktop-compact', !!value);
+    if (value) {
+      show('roulette');
+      window.scrollTo(0, 0);
+    }
+  };
+  desktop?.onCompact?.(applyCompact);
+  desktop?.compactState?.().then(applyCompact);
+  if (desktop) {
+    const exit = document.createElement('button');
+    exit.className = 'compact-exit';
+    exit.textContent = S.lang === 'ru' ? 'Развернуть' : 'Expand';
+    exit.onclick = () => desktop.toggleCompact?.();
+    document.body.append(exit);
+  }
   checkForUpdates(siteVersion());
 }
 

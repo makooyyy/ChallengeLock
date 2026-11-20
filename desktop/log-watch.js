@@ -23,6 +23,7 @@ function trackLine(tracker, line, at = Date.now()) {
   tracker.lastState = state.name;
 
   if (state.name === START_STATE) {
+    if (tracker.inMatch) return null;
     tracker.inMatch = true;
     tracker.startedAt = at;
     tracker.endedAt = null;
@@ -63,3 +64,54 @@ module.exports = {
   START_STATE,
   END_STATE,
 };
+
+// Reads only new bytes, preserves split UTF-8/lines, and never replays old matches.
+function createLogReader(file) {
+  const fs = require('fs');
+  const { StringDecoder } = require('string_decoder');
+  let offset = 0,
+    identity = null,
+    decoder = new StringDecoder('utf8'),
+    carry = '',
+    skipPartial = false;
+  return function poll() {
+    const fd = fs.openSync(file, 'r');
+    try {
+      const stat = fs.fstatSync(fd),
+        id = stat.dev + ':' + stat.ino;
+      const reset = identity !== null && (id !== identity || stat.size < offset);
+      if (identity === null) {
+        identity = id;
+        offset = stat.size;
+        carry = '';
+        decoder = new StringDecoder('utf8');
+        const last = Buffer.alloc(1);
+        skipPartial = offset > 0 && fs.readSync(fd, last, 0, 1, offset - 1) === 1 && last[0] !== 10;
+        return { lines: [], reset: true };
+      }
+      if (reset) {
+        identity = id;
+        offset = 0;
+        carry = '';
+        decoder = new StringDecoder('utf8');
+        skipPartial = false;
+      }
+      const buffer = Buffer.alloc(Math.min(65536, Math.max(0, stat.size - offset)));
+      const read = fs.readSync(fd, buffer, 0, buffer.length, offset);
+      offset += read;
+      let chunk = decoder.write(buffer.subarray(0, read));
+      if (skipPartial) {
+        const end = chunk.indexOf('\n');
+        if (end < 0) return { lines: [], reset: false };
+        chunk = chunk.slice(end + 1);
+        skipPartial = false;
+      }
+      const split = splitLines(chunk, carry);
+      carry = split.carry;
+      return { lines: split.lines, reset };
+    } finally {
+      fs.closeSync(fd);
+    }
+  };
+}
+module.exports.createLogReader = createLogReader;

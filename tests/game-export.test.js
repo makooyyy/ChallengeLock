@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { zstdDecompressSync } from 'node:zlib';
+import { zstdDecompressSync, zstdCompressSync } from 'node:zlib';
 import {
   encodeGameBuild,
+  decodeGameBuild,
   zstdFrame,
   gameBuildCode,
   challengeForExport,
@@ -164,4 +165,29 @@ test('current challenge is exported in full in build and first category descript
     }
   assert.equal(challengeForExport(null, heroes, challenges, dict), null);
   assert.throws(() => gameBuildCode(b, heroes, items, { text: 'я'.repeat(17000), language: 8 }));
+});
+
+test('imports standard compressed frames and preserves four active items', () => {
+  const active = items.filter((i) => i.active !== false && i.isActive && i.tier === 4).slice(0, 4);
+  assert.equal(active.length, 4);
+  const b = makeBuild('import-four', heroes, items, 64000, options(), {
+    stage: 'full',
+    maxActive: 4,
+    locked: active.map((i) => i.id),
+  });
+  assert(b);
+  for (const code of [
+    gameBuildCode(b, heroes, items),
+    zstdCompressSync(encodeGameBuild(b, heroes, items)).toString('base64'),
+  ]) {
+    const restored = decodeGameBuild(code, heroes, items);
+    assert.deepEqual(restored.items, b.items);
+    assert.equal(restored.settings.maxActive, 4);
+  }
+  assert.throws(() =>
+    decodeGameBuild(Buffer.from([40, 181, 47, 253, 32, 255]).toString('base64'), heroes, items),
+  );
+  assert.throws(() =>
+    decodeGameBuild(zstdCompressSync(Buffer.alloc(16001)).toString('base64'), heroes, items),
+  );
 });

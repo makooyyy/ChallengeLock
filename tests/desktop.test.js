@@ -131,7 +131,7 @@ const fakeElectron = {
     showErrorBox: () => {},
     showMessageBoxSync: (options) => {
       state.dialogs.push(options);
-      return 2;
+      return state.answer ?? 2;
     },
     showMessageBox: (options) => {
       state.dialogs.push(options);
@@ -293,7 +293,7 @@ test('the tray and the hotkeys drive the page', async () => {
   assert.equal(window.alwaysOnTop, false);
   assert.deepEqual(window.bounds, { x: 100, y: 100, width: 1280, height: 820 });
 
-  state.ipc['desktop:contract']({}, 'Abrams · Сложная');
+  state.ipc['desktop:contract']({}, { key: 'test-contract', label: 'Abrams · Сложная' });
   assert.equal(
     state.tray.tooltip,
     'ChallengeLock — Abrams · Сложная',
@@ -345,4 +345,46 @@ test('the game probe is reachable from the page', async () => {
   assert.ok('install' in info, 'install is either a path or null');
   const tail = await handlers['desktop:game-log'](5);
   assert.ok(Array.isArray(tail.lines), 'the tail is an array even without a log');
+});
+
+test('watcher preserves appended state lines and never closes a replacement contract', async () => {
+  const os = await import('node:os');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'challengelock-log-'));
+  const file = path.join(dir, 'console.log');
+  const { createLogReader, createTracker } = require('../desktop/log-watch.js');
+  try {
+    fs.writeFileSync(file, 'ChangeGameState: GameInProgress (7)\nChangeGameState: PostGame (8)\n');
+    Object.assign(shell.logWatcher, {
+      file,
+      reader: createLogReader(file),
+      tracker: createTracker(),
+    });
+    state.answer = 0;
+    state.ipc['desktop:contract']({}, { key: 'A', label: 'Contract A' });
+    const before = state.sent.length;
+    shell.watchTick();
+    assert.equal(state.sent.length, before);
+    fs.appendFileSync(file, 'ChangeGameState: GameInProgress (7)\n');
+    shell.watchTick();
+    fs.appendFileSync(file, 'ChangeGameState: Post');
+    shell.watchTick();
+    assert.equal(state.sent.length, before);
+    fs.appendFileSync(file, 'Game (8)\n');
+    shell.watchTick();
+    assert.deepEqual(state.sent.at(-1), {
+      channel: 'desktop:outcome',
+      payload: { key: 'A', outcome: 'done' },
+    });
+    fs.appendFileSync(file, 'ChangeGameState: GameInProgress (7)\n');
+    shell.watchTick();
+    state.ipc['desktop:contract']({}, { key: 'B', label: 'Contract B' });
+    const count = state.sent.length;
+    fs.appendFileSync(file, 'ChangeGameState: PostGame (8)\n');
+    shell.watchTick();
+    assert.equal(state.sent.length, count);
+  } finally {
+    shell.logWatcher.file = null;
+    state.answer = 2;
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

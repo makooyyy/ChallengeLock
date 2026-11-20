@@ -275,6 +275,7 @@ function toggleCompact() {
   }
   mainWindow.show();
   mainWindow.focus();
+  mainWindow.webContents.send('desktop:compact', compact);
   refreshTrayMenu();
   return compact;
 }
@@ -423,9 +424,17 @@ function registerShortcuts() {
 // The renderer reports what it rolled, so the tray tooltip shows the current contract
 // while the window is hidden behind the game.
 let contractActive = false;
+let activeContract = null;
+let matchContract = null;
 ipcMain.on('desktop:contract', (_event, text) => {
-  contractActive = Boolean(text && String(text).trim());
-  if (tray && contractActive) tray.setToolTip('ChallengeLock — ' + String(text).slice(0, 120));
+  activeContract =
+    text && typeof text.key === 'string' && typeof text.label === 'string'
+      ? { key: text.key, label: text.label }
+      : null;
+  contractActive = !!activeContract;
+  if (matchContract && matchContract.key !== activeContract?.key) matchContract = null;
+  if (tray && contractActive)
+    tray.setToolTip('ChallengeLock — ' + activeContract.label.slice(0, 120));
   else if (tray && !contractActive) tray.setToolTip('ChallengeLock');
 });
 
@@ -434,34 +443,20 @@ ipcMain.on('desktop:contract', (_event, text) => {
 const logWatcher = {
   timer: null,
   file: null,
-  offset: 0,
-  carry: '',
+  reader: null,
   tracker: logWatch.createTracker(),
   lastLookup: 0,
 };
 
-function readChunk(file, from) {
-  const fd = fs.openSync(file, 'r');
-  try {
-    const size = fs.fstatSync(fd).size;
-    if (size <= from) return '';
-    const buffer = Buffer.alloc(size - from);
-    fs.readSync(fd, buffer, 0, buffer.length, from);
-    return buffer.toString('utf8');
-  } finally {
-    fs.closeSync(fd);
-  }
-}
-
-function promptMatchResult() {
-  if (!contractActive) {
+function promptMatchResult(contract) {
+  if (!contract || activeContract?.key !== contract.key) {
     log('match ended, but no contract is active');
     return;
   }
   const answer = dialog.showMessageBoxSync({
     type: 'question',
     title: 'ChallengeLock',
-    message: 'Матч закончился. Засчитать контракт?',
+    message: 'Матч закончился. Засчитать контракт?\n' + contract.label,
     buttons: ['Выполнено', 'Провал', 'Позже'],
     defaultId: 0,
     cancelId: 2,
@@ -474,7 +469,7 @@ function promptMatchResult() {
   const outcome = answer === 1 ? 'fail' : 'done';
   log('match ended, sending outcome ' + outcome);
   if (mainWindow && !mainWindow.isDestroyed())
-    mainWindow.webContents.send('desktop:outcome', outcome);
+    mainWindow.webContents.send('desktop:outcome', { key: contract.key, outcome });
   showWindow();
 }
 
@@ -488,46 +483,39 @@ function watchTick() {
       .then((info) => {
         if (info.log && info.log.exists) {
           logWatcher.file = info.log.path;
-          logWatcher.offset = 0;
-          logWatcher.carry = '';
+          logWatcher.reader = logWatch.createLogReader(info.log.path);
+          logWatcher.reader();
+          logWatcher.tracker = logWatch.createTracker();
+          matchContract = null;
           log('watching the game log: ' + info.log.path);
         }
       })
       .catch(() => {});
     return;
   }
-  let size;
+  let batch;
   try {
-    size = fs.statSync(logWatcher.file).size;
+    batch = logWatcher.reader();
   } catch {
     logWatcher.file = null;
+    matchContract = null;
     return;
   }
-  const from = logWatch.nextOffset(size, logWatcher.offset);
-  if (from === 0 && logWatcher.offset !== 0) {
-    logWatcher.carry = '';
-    log('the game started a fresh log');
+  if (batch.reset) {
+    logWatcher.tracker = logWatch.createTracker();
+    matchContract = null;
   }
-  if (size <= from) return;
-  let chunk;
-  try {
-    chunk = readChunk(logWatcher.file, from);
-  } catch {
-    logWatcher.file = null;
-    return;
-  }
-  logWatcher.offset = size;
-  // Never treat a mid-line start as a line of its own.
-  if (from > 0) chunk = chunk.slice(chunk.indexOf('\n') + 1 || chunk.length);
-  const split = logWatch.splitLines(chunk, logWatcher.carry);
-  logWatcher.carry = split.carry;
-  for (const line of split.lines) {
+  for (const line of batch.lines) {
     const event = logWatch.trackLine(logWatcher.tracker, line);
     if (!event) continue;
-    if (event.type === 'start') log('match started');
-    else if (event.type === 'end') {
+    if (event.type === 'start') {
+      matchContract = activeContract ? { ...activeContract } : null;
+      log('match started');
+    } else if (event.type === 'end') {
       log('match ended in state ' + event.state);
-      promptMatchResult();
+      const contract = matchContract;
+      matchContract = null;
+      promptMatchResult(contract);
     } else log('unrecognised game state after GameInProgress: ' + event.state);
   }
 }
@@ -598,6 +586,8 @@ async function probeGame() {
   };
 }
 
+ipcMain.handle('desktop:compact-state', () => compact);
+ipcMain.on('desktop:compact-toggle', () => toggleCompact());
 ipcMain.handle('desktop:game', async () => {
   try {
     return await probeGame();
@@ -730,4 +720,4 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 // Exposed for tests/desktop.test.js, which drives the shell without Electron.
-module.exports = { server, pageUrl, PORT };
+module.exports = { server, pageUrl, PORT, watchTick, logWatcher };

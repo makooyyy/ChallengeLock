@@ -1,9 +1,12 @@
+import os from 'node:os';
+import path from 'node:path';
 // The match detector reads the game's console log, so it is driven by a real excerpt.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
   parseState,
+  createLogReader,
   createTracker,
   trackLine,
   splitLines,
@@ -101,4 +104,25 @@ test('a restarted log resets the offset instead of skipping content', () => {
   assert.equal(nextOffset(500, 100), 100);
   assert.equal(nextOffset(500, 500), 500);
   assert.equal(nextOffset(10, 900), 0, 'the game truncated the log on launch');
+});
+
+test('tail reader ignores history, preserves UTF-8 and resets on truncation', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cl-reader-')),
+    file = path.join(dir, 'console.log');
+  try {
+    fs.writeFileSync(file, 'old match\n');
+    const poll = createLogReader(file);
+    assert.deepEqual(poll().lines, []);
+    const bytes = Buffer.from('Герой\nChangeGameState: GameInProgress (7)\n');
+    fs.appendFileSync(file, bytes.subarray(0, 1));
+    assert.deepEqual(poll().lines, []);
+    fs.appendFileSync(file, bytes.subarray(1));
+    assert.deepEqual(poll().lines, ['Герой', 'ChangeGameState: GameInProgress (7)']);
+    fs.writeFileSync(file, 'fresh\n');
+    assert.deepEqual(poll(), { lines: ['fresh'], reset: true });
+    fs.appendFileSync(file, 'ChangeGameState: PostGame (8)\n');
+    assert.deepEqual(poll().lines, ['ChangeGameState: PostGame (8)']);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

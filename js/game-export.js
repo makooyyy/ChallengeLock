@@ -1,3 +1,4 @@
+import { Decompress } from './vendor/fzstd.js';
 // Deadlock clipboard format: Base64(Zstandard frame(CMsgHeroBuild protobuf)).
 // Schema: SteamTracking/Protobufs/deadlock/citadel_gcmessages_common.proto.
 // Zstandard raw blocks are defined by RFC 8878; no server or runtime dependency is needed.
@@ -129,17 +130,15 @@ function base64ToBytes(value) {
 }
 
 function readVarint(bytes, start) {
-  let result = 0,
-    shift = 0,
-    i = start;
-  while (i < bytes.length) {
-    const byte = bytes[i++];
-    result |= (byte & 0x7f) << shift;
-    if (!(byte & 0x80)) return { value: result >>> 0, next: i };
-    shift += 7;
-    if (shift >= 35) throw new Error('Varint too long');
+  let n = 0n;
+  for (let i = start; i < bytes.length && i < start + 10; i++) {
+    const byte = bytes[i];
+    if (i === start + 9 && byte > 1) throw new Error('Varint overflow');
+    n |= BigInt(byte & 127) << BigInt((i - start) * 7);
+    if (!(byte & 128))
+      return { value: n <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(n) : n, next: i + 1 };
   }
-  throw new Error('Truncated varint');
+  throw new Error('Invalid varint');
 }
 
 function parseFields(bytes) {
@@ -148,6 +147,7 @@ function parseFields(bytes) {
   while (i < bytes.length) {
     const tag = readVarint(bytes, i);
     i = tag.next;
+    if (!Number.isSafeInteger(tag.value) || tag.value === 0) throw new Error('Invalid field');
     const field = tag.value >>> 3;
     const wire = tag.value & 7;
     let value;
@@ -157,10 +157,17 @@ function parseFields(bytes) {
       i = v.next;
     } else if (wire === 2) {
       const len = readVarint(bytes, i);
+      if (!Number.isSafeInteger(len.value)) throw new Error('Invalid length');
       i = len.next;
+      if (i + len.value > bytes.length) throw new Error('Truncated protobuf field');
       value = bytes.slice(i, i + len.value);
       i += len.value;
+    } else if (wire === 1) {
+      if (i + 8 > bytes.length) throw new Error('Truncated fixed64');
+      value = bytes.slice(i, i + 8);
+      i += 8;
     } else if (wire === 5) {
+      if (i + 4 > bytes.length) throw new Error('Truncated protobuf float');
       value = bytes.slice(i, i + 4);
       i += 4;
     } else {
@@ -186,34 +193,50 @@ function bytesToText(bytes) {
 }
 
 function decodeZstdFrame(bytes) {
+  if (bytes.length > 32000) throw new Error('Build code is too large');
+  // Reject oversized windows before the decoder allocates its history buffer.
   if (
-    bytes.length < 8 ||
-    bytes[0] !== 0x28 ||
-    bytes[1] !== 0xb5 ||
-    bytes[2] !== 0x2f ||
-    bytes[3] !== 0xfd
+    bytes.length < 6 ||
+    bytes[0] !== 40 ||
+    bytes[1] !== 181 ||
+    bytes[2] !== 47 ||
+    bytes[3] !== 253
   )
     throw new Error('Invalid zstd frame');
-  let pos = 4;
-  const flag = bytes[pos++];
-  let size;
-  if (flag === 0x20) {
-    size = bytes[pos++];
-  } else if (flag === 0x60) {
-    size = bytes[pos++] + (bytes[pos++] << 8) + 256;
-  } else {
-    throw new Error('Unsupported zstd content size');
+  const flag = bytes[4],
+    single = !!(flag & 32);
+  let pos = 5;
+  if (!single) {
+    const wd = bytes[pos++],
+      base = 2 ** (10 + (wd >> 3));
+    if (base + (base / 8) * (wd & 7) > 1048576) throw new Error('Build window too large');
   }
-  const header = bytes[pos] | (bytes[pos + 1] << 8) | (bytes[pos + 2] << 16);
-  pos += 3;
-  const type = (header >>> 1) & 3;
-  const blockSize = header >>> 3;
-  if (type !== 0) throw new Error('Unsupported zstd block type');
-  if (blockSize !== size) throw new Error('Unexpected zstd block size');
-  return bytes.slice(pos, pos + blockSize);
+  pos += [0, 1, 2, 4][flag & 3];
+  const sizeBytes = [single ? 1 : 0, 2, 4, 8][flag >> 6];
+  let declared = 0;
+  for (let i = 0; i < sizeBytes; i++) declared += bytes[pos + i] * 2 ** (8 * i);
+  if (sizeBytes === 2) declared += 256;
+  if (sizeBytes && (!Number.isSafeInteger(declared) || declared > 16000))
+    throw new Error('Build payload too large');
+  const chunks = [];
+  let size = 0;
+  const stream = new Decompress((chunk) => {
+    size += chunk.length;
+    if (size > 16000) throw new Error('Build payload too large');
+    chunks.push(chunk.slice());
+  });
+  stream.push(bytes, true);
+  const out = new Uint8Array(size);
+  let at = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, at);
+    at += chunk.length;
+  }
+  return out;
 }
 
 export function decodeGameBuild(code, heroes, items) {
+  if (typeof code !== 'string' || code.length > 45000) throw new Error('Invalid build code');
   const payload = decodeZstdFrame(base64ToBytes(code));
   const fields = parseFields(payload);
   const heroApiId = fieldNumber(fields, 2);
@@ -226,9 +249,9 @@ export function decodeGameBuild(code, heroes, items) {
       .split('|')
       .map((part) => part.trim())
       .pop() || '';
-  const stage = stageName === 'Mid game' ? 'mid' : stageName === 'Full game' ? 'full' : 'lane';
+  let stage = stageName === 'Mid game' ? 'mid' : stageName === 'Full game' ? 'full' : 'lane';
   const budgetMatch = description.match(/Budget:\s*([\d\s]+)\s*souls/i);
-  const budget = budgetMatch
+  let budget = budgetMatch
     ? Number(budgetMatch[1].replace(/\s+/g, ''))
     : BUILD_STAGES[stage].budget;
   const focusMatch = description.match(/Experimental\s+(\w+)\s+build/i);
@@ -242,20 +265,36 @@ export function decodeGameBuild(code, heroes, items) {
   for (const groupBytes of fieldNumbers(groupFields, 1)) {
     const group = parseFields(groupBytes);
     for (const itemBytes of fieldNumbers(group, 1)) {
-      const tag = readVarint(itemBytes, 0);
-      itemApiIds.push(readVarint(itemBytes, tag.next).value);
+      const id = fieldNumber(parseFields(itemBytes), 1);
+      if (!Number.isInteger(id)) throw new Error('Missing item ID');
+      itemApiIds.push(id);
     }
   }
-  const ids = itemApiIds
-    .map((apiId) => items.find((item) => item.apiId === apiId)?.id)
-    .filter(Boolean);
+  const imported = itemApiIds.map((apiId) =>
+    items.find((item) => item.apiId === apiId && item.active !== false),
+  );
+  if (imported.some((item) => !item)) throw new Error('Unknown item in game build');
+  const ids = [...new Set(imported.map((item) => item.id))];
   if (!ids.length) throw new Error('No known items in game build');
+  const list = ids.map((id) => items.find((item) => item.id === id));
+  if (!['Laning', 'Mid game', 'Full game'].includes(stageName))
+    stage =
+      list.some((i) => i.tier === 4) || ids.length > 8
+        ? 'full'
+        : list.some((i) => i.tier === 3) || ids.length > 6
+          ? 'mid'
+          : 'lane';
+  const spent = list.reduce((sum, item) => sum + item.cost, 0);
+  if (!budgetMatch) budget = Math.max(800, spent);
+  const active = list.filter((item) => item.isActive).length;
+  const maxActive = [0, 1, 2, 4].find((n) => n >= active);
+  if (maxActive === undefined) throw new Error('Too many active items');
   const settings = buildSettings({
     stage,
     budget: Number.isSafeInteger(budget) ? budget : BUILD_STAGES[stage].budget,
     heroId: hero.id,
     focus,
-    maxActive: 2,
+    maxActive,
     maxItems: Math.min(ids.length, BUILD_STAGES[stage].slots),
     keepHero: true,
   });

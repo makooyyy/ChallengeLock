@@ -115,3 +115,32 @@ test('saved builds are validated against catalog before display', () => {
   assert.equal(state.buildSettings.maxActive, 2);
   assert.equal(state.savedBuild.hero, b.hero);
 });
+
+test('budget optimizer can rearrange slots and matches exhaustive small-catalog optimum', () => {
+  for (const budget of [64800, 65600, 66400, 76800, 100000]) {
+    const b = makeBuild('review0', heroes, items, budget, o, { stage: 'full', maxActive: 4 });
+    assert.equal(b.spent, Math.min(budget, 76800));
+  }
+  const small = items.filter((i) => !i.isActive && i.tier <= 3).slice(0, 12);
+  for (const budget of [5600, 10400, 12800, 20000]) {
+    let best = 0;
+    for (let mask = 1; mask < 1 << small.length; mask++) {
+      const chosen = small.filter((_, i) => mask & (1 << i));
+      if (chosen.length > 4) continue;
+      const raw = {
+        hero: heroes[0].id,
+        seed: 'brute',
+        items: chosen.map((i) => i.id),
+        settings: { stage: 'full', maxItems: 4, maxActive: 0, budget },
+      };
+      const valid = restoreBuild(raw, heroes, small);
+      if (valid) best = Math.max(best, valid.spent);
+    }
+    const b = makeBuild('optimum', heroes, small, budget, o, {
+      stage: 'full',
+      maxItems: 4,
+      maxActive: 0,
+    });
+    assert.equal(b?.spent || 0, best);
+  }
+});

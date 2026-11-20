@@ -17,33 +17,69 @@ function catalog(items) {
   };
 }
 // The greedy pass stops at the slot cap, so a large budget can stay half spent.
-// Upgrade unpinned items to pricier compatible ones until the budget is used.
+// Search price-count plans in descending spend order, then assign compatible items.
+// Pins remain fixed; equal-cost plans prefer more occupied slots.
 function spendRemaining(out, left, { candidates, conflict, locked, settings }) {
-  for (let pass = 0; pass < 8 && left > 0; pass++) {
-    let changed = false;
-    const order = out
-      .map((_, i) => i)
-      .filter((i) => !locked.has(out[i].id))
-      .sort((a, b) => out[a].cost - out[b].cost);
-    for (const i of order) {
-      const current = out[i],
-        others = out.filter((_, j) => j !== i);
-      let best = null;
-      for (const cand of candidates) {
-        const delta = cand.cost - current.cost;
-        if (delta <= 0 || delta > left || (best && cand.cost <= best.cost)) continue;
-        if (others.some((other) => conflict(cand, other))) continue;
-        if (cand.isActive && others.filter((other) => other.isActive).length >= settings.maxActive)
-          continue;
-        best = cand;
-      }
-      if (best) {
-        left -= best.cost - current.cost;
-        out[i] = best;
-        changed = true;
-      }
+  if (!left) return left;
+  const fixed = out.filter((item) => locked.has(item.id)),
+    budget = out.reduce((s, i) => s + i.cost, 0) + left;
+  const available = candidates.filter((i) => !fixed.some((j) => conflict(i, j)));
+  const costs = [...new Set(available.map((i) => i.cost))].sort((a, b) => b - a),
+    slots = settings.maxItems - fixed.length;
+  const remaining = budget - fixed.reduce((s, i) => s + i.cost, 0),
+    plans = [];
+  function plan(at, space, sum, counts) {
+    if (at === costs.length) {
+      plans.push({ sum, counts: [...counts], count: slots - space });
+      return;
     }
-    if (!changed) break;
+    const cost = costs[at],
+      max = Math.min(
+        space,
+        Math.floor((remaining - sum) / cost),
+        available.filter((i) => i.cost === cost).length,
+      );
+    for (let n = max; n >= 0; n--) plan(at + 1, space - n, sum + n * cost, [...counts, n]);
+  }
+  plan(0, slots, 0, []);
+  plans.sort((a, b) => b.sum - a.sum || b.count - a.count);
+  const baseline = out.reduce((s, i) => s + i.cost, 0) - fixed.reduce((s, i) => s + i.cost, 0);
+  for (const p of plans) {
+    if (p.sum <= baseline) break;
+    const wanted = p.counts.flatMap((n, i) => Array(n).fill(costs[i])),
+      chosen = [...fixed];
+    function fill(at, previous = -1) {
+      if (at === wanted.length) return true;
+      const cost = wanted[at],
+        same = at > 0 && wanted[at - 1] === cost;
+      const branchCounts = Object.fromEntries(
+        BRANCHES.map((b) => [b, chosen.filter((i) => i.branch === b).length]),
+      );
+      const preferred =
+        settings.focus === 'balanced'
+          ? BRANCHES.reduce((a, b) => (branchCounts[a] <= branchCounts[b] ? a : b))
+          : settings.focus;
+      const eligible = available
+        .map((item, index) => ({ item, index }))
+        .filter(
+          ({ item, index }) =>
+            item.cost === cost &&
+            (!same || index > previous) &&
+            !chosen.some((j) => conflict(item, j)) &&
+            (!item.isActive || chosen.filter((j) => j.isActive).length < settings.maxActive),
+        );
+      eligible.sort((a, b) => (b.item.branch === preferred) - (a.item.branch === preferred));
+      for (const { item, index } of eligible) {
+        chosen.push(item);
+        if (fill(at + 1, index)) return true;
+        chosen.pop();
+      }
+      return false;
+    }
+    if (fill(0)) {
+      out.splice(0, out.length, ...chosen);
+      return remaining - p.sum;
+    }
   }
   return left;
 }
@@ -113,7 +149,12 @@ export function makeBuild(seed, heroes, items, budget, o, raw = { stage: 'full',
     left -= item.cost;
   }
   if (!out.length) return null;
-  left = spendRemaining(out, left, { candidates, conflict, locked: new Set(locked), settings });
+  left = spendRemaining(out, left, {
+    candidates: shuffle(r, candidates),
+    conflict,
+    locked: new Set(locked),
+    settings,
+  });
   out.sort((a, b) => a.tier - b.tier || a.cost - b.cost || a.name.localeCompare(b.name));
   return {
     hero: hero.id,
