@@ -69,9 +69,16 @@
     <link rel="stylesheet" href="css/app.css" />
   </head>
   <body>
-    <div class="titlebar" id="titlebar" aria-hidden="true">
+    <div class="titlebar" id="titlebar">
       <div class="titlebar-drag">
         <span class="titlebar-brand">ChallengeLock</span>
+        <span class="titlebar-context" data-i18n="headerContext">Твоя игра. Новые правила.</span>
+      </div>
+      <div class="titlebar-actions">
+        <button class="titlebar-icon" id="theme" aria-label="Тёмная тема"></button>
+        <button class="titlebar-icon" id="lang" aria-label="Switch language / Сменить язык">
+          EN
+        </button>
       </div>
       <div class="titlebar-controls">
         <button
@@ -137,18 +144,6 @@
         </div>
       </nav>
       <main class="pad" id="main" tabindex="-1">
-        <header class="app-header">
-          <div class="context-name">
-            <b>ChallengeLock</b><span>/</span
-            ><span data-i18n="headerContext">Твоя игра. Новые правила.</span>
-          </div>
-          <div class="header-actions">
-            <button class="theme-button" id="theme" aria-label="Тёмная тема"></button
-            ><button class="lang-button" id="lang" aria-label="Switch language / Сменить язык">
-              EN
-            </button>
-          </div>
-        </header>
         <section class="panel" id="p-roulette"></section>
         <section class="panel" id="p-build" hidden></section>
         <section class="panel" id="p-ban" hidden></section>

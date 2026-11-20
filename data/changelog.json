@@ -1,6 +1,24 @@
 {
   "releases": [
     {
+      "version": "1.23.5",
+      "date": "2026-11-20",
+      "title": {
+        "ru": "Кастомная шапка и без прокрутки",
+        "en": "Custom title bar and no scrollbar"
+      },
+      "items": {
+        "ru": [
+          "Убрана полоса прокрутки, добавлена кастомная шапка окна.",
+          "Кнопки управления окном в стиле приложения."
+        ],
+        "en": [
+          "Removed scrollbar, added custom window title bar.",
+          "Window controls in app style."
+        ]
+      }
+    },
+    {
       "version": "1.23.4",
       "date": "2026-11-20",
       "title": {
