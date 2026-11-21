@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import {
   parseState,
   createLogReader,
+  recoverCurrentMatch,
   createTracker,
   trackLine,
   splitLines,
@@ -125,4 +126,21 @@ test('tail reader ignores history, preserves UTF-8 and resets on truncation', ()
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('recovery ignores historical starts and restores only the running process', () => {
+  const now = new Date(2026, 10, 20, 12, 0, 0).getTime();
+  const started = now - 600000;
+  const old = '11/19 12:00:00 ChangeGameState: GameInProgress (7)';
+  assert.equal(recoverCurrentMatch([old], started, now).inMatch, false);
+  const fresh = '11/20 11:55:00 ChangeGameState: GameInProgress (7)';
+  assert.equal(recoverCurrentMatch([old, fresh], started, now).inMatch, true);
+  assert.equal(
+    recoverCurrentMatch(
+      [fresh, '11/20 11:59:00 [Client] Disconnecting from server: NETWORK_DISCONNECT_EXITING'],
+      started,
+      now,
+    ).inMatch,
+    false,
+  );
 });

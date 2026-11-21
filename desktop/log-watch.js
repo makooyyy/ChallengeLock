@@ -19,7 +19,19 @@ function createTracker() {
 // Feed one log line; returns an event when it matters.
 function trackLine(tracker, line, at = Date.now()) {
   const state = parseState(line);
-  if (!state) return null;
+  if (!state) {
+    if (
+      tracker.inMatch &&
+      /\[Client\] Disconnecting from server:|SIGNONSTATE_FULL -> SIGNONSTATE_NONE/.test(
+        String(line),
+      )
+    ) {
+      tracker.inMatch = false;
+      tracker.endedAt = at;
+      return { type: 'interrupted', state: 'Disconnected', at, durationMs: at - tracker.startedAt };
+    }
+    return null;
+  }
   tracker.lastState = state.name;
 
   if (state.name === START_STATE) {
@@ -31,6 +43,12 @@ function trackLine(tracker, line, at = Date.now()) {
   }
 
   if (!tracker.inMatch) return null;
+
+  if (/shutdown/i.test(state.name)) {
+    tracker.inMatch = false;
+    tracker.endedAt = at;
+    return { type: 'interrupted', state: state.name, at, durationMs: at - tracker.startedAt };
+  }
 
   if (END_STATE.test(state.name)) {
     tracker.inMatch = false;
@@ -115,3 +133,21 @@ function createLogReader(file) {
   };
 }
 module.exports.createLogReader = createLogReader;
+
+// Recovery is display-only and only considers timestamped lines from this game
+// process. An old log touched during startup must not resurrect yesterday's match.
+function recoverCurrentMatch(lines, processStartedAt, now = Date.now()) {
+  const tracker = createTracker();
+  for (const line of lines) {
+    const stamp = /^(\d{2})\/(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(line);
+    if (!stamp) continue;
+    const date = new Date(now);
+    date.setMonth(Number(stamp[1]) - 1, Number(stamp[2]));
+    date.setHours(Number(stamp[3]), Number(stamp[4]), Number(stamp[5]), 0);
+    if (date.getTime() > now + 86400000) date.setFullYear(date.getFullYear() - 1);
+    const at = date.getTime();
+    if (at >= processStartedAt - 2000 && at <= now + 2000) trackLine(tracker, line, at);
+  }
+  return tracker;
+}
+module.exports.recoverCurrentMatch = recoverCurrentMatch;

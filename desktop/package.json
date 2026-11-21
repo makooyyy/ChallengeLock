@@ -1,6 +1,6 @@
 {
   "name": "challengelock-desktop",
-  "version": "1.23.13",
+  "version": "1.24.0",
   "description": "Desktop app for ChallengeLock (Deadlock Challenge Roulette)",
   "main": "main.js",
   "scripts": {
@@ -32,7 +32,8 @@
       "game.js",
       "log-watch.js",
       "overlay.html",
-      "web/**/*"
+      "web/**/*",
+      "match-monitor.js"
     ],
     "win": {
       "target": "nsis",

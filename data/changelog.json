@@ -1,6 +1,28 @@
 {
   "releases": [
     {
+      "version": "1.24.0",
+      "date": "2026-11-21",
+      "title": {
+        "ru": "Отслеживание матчей и проверка челленджей",
+        "en": "Match tracking and challenge verification"
+      },
+      "items": {
+        "ru": [
+          "Начало и окончание матча автоматически управляют таймером; отключение не считается поражением.",
+          "Подключение Deadlock API по активному Steam-аккаунту и проверка семи условий по статистике.",
+          "Защита от старых матчей, другого героя, смены челленджа и задержанных ответов API.",
+          "Статус матча и проверенных условий в интерфейсе; неподтверждаемые действия остаются ручными."
+        ],
+        "en": [
+          "Match start/end automatically control the timer; disconnects are not defeats.",
+          "Optional Deadlock API integration using the active Steam account, with seven statistical checks.",
+          "Guards against old matches, wrong heroes, changed challenges and delayed API replies.",
+          "Visible match and verification status; unsupported actions remain manually confirmed."
+        ]
+      }
+    },
+    {
       "version": "1.23.13",
       "date": "2026-11-20",
       "title": {

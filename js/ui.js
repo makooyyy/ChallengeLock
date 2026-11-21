@@ -277,10 +277,12 @@ function paintContract() {
           key: resultKey(RT.cur),
           label: `${H(RT.cur.hero).name} · ${t('diff.' + RT.cur.diff)}`,
           hero: H(RT.cur.hero)?.name || RT.cur.hero,
+          heroId: H(RT.cur.hero)?.apiId,
+          gameMode: options(RT.cur.opts).gameMode,
           difficulty: t('diff.' + RT.cur.diff),
           conditions: RT.cur.conds.map((id) => {
             const c = C(id);
-            return { name: loc(c?.name || id), desc: loc(c?.desc || '') };
+            return { id, name: loc(c?.name || id), desc: loc(c?.desc || '') };
           }),
           mode: modeName(RT.cur),
           timer: mmss(RT.timer.ms),
@@ -302,7 +304,7 @@ function paintContract() {
     fav = S.favs.some((f) => resultKey(f) === resultKey(x));
   el.innerHTML = `<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${difficultyBadge(x)}</div>
   <div class="contract-hero">${dia(h)}<div><h2>${esc(h.name)}</h2><p>${modeName(x)} · ${t('diff.' + x.diff)} · ${x.conds.length} ${t('conditionsCount')}</p></div><button class="icon-button" id="fav" aria-label="${t('fav')}" title="${t('fav')}" aria-pressed="${fav}">${icon('star', 18)}</button></div>
-  <div class="contract-state">${icon(RT.finished ? 'check' : 'play', 12)}${t(RT.finished ? 'sessionClosed' : 'sessionActive')}</div><p class="contract-note">${t('contractHint')}</p>
+  <div class="contract-state">${icon(RT.finished ? 'check' : 'play', 12)}${t(RT.finished ? 'sessionClosed' : 'sessionActive')}</div><p class="contract-note">${t('contractHint')}</p>${desktop?.matchState ? `<div data-match-status>${matchStatus()}</div>` : ''}
   ${RT.finished ? `<div class="completion-status ${x.outcome === 'fail' ? 'failed' : ''}">${icon(x.outcome === 'done' ? 'check' : 'close', 17)}${t(x.outcome === 'done' ? 'completedStatus' : 'failedStatus')}</div>` : ''}
   <div class="result-actions"><button class="pb" id="done" ${RT.finished ? 'disabled' : ''}>${icon('check', 16)}${t('done')}</button><button class="pb o" id="failb" ${RT.finished ? 'disabled' : ''}>${icon('close', 15)}${t('fail')}</button></div>
   <button class="pb friend-challenge" id="cf">${icon('shield', 15)}${t('challengeFriend')}</button>
@@ -372,10 +374,12 @@ async function doRoll(reroll, opt = {}) {
           key: resultKey(res),
           label: `${H(res.hero).name} · ${t('diff.' + res.diff)}`,
           hero: H(res.hero)?.name || res.hero,
+          heroId: H(res.hero)?.apiId,
+          gameMode: options(res.opts).gameMode,
           difficulty: t('diff.' + res.diff),
           conditions: res.conds.map((id) => {
             const c = C(id);
-            return { name: loc(c?.name || id), desc: loc(c?.desc || '') };
+            return { id, name: loc(c?.name || id), desc: loc(c?.desc || '') };
           }),
           mode: modeName(res),
           timer: mmss(RT.timer.ms),
@@ -563,10 +567,70 @@ function overlayCard() {
 }
 // Desktop only: where the game lives and what its console log says. This panel is the
 // ground truth we need before the shell can close contracts by itself.
+function matchStatus() {
+  const m = RT.match || {};
+  const en = S.lang === 'en';
+  const phase = {
+    idle: en ? 'Waiting for a match' : 'Ожидание матча',
+    waiting: en ? 'Challenge ready — waiting for a match' : 'Челлендж выбран — ожидание матча',
+    playing: en ? 'Match in progress' : 'Матч идёт',
+    ended: en ? 'Match ended' : 'Матч закончился',
+    interrupted: en
+      ? 'Disconnected — result needs confirmation'
+      : 'Соединение прервано — результат нужно подтвердить',
+  };
+  const api = {
+    disabled: en ? 'API disabled' : 'API отключён',
+    'no-account': en ? 'Sign in to Steam' : 'Войди в Steam',
+    ready: en ? 'API connected' : 'API подключён',
+    loading: en ? 'Checking match history…' : 'Проверяю историю матчей…',
+    waiting: en
+      ? 'Waiting for match data. You can confirm manually.'
+      : 'Ожидаю данные матча. Можно подтвердить результат вручную.',
+    unavailable: en
+      ? 'API unavailable; will retry automatically.'
+      : 'API недоступен; повторю запрос автоматически.',
+    verified: en ? 'Match statistics received' : 'Статистика матча получена',
+  };
+  const current = RT.cur && m.key === resultKey(RT.cur);
+  const checks = current ? m.checks || [] : [];
+  const late = m.phase === 'playing' && !current;
+  return `<div class="match-status"><strong>${esc(phase[m.phase] || phase.idle)}</strong><small>${esc(api[m.api] || '')}</small>${late ? `<small>${en ? 'Joined an ongoing match. Automatic completion is available from the next match.' : 'Подключились к уже начатому матчу. Автозачёт доступен со следующего матча.'}</small>` : ''}${['stale', 'missing'].includes(m.logHealth) ? `<small>${en ? 'No fresh log. Add -condebug in Steam launch options and restart Deadlock.' : 'Нет свежего журнала. Нужен -condebug в параметрах Steam и перезапуск Deadlock.'}</small>` : ''}${current && m.matchId ? `<small>${en ? 'Match' : 'Матч'} #${m.matchId} · ${m.stats?.kills ?? '—'}/${m.stats?.deaths ?? '—'}/${m.stats?.assists ?? '—'}</small>` : ''}${checks.map((c) => `<div>${c.status === 'pass' ? '✓' : c.status === 'fail' ? '×' : '○'} ${esc(c.name || c.id)} — ${c.status === 'manual' ? (en ? 'confirm manually' : 'подтверди вручную') : `${c.value} / ${c.target}`}</div>`).join('')}</div>`;
+}
+function updateMatch(state) {
+  if (!state) return;
+  const previous = RT.match;
+  RT.match = state;
+  const current = RT.cur && state.key === resultKey(RT.cur) && !RT.finished;
+  if (
+    current &&
+    state.phase === 'playing' &&
+    (previous?.phase !== 'playing' || previous?.key !== state.key)
+  ) {
+    RT.timer = { ms: Math.max(0, Date.now() - state.startedAt), t0: state.startedAt, run: true };
+    paintContract();
+  }
+  if (current && ['ended', 'interrupted'].includes(state.phase)) {
+    RT.timer.run = false;
+    if (Number.isFinite(state.durationMs)) RT.timer.ms = state.durationMs;
+    const timer = $('#tm');
+    if (timer) timer.textContent = mmss(RT.timer.ms);
+    desktop?.reportTimer?.(mmss(RT.timer.ms));
+    if (['done', 'fail'].includes(state.outcome)) finish(state.outcome);
+    else if (previous?.phase !== state.phase) paintContract();
+  }
+  $$('[data-match-status]').forEach((el) => {
+    el.innerHTML = matchStatus();
+  });
+  const toggle = $('#match-api-enabled');
+  if (toggle) toggle.checked = state.enabled === true;
+}
 function gameCard() {
   if (!desktop?.game) return '';
-  return `<div class="card"><div class="section-heading"><div><h2>${t('gameTitle')}</h2><p>${t('gameHint')}</p></div>${icon('search', 20)}</div><button id="game-probe">${icon('search', 14)}${t('gameFind')}</button><div id="game-result" class="game-result" aria-live="polite"></div></div>`;
+  const en = S.lang === 'en';
+  return `<div class="card"><div class="section-heading"><div><h2>${t('gameTitle')}</h2><p>${t('gameHint')}</p></div>${icon('search', 20)}</div><div data-match-status>${matchStatus()}</div><label class="chk"><input type="checkbox" id="match-api-enabled" ${RT.match?.enabled ? 'checked' : ''}>${en ? 'Check my matches using Deadlock API' : 'Проверять мои матчи через Deadlock API'}</label><p class="lab-help">${en ? 'Sends the active Steam Account ID to api.deadlock-api.com. No API key required. Unsupported conditions stay manual; history may arrive late.' : 'Передаёт ID активного Steam-аккаунта на api.deadlock-api.com. Ключ не нужен. Недоступные в статистике условия проверяются вручную; данные могут задерживаться.'}</p><button id="match-refresh">${en ? 'Check match data' : 'Проверить данные матча'}</button><button id="game-probe">${icon('search', 14)}${t('gameFind')}</button><div id="game-result" class="game-result" aria-live="polite"></div></div>`;
 }
+
 async function probeGameDesktop() {
   const box = $('#game-result');
   if (!box || !desktop?.game) return;
@@ -715,6 +779,10 @@ function bind() {
     if (d.tab) return show(d.tab);
     if (RT.busy) return;
     if ((await builderClick(b, toast, persist)) || (await banClick(b, toast, persist))) return;
+    if (b.id === 'match-refresh') {
+      updateMatch(await desktop?.refreshMatch?.());
+      return;
+    }
     if (b.id === 'overlay-toggle') {
       desktop?.toggleOverlay?.();
       return;
@@ -867,6 +935,11 @@ function bind() {
     } else if (i.id === 'import-file') {
       importData(i.files?.[0]);
       i.value = '';
+    } else if (i.id === 'match-api-enabled') {
+      desktop
+        ?.setMatchEnabled?.(i.checked)
+        .then(updateMatch)
+        .catch(() => toast(t('gameFailed')));
     } else if (i.id === 'overlay-toggle') {
       desktop?.toggleOverlay?.();
     } else if (
@@ -1098,6 +1171,8 @@ export async function boot() {
     if (!RT.busy) doRoll(false);
   });
   // The shell detected a finished match and the player picked the outcome.
+  desktop?.onMatch?.(updateMatch);
+  desktop?.matchState?.().then(updateMatch);
   desktop?.onOutcome?.((event) => {
     if (
       RT.cur &&

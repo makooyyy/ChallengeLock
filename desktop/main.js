@@ -22,6 +22,7 @@ const path = require('path');
 const { execFile } = require('child_process');
 const game = require('./game.js');
 const logWatch = require('./log-watch.js');
+const { MatchMonitor, fetchHistory } = require('./match-monitor.js');
 
 // The interface is 2D, so software compositing costs nothing and removes the GPU
 // process. On some Windows setups that process dies at startup with
@@ -651,6 +652,8 @@ ipcMain.on('desktop:contract', (_event, text) => {
           label: text.label,
           hero: text.hero,
           difficulty: text.difficulty,
+          heroId: text.heroId,
+          gameMode: text.gameMode,
           conditions: Array.isArray(text.conditions) ? text.conditions : [],
           mode: text.mode,
           timer: text.timer,
@@ -668,6 +671,7 @@ ipcMain.on('desktop:contract', (_event, text) => {
     tray.setToolTip('ChallengeLock — ' + activeContract.label.slice(0, 120));
   else if (tray && !contractActive) tray.setToolTip('ChallengeLock');
   setOverlayContract(reportedContract);
+  monitor.contract(reportedContract);
 });
 
 // Match watching: the game rewrites console.log on every launch, so the reader keeps
@@ -678,31 +682,61 @@ const logWatcher = {
   reader: null,
   tracker: logWatch.createTracker(),
   lastLookup: 0,
+  recovered: false,
 };
 
-function promptMatchResult(contract) {
-  if (!contract || activeContract?.key !== contract.key) {
-    log('match ended, but no contract is active');
-    return;
-  }
-  const answer = dialog.showMessageBoxSync({
-    type: 'question',
-    title: 'ChallengeLock',
-    message: 'Матч закончился. Засчитать контракт?\n' + contract.label,
-    buttons: ['Выполнено', 'Провал', 'Позже'],
-    defaultId: 0,
-    cancelId: 2,
-    noLink: true,
+const matchSettingsPath = path.join(app.getPath('userData'), 'match-settings.json');
+let matchSettings;
+try {
+  const saved = JSON.parse(fs.readFileSync(matchSettingsPath, 'utf8'));
+  matchSettings = { enabled: saved?.enabled === true };
+} catch {
+  matchSettings = { enabled: false };
+}
+let matchSnapshot = { phase: 'idle', api: 'disabled', logHealth: 'searching' };
+const monitor = new MatchMonitor({
+  fetchHistory,
+  notify: (state) => {
+    matchSnapshot = { ...matchSnapshot, ...state };
+    if (mainWindow && !mainWindow.isDestroyed())
+      mainWindow.webContents.send('desktop:match', matchSnapshot);
+    if (overlayWindow && !overlayWindow.isDestroyed())
+      overlayWindow.webContents.send('desktop:match', matchSnapshot);
+  },
+});
+async function refreshAccount() {
+  const accountId = await new Promise((resolve) => {
+    if (process.platform !== 'win32') return resolve(null);
+    execFile(
+      'reg',
+      ['query', 'HKCU\\Software\\Valve\\Steam\\ActiveProcess', '/v', 'ActiveUser'],
+      { windowsHide: true, timeout: 5000 },
+      (error, output) => {
+        const value = /ActiveUser\s+REG_DWORD\s+(0x[0-9a-f]+)/i.exec(output || '');
+        resolve(error || !value ? null : Number(value[1]));
+      },
+    );
   });
-  if (answer === 2) {
-    log('match ended, the player chose to decide later');
-    return;
+  monitor.configure(matchSettings.enabled, accountId);
+}
+ipcMain.handle('desktop:match-state', () => matchSnapshot);
+ipcMain.handle('desktop:match-settings', async (_event, enabled) => {
+  matchSettings = { enabled: enabled === true };
+  fs.mkdirSync(path.dirname(matchSettingsPath), { recursive: true });
+  fs.writeFileSync(matchSettingsPath, JSON.stringify(matchSettings));
+  await refreshAccount();
+  void monitor.poll();
+  return matchSnapshot;
+});
+ipcMain.handle('desktop:match-refresh', async () => {
+  await monitor.poll();
+  return matchSnapshot;
+});
+function publishLogHealth(logHealth) {
+  if (matchSnapshot.logHealth !== logHealth) {
+    matchSnapshot.logHealth = logHealth;
+    monitor.publish({});
   }
-  const outcome = answer === 1 ? 'fail' : 'done';
-  log('match ended, sending outcome ' + outcome);
-  if (mainWindow && !mainWindow.isDestroyed())
-    mainWindow.webContents.send('desktop:outcome', { key: contract.key, outcome });
-  showWindow();
 }
 
 function watchTick() {
@@ -716,13 +750,17 @@ function watchTick() {
         if (info.log && info.log.exists) {
           logWatcher.file = info.log.path;
           logWatcher.reader = logWatch.createLogReader(info.log.path);
+          logWatcher.recovered = false;
           logWatcher.reader();
           logWatcher.tracker = logWatch.createTracker();
           matchContract = null;
+          publishLogHealth(
+            Date.now() - fs.statSync(info.log.path).mtimeMs < 120000 ? 'ready' : 'stale',
+          );
           log('watching the game log: ' + info.log.path);
-        }
+        } else publishLogHealth('missing');
       })
-      .catch(() => {});
+      .catch(() => publishLogHealth('missing'));
     return;
   }
   let batch;
@@ -734,34 +772,123 @@ function watchTick() {
     return;
   }
   if (batch.reset) {
+    if (logWatcher.tracker.inMatch)
+      monitor.local(
+        { type: 'interrupted', at: now, durationMs: now - logWatcher.tracker.startedAt },
+        matchContract,
+      );
     logWatcher.tracker = logWatch.createTracker();
     matchContract = null;
   }
+  if (batch.lines.length) publishLogHealth('receiving');
   for (const line of batch.lines) {
     const event = logWatch.trackLine(logWatcher.tracker, line);
     if (!event) continue;
     if (event.type === 'start') {
       matchContract = activeContract ? { ...activeContract } : null;
+      monitor.local(event, matchContract);
       if (overlaySettings.autoShow) showOverlay();
       log('match started');
     } else if (event.type === 'end') {
       log('match ended in state ' + event.state);
       const contract = matchContract;
       matchContract = null;
-      promptMatchResult(contract);
+      monitor.local(event, contract);
       if (overlaySettings.autoHide) {
         setTimeout(() => {
           if (overlayWindow && !overlayWindow.isDestroyed()) hideOverlay();
         }, 10000).unref?.();
       }
+    } else if (event.type === 'interrupted') {
+      monitor.local(event, matchContract);
+      matchContract = null;
     } else log('unrecognised game state after GameInProgress: ' + event.state);
   }
+}
+
+let lastGamePid = null;
+let processProbeBusy = false;
+function checkGameProcess() {
+  if (process.platform !== 'win32' || processProbeBusy) return;
+  processProbeBusy = true;
+  const command =
+    "$p = Get-Process -Name deadlock -ErrorAction SilentlyContinue | Select-Object -First 1; if ($p) { @{ id=$p.Id; startedAt=$p.StartTime.ToUniversalTime().ToString('o') } | ConvertTo-Json -Compress } else { 'null' }";
+  execFile(
+    'powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-Command', command],
+    { windowsHide: true, timeout: 5000 },
+    (error, output) => {
+      processProbeBusy = false;
+      if (error) return;
+      let processInfo;
+      try {
+        processInfo = JSON.parse(output);
+      } catch {
+        return;
+      }
+      if (lastGamePid && lastGamePid !== processInfo?.id && logWatcher.tracker.inMatch) {
+        monitor.local(
+          { type: 'interrupted', durationMs: Date.now() - logWatcher.tracker.startedAt },
+          matchContract,
+        );
+        logWatcher.tracker = logWatch.createTracker();
+        matchContract = null;
+      }
+      lastGamePid = processInfo?.id || null;
+      if (!processInfo) {
+        publishLogHealth('not-running');
+        return;
+      }
+      if (!logWatcher.file || !fs.existsSync(logWatcher.file)) {
+        publishLogHealth('missing');
+        return;
+      }
+      let modified;
+      try {
+        modified = fs.statSync(logWatcher.file).mtimeMs;
+      } catch {
+        publishLogHealth('missing');
+        return;
+      }
+      if (!logWatcher.recovered && modified >= Date.parse(processInfo.startedAt) - 2000) {
+        logWatcher.recovered = true;
+        if (!logWatcher.tracker.inMatch) {
+          let recovered;
+          try {
+            recovered = logWatch.recoverCurrentMatch(
+              readTail(logWatcher.file).split(/\r?\n/),
+              Date.parse(processInfo.startedAt),
+            );
+          } catch {
+            return;
+          }
+          if (recovered.inMatch) {
+            logWatcher.tracker = recovered;
+            matchContract = null;
+            monitor.session = null;
+            monitor.publish({ phase: 'playing', key: null, late: true });
+          }
+        }
+      }
+      if (modified < Date.parse(processInfo.startedAt) - 2000) publishLogHealth('stale');
+      else if (['stale', 'missing', 'not-running'].includes(matchSnapshot.logHealth))
+        publishLogHealth('ready');
+    },
+  );
 }
 
 function startMatchWatch() {
   if (logWatcher.timer) return;
   logWatcher.timer = setInterval(watchTick, 2000);
   logWatcher.timer.unref?.();
+  void refreshAccount();
+  checkGameProcess();
+  const processTimer = setInterval(checkGameProcess, 15000);
+  processTimer.unref?.();
+  const apiTimer = setInterval(() => {
+    void monitor.poll();
+  }, 15000);
+  apiTimer.unref?.();
 }
 
 const GAME_LOG_TAIL_BYTES = 64 * 1024;
@@ -1028,4 +1155,4 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 // Exposed for tests/desktop.test.js, which drives the shell without Electron.
-module.exports = { server, pageUrl, PORT, watchTick, logWatcher };
+module.exports = { server, pageUrl, PORT, watchTick, logWatcher, monitor };

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.24.0 — 2026-11-21
+
+- Track live match phases and synchronize the challenge timer.
+- Add opt-in Deadlock API history checks with conservative result verification.
+- Guard stale logs, disconnects, contract changes and delayed API responses.
+
 ## 1.23.13 — 2026-11-20
 
 - Fix overlay scrolling, visibility controls, saved positioning and build completion.

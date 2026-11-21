@@ -438,6 +438,8 @@ try {
       reportContract: (c) => (window.__contract = c),
       onSpin: (f) => (window.__spin = f),
       onOutcome: (f) => (window.__outcome = f),
+      onMatch: (f) => (window.__match = f),
+      matchState: async () => ({ phase: 'waiting', api: 'disabled' }),
       onCompact: (f) => (window.__compact = f),
       compactState: async () => true,
       toggleCompact: () => window.__compact(false),
@@ -452,13 +454,42 @@ try {
   assert((await compactPage.locator('.hero-display').boundingBox()).y < 180);
   assert((await compactPage.locator('.condition-result').first().boundingBox()).y < 260);
   assert(await compactPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await compactPage.evaluate(() =>
+    window.__match({
+      key: window.__contract.key,
+      phase: 'playing',
+      startedAt: Date.now() - 4000,
+      api: 'ready',
+    }),
+  );
+  assert(await compactPage.evaluate(async () => (await import('/js/state.js')).RT.timer.run));
+  await compactPage.evaluate(() =>
+    window.__match({
+      key: window.__contract.key,
+      phase: 'ended',
+      durationMs: 90000,
+      api: 'waiting',
+    }),
+  );
+  assert.equal(
+    await compactPage.evaluate(async () => (await import('/js/state.js')).RT.timer.run),
+    false,
+  );
+  assert.equal(await compactPage.locator('#tm').textContent(), '01:30');
   await compactPage.evaluate(() => window.__outcome({ key: 'stale', outcome: 'done' }));
   assert.equal(
     await compactPage.evaluate(async () => (await import('/js/state.js')).RT.finished),
     false,
   );
   await compactPage.evaluate(() =>
-    window.__outcome({ key: window.__contract.key, outcome: 'done' }),
+    window.__match({
+      key: window.__contract.key,
+      phase: 'ended',
+      api: 'verified',
+      durationMs: 90000,
+      outcome: 'done',
+      checks: [],
+    }),
   );
   assert(await compactPage.locator('#completion-dialog').isVisible());
   await compactPage.keyboard.press('Escape');

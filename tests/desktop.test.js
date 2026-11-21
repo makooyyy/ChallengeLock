@@ -373,20 +373,20 @@ test('watcher preserves appended state lines and never closes a replacement cont
     shell.watchTick();
     fs.appendFileSync(file, 'ChangeGameState: Post');
     shell.watchTick();
-    assert.equal(state.sent.length, before);
+    assert.equal(shell.monitor.state.phase, 'playing');
     fs.appendFileSync(file, 'Game (8)\n');
     shell.watchTick();
-    assert.deepEqual(state.sent.at(-1), {
-      channel: 'desktop:outcome',
-      payload: { key: 'A', outcome: 'done' },
-    });
+    assert.equal(shell.monitor.state.phase, 'ended');
+    assert.equal(shell.monitor.state.key, 'A');
+    assert.equal(shell.monitor.state.outcome, null);
     fs.appendFileSync(file, 'ChangeGameState: GameInProgress (7)\n');
     shell.watchTick();
     state.ipc['desktop:contract']({}, { key: 'B', label: 'Contract B' });
-    const count = state.sent.length;
+    const count = state.sent.filter((x) => x.channel === 'desktop:outcome').length;
     fs.appendFileSync(file, 'ChangeGameState: PostGame (8)\n');
     shell.watchTick();
-    assert.equal(state.sent.length, count);
+    assert.equal(state.sent.filter((x) => x.channel === 'desktop:outcome').length, count);
+    assert.equal(shell.monitor.state.key, null);
   } finally {
     shell.logWatcher.file = null;
     state.answer = 2;

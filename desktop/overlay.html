@@ -314,6 +314,7 @@
           <div class="counter" id="counter">0</div>
         </div>
 
+        <div id="match-phase" style="font-size: 11px; color: #a9b6d0" hidden></div>
         <div class="content">
           <div class="conditions" id="conditions" hidden></div>
 
@@ -463,6 +464,27 @@
         timerEl.textContent = data.timer || '00:00';
       }
 
+      function renderMatch(state) {
+        const el = document.getElementById('match-phase');
+        const en = document.documentElement.lang === 'en';
+        el.textContent =
+          state.phase === 'playing'
+            ? en
+              ? 'Match in progress'
+              : 'Матч идёт'
+            : state.phase === 'ended'
+              ? en
+                ? 'Match ended'
+                : 'Матч закончился'
+              : state.phase === 'interrupted'
+                ? en
+                  ? 'Disconnected'
+                  : 'Соединение прервано'
+                : '';
+        el.hidden = !el.textContent;
+      }
+      window.challengeLockDesktop?.onMatch?.(renderMatch);
+      window.challengeLockDesktop?.matchState?.().then(renderMatch);
       if (
         window.challengeLockDesktop &&
         typeof window.challengeLockDesktop.onOverlay === 'function'
