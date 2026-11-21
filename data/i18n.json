@@ -387,7 +387,12 @@
     "journalResume": "Продолжить в рулетке",
     "journalSearch": "Поиск по герою или условию",
     "journalAllTime": "За всё время",
-    "journalRecent": "По последним 50 попыткам"
+    "journalRecent": "По последним 50 попыткам",
+    "buildThisHero": "Собрать билд для этого героя",
+    "checkPassed": "Подтверждено статистикой",
+    "checkFailed": "Условие не выполнено по статистике",
+    "checkManual": "Осталось подтвердить вручную",
+    "checkMarked": "Отмечено вручную"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -777,6 +782,11 @@
     "journalResume": "Continue in roulette",
     "journalSearch": "Search hero or condition",
     "journalAllTime": "All time",
-    "journalRecent": "Last 50 attempts"
+    "journalRecent": "Last 50 attempts",
+    "buildThisHero": "Create a build for this hero",
+    "checkPassed": "Confirmed by match statistics",
+    "checkFailed": "Missed according to match statistics",
+    "checkManual": "Still needs your confirmation",
+    "checkMarked": "Marked manually"
   }
 }

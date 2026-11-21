@@ -305,10 +305,11 @@ function paintReels(res, animate) {
     lock.disabled = !entry || RT.busy;
     lock.hidden = !entry || !RT.preview;
     if (entry && i > 0 && !RT.preview && !RT.finished && res.conds.length > 1) {
-      const checked = !!res.checked?.includes(entry.id);
+      const auto = verifiedCondition(entry.id);
+      const checked = auto || !!res.checked?.includes(entry.id);
       el.insertAdjacentHTML(
         'beforeend',
-        `<button class="progress-check" data-progress="${esc(entry.id)}" aria-pressed="${checked}">${icon(checked ? 'check' : 'plus', 14)} ${t(checked ? 'markedCondition' : 'markCondition')}</button>`,
+        `<button class="progress-check" ${auto ? 'disabled' : ''} data-progress="${esc(entry.id)}" aria-pressed="${checked}">${icon(checked ? 'check' : 'plus', 14)} ${t(auto ? 'checkPassed' : checked ? 'markedCondition' : 'markCondition')}</button>`,
       );
     }
     if (animate && !reduce && entry && !RT.locks[i])
@@ -324,6 +325,13 @@ function paintReels(res, animate) {
   }
   return Promise.all(promises);
 }
+function verifiedCondition(id) {
+  return (
+    RT.cur &&
+    RT.match?.key === resultKey(RT.cur) &&
+    RT.match.checks?.some((c) => c.id === id && c.status === 'pass')
+  );
+}
 function paintContract() {
   desktop?.reportContract?.(
     RT.cur && !RT.preview
@@ -336,7 +344,12 @@ function paintContract() {
           difficulty: t('diff.' + RT.cur.diff),
           conditions: RT.cur.conds.map((id) => {
             const c = C(id);
-            return { id, name: loc(c?.name || id), desc: loc(c?.desc || '') };
+            return {
+              id,
+              name: loc(c?.name || id),
+              desc: loc(c?.desc || ''),
+              checked: !!(RT.cur.checked?.includes(id) || verifiedCondition(id)),
+            };
           }),
           mode: modeName(RT.cur),
           timer: mmss(RT.timer.ms),
@@ -365,7 +378,7 @@ function paintContract() {
   <div class="contract-state">${icon(RT.finished ? 'check' : 'play', 12)}${t(RT.finished ? 'sessionClosed' : 'sessionActive')}</div><p class="contract-note">${RT.finished ? t('contractHint') : t('contractDeadline') + ' ' + esc(new Date(x.ts + CONTRACT_DAY).toLocaleString(S.lang, { dateStyle: 'short', timeStyle: 'short' }))}</p>${desktop?.matchState ? `<div data-match-status>${matchStatus()}</div>` : ''}
   ${RT.finished ? `<div class="completion-status ${x.outcome === 'fail' ? 'failed' : ''}">${icon(x.outcome === 'done' ? 'check' : 'close', 17)}${t(x.outcome === 'done' ? 'completedStatus' : 'failedStatus')}</div>` : ''}
   <div class="result-actions"><button class="pb" id="done" ${RT.finished ? 'disabled' : ''}>${icon('check', 16)}${t('done')}</button><button class="pb o" id="failb" ${RT.finished ? 'disabled' : ''}>${icon('close', 15)}${t('fail')}</button></div>
-  ${!RT.finished ? `<p>${RT.ban?.hero === x.hero ? esc(banRule(RT.ban)) : ''}</p><button class="pb" data-tab="ban">${t('addBan')}</button>` : ''}
+  ${!RT.finished ? `<button class="pb contract-build" id="contract-build">${icon('layers', 16)}${t('buildThisHero')}</button><p>${RT.ban?.hero === x.hero ? esc(banRule(RT.ban)) : ''}</p><button class="pb" data-tab="ban">${t('addBan')}</button>` : ''}
   <button class="pb friend-challenge" id="cf">${icon('shield', 15)}${t('challengeFriend')}</button>
   ${RT.finished ? `<button class="review-stamp" id="review-stamp">${icon('shield', 17)}${t('reviewStamp')}${icon('arrow', 15)}</button>` : ''}
   <div class="timer-row"><div class="timer-readout">${icon('clock', 17)}<b id="tm" class="mono-t">${mmss(RT.timer.ms)}</b></div><button class="timer-toggle" id="tgl" ${RT.finished ? 'disabled' : ''}>${icon(RT.timer.run ? 'clock' : 'play', 12)}${RT.timer.run ? t('pause') : t('start')}</button></div>
@@ -651,7 +664,9 @@ function updatePreview() {
     shop = s.mode === 'shop',
     x = RT.cur && !RT.preview ? RT.cur : null;
   const rows = x
-    ? x.conds.map((id) => loc(C(id).name))
+    ? x.conds
+        .filter((id) => !shop || !(x.checked?.includes(id) || verifiedCondition(id)))
+        .map((id) => loc(C(id).name))
     : [t('exampleCondition1'), t('exampleCondition2'), t('exampleCondition3')];
   const b = RT.build,
     next = b?.items.find(
@@ -660,14 +675,22 @@ function updatePreview() {
   const i = RT.data.items.find((i) => i.id === next);
   el.style.opacity = s.opacity ?? 0.92;
   el.style.width = Math.round((s.width || 360) * 0.8) + 'px';
+  const purchase =
+    s.showBuild !== false &&
+    esc(t('nextPurchase') + ' · ' + (i ? i.name + ' · ' + i.cost : t('examplePurchase')));
   el.innerHTML = [
+    shop && purchase,
+    shop && RT.ban && esc(banRule(RT.ban)),
     s.showHero !== false && `<strong>${esc(x ? H(x.hero).name : 'Abrams')}</strong>`,
     s.showStatus !== false && t('sessionActive'),
     s.showConditions !== false && rows.map((r) => esc(r)).join('<br>'),
-    shop && RT.ban && esc(banRule(RT.ban)),
+    shop &&
+      s.showConditions !== false &&
+      x &&
+      x.conds.length > rows.length &&
+      esc(t('markedCondition') + ' · ' + (x.conds.length - rows.length)),
     !shop && s.showTimer !== false && '02:15',
-    s.showBuild !== false &&
-      esc(t('nextPurchase') + ' · ' + (i ? i.name + ' · ' + i.cost : t('examplePurchase'))),
+    !shop && purchase,
   ]
     .filter(Boolean)
     .map((v) => `<div>${v}</div>`)
@@ -725,8 +748,33 @@ function matchStatus() {
   };
   const current = RT.cur && m.key === resultKey(RT.cur);
   const checks = current ? m.checks || [] : [];
+  if (checks.length) {
+    const groups = [
+      ['checkPassed', checks.filter((c) => c.status === 'pass')],
+      ['checkFailed', checks.filter((c) => c.status === 'fail')],
+      [
+        'checkManual',
+        checks.filter((c) => c.status === 'manual' && !RT.cur.checked?.includes(c.id)),
+      ],
+      [
+        'checkMarked',
+        checks.filter((c) => c.status === 'manual' && RT.cur.checked?.includes(c.id)),
+      ],
+    ];
+    return (
+      '<div class="match-status">' +
+      groups
+        .filter(([, cs]) => cs.length)
+        .map(
+          ([key, cs]) =>
+            `<section><strong>${t(key)}</strong><ul>${cs.map((c) => `<li>${esc(C(c.id) ? loc(C(c.id).name) : c.name || c.id)}${c.status === 'manual' ? '' : ` · ${esc(c.value)} / ${esc(c.target)}`}</li>`).join('')}</ul></section>`,
+        )
+        .join('') +
+      '</div>'
+    );
+  }
   const late = m.phase === 'playing' && !current;
-  return `<div class="match-status"><strong>${esc(phase[m.phase] || phase.idle)}</strong><small>${esc(api[m.api] || '')}</small>${late ? `<small>${en ? 'Joined an ongoing match. Automatic completion is available from the next match.' : 'Подключились к уже начатому матчу. Автозачёт доступен со следующего матча.'}</small>` : ''}${['stale', 'missing'].includes(m.logHealth) ? `<small>${en ? 'No fresh log. Add -condebug in Steam launch options and restart Deadlock.' : 'Нет свежего журнала. Нужен -condebug в параметрах Steam и перезапуск Deadlock.'}</small>` : ''}${current && m.matchId ? `<small>${en ? 'Match' : 'Матч'} #${m.matchId} · ${m.stats?.kills ?? '—'}/${m.stats?.deaths ?? '—'}/${m.stats?.assists ?? '—'}</small>` : ''}${checks.map((c) => `<div>${c.status === 'pass' ? '✓' : c.status === 'fail' ? '×' : '○'} ${esc(c.name || c.id)} — ${c.status === 'manual' ? (en ? 'confirm manually' : 'подтверди вручную') : `${c.value} / ${c.target}`}</div>`).join('')}</div>`;
+  return `<div class="match-status"><strong>${esc(phase[m.phase] || phase.idle)}</strong><small>${esc(api[m.api] || '')}</small>${late ? `<small>${en ? 'Joined an ongoing match. Automatic completion is available from the next match.' : 'Подключились к уже начатому матчу. Автозачёт доступен со следующего матча.'}</small>` : ''}${['stale', 'missing'].includes(m.logHealth) ? `<small>${en ? 'No fresh log. Add -condebug in Steam launch options and restart Deadlock.' : 'Нет свежего журнала. Нужен -condebug в параметрах Steam и перезапуск Deadlock.'}</small>` : ''}${current && m.matchId ? `<small>${en ? 'Match' : 'Матч'} #${m.matchId} · ${m.stats?.kills ?? '—'}/${m.stats?.deaths ?? '—'}/${m.stats?.assists ?? '—'}</small>` : ''}</div>`;
 }
 function updateMatch(state) {
   if (!state) return;
@@ -755,7 +803,13 @@ function updateMatch(state) {
     if (timer) timer.textContent = mmss(RT.timer.ms);
     desktop?.reportTimer?.(mmss(RT.timer.ms));
     if (['done', 'fail'].includes(state.outcome)) finish(state.outcome, 'match');
-    else if (previous?.phase !== state.phase) paintContract();
+    else if (
+      previous?.phase !== state.phase ||
+      JSON.stringify(previous?.checks) !== JSON.stringify(state.checks)
+    ) {
+      paintContract();
+      paintReels(RT.cur, false);
+    }
   }
   $$('[data-match-status]').forEach((el) => {
     el.innerHTML = matchStatus();
@@ -1130,6 +1184,13 @@ function bind() {
     }
     if (b.id === 'review-stamp' && RT.cur && RT.finished)
       return showCelebration(RT.cur, H(RT.cur.hero), RT.data.challenges);
+    if (b.id === 'contract-build' && RT.cur && !RT.preview && !RT.finished) {
+      S.buildSettings.heroId = RT.cur.hero;
+      persist();
+      show('build');
+      $('#rb')?.focus();
+      return;
+    }
     if (b.id === 'accept-contract' && RT.cur && RT.preview) {
       RT.cur.ts = Date.now();
       RT.preview = false;
@@ -1152,6 +1213,7 @@ function bind() {
       for (const f of S.favs) if (resultKey(f) === resultKey(RT.cur)) f.checked = RT.cur.checked;
       persist();
       paintReels(RT.cur, false);
+      paintContract();
       document.querySelector('[data-progress="' + CSS.escape(id) + '"]')?.focus();
       return;
     }
@@ -1530,7 +1592,7 @@ export async function boot() {
     exit.onclick = () => desktop.toggleCompact?.();
     document.body.append(exit);
   }
-  checkForUpdates(siteVersion());
+  checkForUpdates(RT.data.changelog.installerVersion || siteVersion());
 }
 
 // PWA shortcuts and bookmarked sections arrive as ?tab=<name>; a shared result

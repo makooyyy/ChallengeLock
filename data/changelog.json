@@ -1,7 +1,28 @@
 {
+  "installerVersion": "1.30.0",
   "releases": [
     {
-      "version": "1.29.0",
+      "version": "1.27.0",
+      "date": "2026-11-21",
+      "title": {
+        "ru": "От челленджа до покупки",
+        "en": "From challenge to purchase"
+      },
+      "items": {
+        "ru": [
+          "После принятия челленджа можно сразу открыть конструктор для выбранного героя.",
+          "В магазине сверху видны следующая покупка и цена, затем запрет и оставшиеся условия. Отмеченные условия свёрнуты в счётчик.",
+          "После проверки матча видно, какие условия подтвердила статистика, а какие ещё требуют ручной отметки."
+        ],
+        "en": [
+          "Open the build editor for the accepted hero.",
+          "The shop prioritizes the next purchase and cost, followed by the restriction and remaining conditions.",
+          "Match checks distinguish verified conditions, missed targets and outstanding manual checks."
+        ]
+      }
+    },
+    {
+      "version": "1.26.0",
       "date": "2026-11-21",
       "title": {
         "ru": "Рулетка, билд и журнал попыток",
@@ -9,54 +30,18 @@
       },
       "items": {
         "ru": [
-          "Рулетка из 1.27: предпросмотр, принятие на 24 часа, переброс с закреплением и отметки условий.",
-          "Билд из 1.28: следующая покупка с отменой, выбор замены и сравнение двух вариантов.",
+          "Рулетка: предпросмотр, принятие на 24 часа, переброс с закреплением и отметки условий.",
+          "Билд: следующая покупка с отменой, выбор замены и сравнение двух вариантов.",
           "Запрет на матч: выбери правило для способности или предмета и примени его в карточке, магазине и экспорте.",
           "Настройки проверяют совместимость фильтров. Для оверлея доступны магазинный, матчевый и ручной режимы с предпросмотром.",
           "История показывает сроки и причины завершения. Ищи попытки по герою или условию, смотри печать и повторяй задания с новым сроком."
         ],
         "en": [
-          "Roulette from 1.27: preview, accept for 24 hours, pin slots on reroll and check off conditions.",
-          "Builds from 1.28: track and undo purchases, choose replacements and compare two variants.",
+          "Roulette: preview, accept for 24 hours, pin slots on reroll and check off conditions.",
+          "Builds: track and undo purchases, choose replacements and compare two variants.",
           "Preview and apply a one-match ability or item restriction on the contract, in the shop and in build exports.",
           "Check filter compatibility and preview shop-only, whole-match or manual overlay settings.",
           "Search attempt history, inspect deadlines and outcomes, revisit stamps and retry challenges with a fresh deadline."
-        ]
-      }
-    },
-    {
-      "version": "1.28.0",
-      "date": "2026-11-21",
-      "title": {
-        "ru": "Билд и план покупок",
-        "en": "Builds and shopping"
-      },
-      "items": {
-        "ru": [
-          "Герой принятого челленджа подставляется в настройки. Следующую покупку можно отметить или отменить.",
-          "Выбирай замену предмета и сравнивай два сохранённых варианта."
-        ],
-        "en": [
-          "Start with the accepted hero, track the next purchase and undo it.",
-          "Choose an item replacement and compare two builds."
-        ]
-      }
-    },
-    {
-      "version": "1.27.0",
-      "date": "2026-11-21",
-      "title": {
-        "ru": "Предпросмотр и принятие челленджа",
-        "en": "Preview and accept challenges"
-      },
-      "items": {
-        "ru": [
-          "24 часа начинаются с принятия. Закрепляй понравившиеся условия перед перебросом и отмечай их во время игры.",
-          "Уровень сложности задаёт сочетание основной цели и дополнительных условий."
-        ],
-        "en": [
-          "Your 24 hours start on acceptance. Pin slots before rerolling and track conditions during play.",
-          "Difficulty sets the mix of primary and secondary goals."
         ]
       }
     },

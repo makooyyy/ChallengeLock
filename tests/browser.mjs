@@ -113,6 +113,9 @@ try {
   assert.deepEqual(received.conds, rerolled.cur.conds);
   assert.deepEqual(received.opts, rerolled.cur.opts);
   await page.click('#accept-contract');
+  await page.click('#contract-build');
+  assert.equal(await page.locator('#build-hero').inputValue(), (await state()).cur.hero);
+  await page.click('[data-tab="roulette"]');
   await page.click('#done');
   const completed = (await state()).stats.done;
   assert(await page.locator('#completion-dialog').isVisible());
@@ -516,6 +519,28 @@ try {
     false,
   );
   assert.equal(await compactPage.locator('#tm').textContent(), '01:30');
+  await compactPage.evaluate(() =>
+    window.__match({
+      key: window.__contract.key,
+      phase: 'ended',
+      api: 'verified',
+      checks: window.__contract.conditions.map((c, i) => ({
+        ...c,
+        status: i === 1 ? 'pass' : 'manual',
+        value: 3,
+        target: 2,
+      })),
+    }),
+  );
+  assert(
+    (await compactPage.locator('#contract [data-match-status]').textContent()).includes(
+      'Осталось подтвердить вручную',
+    ),
+  );
+  assert.equal(
+    await compactPage.evaluate(() => window.__contract.conditions.filter((c) => c.checked).length),
+    2,
+  );
   await compactPage.evaluate(() => window.__outcome({ key: 'stale', outcome: 'done' }));
   assert.equal(
     await compactPage.evaluate(async () => (await import('/js/state.js')).RT.finished),
@@ -538,6 +563,37 @@ try {
   await compactPage.locator('.compact-exit').click();
   assert(await compactPage.locator('.studio-intro').isVisible());
   assert.equal(await compactPage.evaluate(() => window.__contract.outcome), 'done');
+  const shopPage = await desk.newPage();
+  await shopPage.route('**/mod/state', (route) =>
+    route.fulfill({
+      json: {
+        hero: 'Abrams',
+        conditions: [
+          { name: 'Remaining', desc: 'Finish this', checked: false },
+          { name: 'Already marked', desc: '', checked: true },
+        ],
+        ban: 'Rule',
+        next: 'Item',
+        cost: 800,
+        buildHero: 'Abrams',
+      },
+    }),
+  );
+  await shopPage.goto(origin + '/desktop/mod-shop.html');
+  await shopPage.waitForSelector('#next:text("Item")');
+  assert.equal(await shopPage.locator('#conditions li').count(), 1);
+  assert.match(await shopPage.locator('#checked').textContent(), /1 \/ 2/);
+  assert.match(await shopPage.locator('#price').textContent(), /800/);
+  assert(
+    await shopPage
+      .locator('#price')
+      .evaluate(
+        (el) =>
+          el.getBoundingClientRect().bottom <=
+          document.querySelector('#ban').getBoundingClientRect().top,
+      ),
+  );
+  await shopPage.close();
   // Exercise the actual overlay document, including CSS hidden/overflow behavior.
   const overlayPage = await desk.newPage();
   await overlayPage.setViewportSize({ width: 360, height: 220 });

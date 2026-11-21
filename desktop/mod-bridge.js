@@ -10,6 +10,7 @@ function snapshot(contract, build) {
     conditions: (contract?.conditions || []).slice(0, 3).map((c) => ({
       name: text(c.name, 80),
       desc: text(c.desc, 380),
+      checked: c.checked === true,
     })),
     buildHero: text(build?.hero, 60),
     next: text(build?.nextItem, 80),

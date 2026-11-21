@@ -6985,3 +6985,8 @@ body.desktop .pad::-webkit-scrollbar {
   min-height: 40px;
   padding: 6px 12px;
 }
+
+.desktop-compact .paper .contract-build {
+  display: inline-flex;
+  justify-content: center;
+}
