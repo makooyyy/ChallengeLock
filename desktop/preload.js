@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('challengeLockDesktop', {
     if (text === null || (text && typeof text.key === 'string' && typeof text.label === 'string'))
       ipcRenderer.send('desktop:contract', text);
   },
+  reportBan: (value) => ipcRenderer.send('desktop:ban', value),
   reportBuild: (build) => {
     if (build === null || (build && typeof build === 'object'))
       ipcRenderer.send('desktop:build', build);

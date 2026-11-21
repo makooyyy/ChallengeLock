@@ -1,6 +1,30 @@
 {
   "releases": [
     {
+      "version": "1.29.0",
+      "date": "2026-11-21",
+      "title": {
+        "ru": "Рулетка, билд и журнал попыток",
+        "en": "Roulette, builds and attempt history"
+      },
+      "items": {
+        "ru": [
+          "Рулетка из 1.27: предпросмотр, принятие на 24 часа, переброс с закреплением и отметки условий.",
+          "Билд из 1.28: следующая покупка с отменой, выбор замены и сравнение двух вариантов.",
+          "Запрет на матч: выбери правило для способности или предмета и примени его в карточке, магазине и экспорте.",
+          "Настройки проверяют совместимость фильтров. Для оверлея доступны магазинный, матчевый и ручной режимы с предпросмотром.",
+          "История показывает сроки и причины завершения. Ищи попытки по герою или условию, смотри печать и повторяй задания с новым сроком."
+        ],
+        "en": [
+          "Roulette from 1.27: preview, accept for 24 hours, pin slots on reroll and check off conditions.",
+          "Builds from 1.28: track and undo purchases, choose replacements and compare two variants.",
+          "Preview and apply a one-match ability or item restriction on the contract, in the shop and in build exports.",
+          "Check filter compatibility and preview shop-only, whole-match or manual overlay settings.",
+          "Search attempt history, inspect deadlines and outcomes, revisit stamps and retry challenges with a fresh deadline."
+        ]
+      }
+    },
+    {
       "version": "1.28.0",
       "date": "2026-11-21",
       "title": {

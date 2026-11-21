@@ -1,8 +1,8 @@
 // A release caches code and data together. Bump VERSION for every deployment.
 // CATALOG_VERSION is rewritten automatically by scripts/sync-catalog.mjs.
-const CATALOG_VERSION = '7df33ce9dbedca22';
+const CATALOG_VERSION = '6c5d33f1af6788bd';
 const PREFIX = 'challengelock:' + self.registration.scope + ':';
-const VERSION = PREFIX + 'v56:' + CATALOG_VERSION;
+const VERSION = PREFIX + 'v59:' + CATALOG_VERSION;
 const FILES = [
   './',
   'index.html',

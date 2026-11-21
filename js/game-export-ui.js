@@ -1,3 +1,4 @@
+import { rule as banRule } from './ban-ui.js';
 import { S, RT } from './state.js';
 import { gameBuildCode, challengeForExport } from './game-export.js';
 import { copy } from './share.js';
@@ -5,13 +6,19 @@ import { t, getDict } from './i18n.js';
 import { icon } from './icons.js';
 let dialog, sourceButton;
 export async function showGameExport(build, heroes, items) {
-  const challenge = challengeForExport(
+  let challenge = challengeForExport(
     RT.preview ? null : RT.cur,
     heroes,
     RT.data.challenges,
     getDict(),
     S.lang,
   );
+  if (RT.ban?.hero === build.hero) {
+    const line = t('oneMatchRule') + ' · ' + banRule(RT.ban);
+    challenge = challenge
+      ? { ...challenge, text: challenge.text + '\n\n' + line }
+      : { text: line, heroId: build.hero, language: S.lang === 'ru' ? 8 : 0 };
+  }
   const code = gameBuildCode(build, heroes, items, challenge),
     hero = heroes.find((h) => h.id === build.hero);
   sourceButton = document.getElementById('copy-game-build');

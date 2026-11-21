@@ -140,7 +140,16 @@ const server = http.createServer((req, res) => {
     );
     const body =
       urlPath === '/mod/state'
-        ? JSON.stringify(modBridge.snapshot(overlayContract, overlayBuild))
+        ? JSON.stringify({
+            ...modBridge.snapshot(overlayContract, overlayBuild),
+            ban: shopBan,
+            display: {
+              hero: overlaySettings.showHero,
+              conditions: overlaySettings.showConditions,
+              status: overlaySettings.showStatus,
+              build: overlaySettings.showBuild,
+            },
+          })
         : modBridge.bridgePage;
     res.end(req.method === 'HEAD' ? undefined : body);
     return;
@@ -307,6 +316,7 @@ function toggleCompact() {
 
 const OVERLAY_SETTINGS_FILE = 'overlay.json';
 const DEFAULT_OVERLAY_SETTINGS = {
+  mode: 'shop',
   visible: false,
   opacity: 0.92,
   clickThrough: false,
@@ -337,7 +347,15 @@ function loadOverlaySettings() {
   if (!file || !fs.existsSync(file)) return { ...DEFAULT_OVERLAY_SETTINGS };
   try {
     const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
-    return { ...DEFAULT_OVERLAY_SETTINGS, ...parsed };
+    return {
+      ...DEFAULT_OVERLAY_SETTINGS,
+      ...parsed,
+      mode: ['shop', 'manual', 'match'].includes(parsed.mode)
+        ? parsed.mode
+        : parsed.autoShow === false
+          ? 'manual'
+          : 'match',
+    };
   } catch {
     return { ...DEFAULT_OVERLAY_SETTINGS };
   }
@@ -357,6 +375,10 @@ function saveOverlaySettings(settings) {
 let overlaySettings = loadOverlaySettings();
 let overlayContract = null;
 let overlayBuild = null;
+let shopBan = '';
+ipcMain.on('desktop:ban', (_event, value) => {
+  shopBan = typeof value === 'string' ? value.slice(0, 300) : '';
+});
 
 function overlayBounds(position = overlaySettings.position) {
   const area = screen.getPrimaryDisplay().workArea;
@@ -468,6 +490,7 @@ function hideOverlay() {
 }
 
 function toggleOverlay() {
+  if (overlaySettings.mode === 'shop') return false;
   if (!process.versions.electron) return overlaySettings.visible;
   if (overlayWindow && !overlayWindow.isDestroyed() && overlayWindow.isVisible()) {
     hideOverlay();
@@ -761,21 +784,15 @@ function publishLogHealth(logHealth) {
 let shopWindow = null;
 let shopDeadline = 0;
 function updateShopWindow(open) {
-  if (!open) {
+  if (!open || overlaySettings.mode !== 'shop') {
     shopDeadline = 0;
     shopWindow?.hide();
     return;
   }
   shopDeadline = Date.now() + 6500;
   if (!shopWindow) {
-    const { x, y, width, height } = screen.getDisplayNearestPoint(
-      screen.getCursorScreenPoint(),
-    ).bounds;
     shopWindow = new BrowserWindow({
-      x: x + Math.round(width * 0.0125),
-      y: y + Math.round(height * 0.14),
-      width: Math.min(330, Math.round(width * 0.2)),
-      height: Math.round(height * 0.64),
+      ...overlayBounds(),
       frame: false,
       transparent: true,
       focusable: false,
@@ -783,6 +800,7 @@ function updateShopWindow(open) {
       skipTaskbar: true,
       webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false },
     });
+    shopWindow.setOpacity(overlaySettings.opacity);
     shopWindow.setIgnoreMouseEvents(true);
     shopWindow.setAlwaysOnTop(true, 'screen-saver');
     shopWindow.on('closed', () => {
@@ -843,19 +861,16 @@ function watchTick() {
     if (event.type === 'start') {
       matchContract = activeContract ? { ...activeContract } : null;
       monitor.local(event, matchContract);
-      if (overlaySettings.autoShow) showOverlay();
+      if (overlaySettings.mode === 'match') showOverlay();
       log('match started');
     } else if (event.type === 'end') {
       log('match ended in state ' + event.state);
       const contract = matchContract;
       matchContract = null;
       monitor.local(event, contract);
-      if (overlaySettings.autoHide) {
-        setTimeout(() => {
-          if (overlayWindow && !overlayWindow.isDestroyed()) hideOverlay();
-        }, 10000).unref?.();
-      }
+      if (overlaySettings.mode === 'match') hideOverlay();
     } else if (event.type === 'interrupted') {
+      if (overlaySettings.mode === 'match') hideOverlay();
       monitor.local(event, matchContract);
       matchContract = null;
     } else log('unrecognised game state after GameInProgress: ' + event.state);
@@ -892,6 +907,7 @@ function checkGameProcess() {
       }
       lastGamePid = processInfo?.id || null;
       if (!processInfo) {
+        if (overlaySettings.mode === 'match') hideOverlay();
         publishLogHealth('not-running');
         return;
       }
@@ -920,6 +936,7 @@ function checkGameProcess() {
           }
           if (recovered.inMatch) {
             logWatcher.tracker = recovered;
+            if (overlaySettings.mode === 'match') showOverlay();
             matchContract = null;
             monitor.session = null;
             monitor.publish({ phase: 'playing', key: null, late: true });
@@ -1062,6 +1079,15 @@ ipcMain.handle('desktop:overlay-settings', (_event, settings) => {
   delete overlaySettings.resetPosition;
   if (Number.isFinite(settings.width)) overlaySettings.width = settings.width;
   if (Number.isFinite(settings.height)) overlaySettings.height = settings.height;
+  if (settings.mode) {
+    updateShopWindow(false);
+    if (settings.mode === 'match' && logWatcher.tracker.inMatch) showOverlay();
+    else hideOverlay();
+  }
+  if (shopWindow && !shopWindow.isDestroyed()) {
+    shopWindow.setBounds(overlayBounds());
+    shopWindow.setOpacity(overlaySettings.opacity);
+  }
   saveOverlaySettings(overlaySettings);
   if (overlayWindow && !overlayWindow.isDestroyed()) {
     overlayWindow.setOpacity(Math.min(1, Math.max(0.35, Number(overlaySettings.opacity) || 0.92)));

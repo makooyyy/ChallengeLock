@@ -2,8 +2,8 @@
   "_meta": {
     "schemaVersion": 1,
     "clientVersion": 6861,
-    "retrievedAt": "2026-11-14T13:40:29.803Z",
-    "revision": "7df33ce9dbedca22",
+    "retrievedAt": "2026-11-21T16:49:40.544Z",
+    "revision": "6c5d33f1af6788bd",
     "provider": "Deadlock API",
     "providerUrl": "https://deadlock-api.com/",
     "verification": "Matched to the provider snapshot; not independently verified by Valve.",

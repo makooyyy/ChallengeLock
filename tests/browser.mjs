@@ -80,7 +80,7 @@ try {
     });
   const initial = (await state()).cur;
   await page.click('[data-tab="history"]');
-  assert.equal(await page.locator('.hl a').count(), 0);
+  assert.equal(await page.locator('.journal-record').count(), 0);
   await page.click('[data-tab="roulette"]');
   assert(await page.locator('#spin').isVisible());
   await page.click('[data-lock="0"]');
@@ -135,8 +135,17 @@ try {
   await page.waitForSelector('#spin');
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
   await page.click('[data-tab="history"]');
-  await page.click('.hl a');
-  assert(await page.locator('#done').isDisabled());
+  const currentSeed = (await state()).cur.seed;
+  await page.click('.journal-record summary');
+  assert(await page.locator('#p-history').isVisible());
+  assert.equal((await state()).cur.seed, currentSeed);
+  await page.click('[data-journal-stamp]');
+  assert(await page.locator('.result-seal').isVisible());
+  await page.keyboard.press('Escape');
+  await page.click('[data-journal-repeat]');
+  assert(await page.locator('#accept-contract').isVisible());
+  assert.notEqual((await state()).cur.seed, currentSeed);
+  assert.deepEqual((await state()).cur.conds, rerolled.cur.conds);
   assert.equal((await state()).stats.done, completed);
   await page.evaluate(() => (location.hash = '#seed=change&d=easy&r=0&p=2'));
   await page.waitForFunction(async () => (await import('/js/state.js')).S.diff === 'easy');
@@ -223,8 +232,9 @@ try {
   await page.waitForSelector('#contract h2');
   assert(await page.evaluate(async () => (await caches.keys()).includes('unrelated-test-cache')));
   await context.setOffline(false);
-  // Search must preserve selected heroes even when other cards are hidden.
-  await page.click('[data-tab="custom"]');
+  // Enter settings directly from the roulette and restore keyboard focus on return.
+  await page.click('#configure-pool');
+  assert(await page.locator('#hero-search').evaluate((el) => el === document.activeElement));
   await page.fill('#hero-search', 'abrams');
   assert.equal(await page.locator('.hc:visible').count(), 1);
   await page.check('[data-h="abrams"]');
@@ -239,7 +249,9 @@ try {
   await page.click('#hreset');
   await page.fill('#hero-search', '');
   assert.equal(await page.locator('.hc:visible').count(), 42);
-  await page.click('[data-tab="roulette"]');
+  assert.equal(await page.locator('[data-pool-label]').first().textContent(), 'In pool');
+  await page.click('#back-to-roll');
+  assert(await page.locator('#configure-pool').evaluate((el) => el === document.activeElement));
   await page.locator('.board-options summary').click();
   await page.uncheck('#fsame');
   assert(await page.locator('#fpl').isEnabled());
@@ -371,6 +383,8 @@ try {
   await page.click('[data-ban-type="item"]');
   await page.check('#ban-from-build');
   await page.click('#ban-roll');
+  assert(await page.locator('#apply-ban').isVisible());
+  await page.click('#apply-ban');
   const ban = await page.evaluate(async () => (await import('/js/state.js')).RT.ban);
   assert(saved.items.includes(ban.item));
   for (const language of ['ru', 'en']) {
@@ -408,12 +422,16 @@ try {
       const { RT, S } = await import('/js/state.js');
       const { gameBuildCode, challengeForExport } = await import('/js/game-export.js');
       const { getDict } = await import('/js/i18n.js');
-      return gameBuildCode(
-        RT.build,
+      const note = challengeForExport(
+        RT.cur,
         RT.data.heroes,
-        RT.data.items,
-        challengeForExport(RT.cur, RT.data.heroes, RT.data.challenges, getDict(), S.lang),
+        RT.data.challenges,
+        getDict(),
+        S.lang,
       );
+      const { rule } = await import('/js/ban-ui.js');
+      note.text += '\n\n' + getDict()[S.lang].oneMatchRule + ' · ' + rule(RT.ban);
+      return gameBuildCode(RT.build, RT.data.heroes, RT.data.items, note);
     }),
     exportCode,
   );

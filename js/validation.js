@@ -58,10 +58,13 @@ export function normalizeState(x, def) {
         player: count(r.player),
         opts: options(r.opts),
         ts: r.ts,
+        reason: ['manual', 'match', 'deadline'].includes(r.reason) ? r.reason : null,
+        endedAt: Number.isFinite(r.endedAt) && r.endedAt > 0 ? r.endedAt : null,
         checked: strings(r.checked).filter((id) => r.conds.includes(id)),
         outcome: ['done', 'fail'].includes(r.outcome) ? r.outcome : null,
       }));
   out.banSettings = banSettings(x.banSettings);
+  out.banContractKey = typeof x.banContractKey === 'string' ? x.banContractKey : '';
   out.savedBan = savedBan(x.savedBan);
   out.buildSettings = buildSettings(x.buildSettings);
   out.savedBuild = savedBuild(x.savedBuild);

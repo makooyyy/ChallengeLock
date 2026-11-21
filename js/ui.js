@@ -5,7 +5,15 @@ import {
   useContractHero,
   hydrateBuilder,
 } from './builder-ui.js';
-import { renderBan, banClick, banChange, hydrateBan } from './ban-ui.js';
+import {
+  renderBan,
+  banClick,
+  banChange,
+  hydrateBan,
+  syncBanHero,
+  clearBan,
+  rule as banRule,
+} from './ban-ui.js';
 // UI: tabs, reels animation, contract, timer, builds, bans, filters, history.
 import { icon } from './icons.js';
 import { applyTheme, toggleTheme } from './theme.js';
@@ -257,7 +265,7 @@ function viewRoulette() {
     )}</div>
     <div class="reel-stage"><div class="reel hero-reel" data-i="0"><div class="reel-title"><span>${t('yourHero')}</span>${icon('shield', 13)}</div><div class="strip"></div><button class="lk" data-lock="0" aria-label="${t('lock')} — ${t('hero')}"></button></div>
     <div class="conditions">${[1, 2, 3].map((i) => `<div class="reel condition-reel" data-i="${i}"><div class="condition-top"><div class="reel-title"><span class="condition-number">0${i}</span><span>${t('cond')} ${ROMAN[i - 1]}</span></div><button class="lk" data-lock="${i}" aria-label="${t('lock')} — ${t('cond')} ${ROMAN[i - 1]}"></button></div><div class="strip"></div></div>`).join('')}</div></div>
-    <div class="filter-summary"><span>${icon('shield', 12)}${heroPool(RT.data.heroes, S).length} ${t('heroesCount')}</span><span class="sep">/</span><span>${S.cats.length} ${t('categoriesCount')}</span><button data-tab="custom">${t('configure')}${icon('arrow', 12)}</button></div>
+    <div class="filter-summary"><span>${icon('shield', 12)}${heroPool(RT.data.heroes, S).length} ${t('heroesCount')}</span><span class="sep">/</span><span>${S.cats.length} ${t('categoriesCount')}</span><button id="configure-pool" data-tab="custom">${t('configure')}${icon('arrow', 12)}</button></div>
     <div class="board-actions"><button class="spin" id="spin">${icon('shuffle')}<span id="spin-label">${t('spin')}</span><kbd>SPACE</kbd></button></div>
     <details class="board-options"><summary><span>${icon('settings', 14)}${t('extraSettings')}</span>${icon('chevron', 14)}</summary><div class="options-content"><label class="chk"><input type="checkbox" id="snd" ${S.sound ? 'checked' : ''}>${t('soundOn')}</label><label class="chk"><input type="checkbox" id="fsame" ${S.friend.same ? 'checked' : ''}>${t('sameHero')}</label><label class="chk">${t('player')}<input type="number" id="fpl" min="1" max="9" value="${S.friend.player}" class="num" ${S.friend.same ? 'disabled' : ''}></label><p class="keyboard-hint">${t('keys')}</p></div></details>
   </section><section class="paper" id="contract" aria-live="polite" tabindex="-1"></section></div>`;
@@ -357,6 +365,7 @@ function paintContract() {
   <div class="contract-state">${icon(RT.finished ? 'check' : 'play', 12)}${t(RT.finished ? 'sessionClosed' : 'sessionActive')}</div><p class="contract-note">${RT.finished ? t('contractHint') : t('contractDeadline') + ' ' + esc(new Date(x.ts + CONTRACT_DAY).toLocaleString(S.lang, { dateStyle: 'short', timeStyle: 'short' }))}</p>${desktop?.matchState ? `<div data-match-status>${matchStatus()}</div>` : ''}
   ${RT.finished ? `<div class="completion-status ${x.outcome === 'fail' ? 'failed' : ''}">${icon(x.outcome === 'done' ? 'check' : 'close', 17)}${t(x.outcome === 'done' ? 'completedStatus' : 'failedStatus')}</div>` : ''}
   <div class="result-actions"><button class="pb" id="done" ${RT.finished ? 'disabled' : ''}>${icon('check', 16)}${t('done')}</button><button class="pb o" id="failb" ${RT.finished ? 'disabled' : ''}>${icon('close', 15)}${t('fail')}</button></div>
+  ${!RT.finished ? `<p>${RT.ban?.hero === x.hero ? esc(banRule(RT.ban)) : ''}</p><button class="pb" data-tab="ban">${t('addBan')}</button>` : ''}
   <button class="pb friend-challenge" id="cf">${icon('shield', 15)}${t('challengeFriend')}</button>
   ${RT.finished ? `<button class="review-stamp" id="review-stamp">${icon('shield', 17)}${t('reviewStamp')}${icon('arrow', 15)}</button>` : ''}
   <div class="timer-row"><div class="timer-readout">${icon('clock', 17)}<b id="tm" class="mono-t">${mmss(RT.timer.ms)}</b></div><button class="timer-toggle" id="tgl" ${RT.finished ? 'disabled' : ''}>${icon(RT.timer.run ? 'clock' : 'play', 12)}${RT.timer.run ? t('pause') : t('start')}</button></div>
@@ -416,6 +425,7 @@ async function doRoll(reroll, opt = {}) {
   RT.preview = !existing;
   if (existing && !existing.outcome) {
     useContractHero(existing);
+    syncBanHero(existing);
     persist();
   }
   RT.finished = !!RT.cur.outcome;
@@ -463,21 +473,24 @@ function checkDeadlines() {
   paintHeader();
   if (RT.tab === 'history') viewHistory();
 }
-function finish(o) {
+function finish(o, reason = 'manual') {
   checkDeadlines();
   const x = RT.cur;
   if (!x || RT.preview || RT.finished) return;
   RT.finished = true;
   setBusy(RT.busy);
   RT.timer.run = false;
-  x.outcome = o;
-  for (const f of S.favs) if (resultKey(f) === resultKey(x)) f.outcome = o;
+  const completion = { outcome: o, reason, endedAt: Date.now() };
+  Object.assign(x, completion);
+  for (const entry of [...S.favs, ...S.history])
+    if (resultKey(entry) === resultKey(x)) Object.assign(entry, completion);
   if (o === 'done') {
     S.stats.done++;
   } else S.stats.fail++;
   persist();
   viewRoulette();
   paintHeader();
+  if (RT.tab === 'history') renderJournalRows();
   // paintContract reports the final result; the shell excludes it from match tracking.
   beep(o === 'done' ? 880 : 140, 0.2);
   showCelebration(x, H(x.hero), RT.data.challenges);
@@ -561,11 +574,49 @@ function updateHeroSearch() {
   const countEl = $('#hero-count'),
     available = heroPool(RT.data.heroes, S).length;
   if (countEl) {
-    countEl.textContent = t('available') + ': ' + available + ' / ' + activeHeroes().length;
+    countEl.textContent = t('poolCount')
+      .replace('{n}', available)
+      .replace('{total}', activeHeroes().length);
+    const eligible = new Set(heroPool(RT.data.heroes, S).map((h) => h.id));
+    $$('[data-pool-label]').forEach((el) => {
+      el.textContent = t(eligible.has(el.dataset.poolLabel) ? 'inPool' : 'outPool');
+    });
     countEl.classList.toggle('warning', available === 0);
   }
   const empty = $('#hero-search-empty');
   if (empty) empty.hidden = count > 0;
+}
+function poolCheck() {
+  const works = (o) =>
+    rollDetailed({
+      seed: 'filter-check',
+      heroes: RT.data.heroes,
+      challenges: RT.data.challenges,
+      o,
+    }).result;
+  const label = modeName() + ' · ' + t('diff.' + S.diff);
+  if (works(S)) return esc(label) + ' — ' + t('poolReady');
+  const fixes = [
+    ['heroes', { excluded: [], only: [] }],
+    ['cats', { cats: ALL_CATS }],
+    ['team', { team: true }],
+    ['cats-team', { cats: ALL_CATS, team: true }],
+    ['heroes-cats', { excluded: [], only: [], cats: ALL_CATS }],
+    ['heroes-team', { excluded: [], only: [], team: true }],
+    ['heroes-cats-team', { excluded: [], only: [], cats: ALL_CATS, team: true }],
+  ];
+  const fix = fixes.find(([, patch]) => works({ ...S, ...patch }));
+  return (
+    esc(label) +
+    ' — ' +
+    t(heroPool(RT.data.heroes, S).length ? 'poolNoSet' : 'poolNoHero') +
+    (fix
+      ? ` <button data-filter-fix="${fix[0]}">${fix[0]
+          .split('-')
+          .map((k) => t('fix.' + k))
+          .join(' + ')}</button>`
+      : '')
+  );
 }
 function viewCustom() {
   const p = $('#p-custom');
@@ -579,26 +630,56 @@ function viewCustom() {
     ],
     S.heroMode,
     'hm',
-  )}</div><div class="hero-tools"><label class="search-wrap">${icon('search', 16)}<input class="search-input" id="hero-search" type="search" placeholder="${t('searchHeroes')}" aria-label="${t('searchHeroes')}" value="${esc(RT.heroSearch || '')}"></label><span class="hero-count" id="hero-count" aria-live="polite"></span><button id="hreset">${t('reset')}</button></div>
+  )}</div><div class="hero-tools"><label class="search-wrap">${icon('search', 16)}<input class="search-input" id="hero-search" type="search" placeholder="${t('searchHeroes')}" aria-label="${t('searchHeroes')}" value="${esc(RT.heroSearch || '')}"></label><span class="hero-count" id="hero-count" aria-live="polite"></span><button id="hreset">${t('fix.heroes')}</button></div>
   <div class="hg">${activeHeroes()
     .map(
       (h) =>
-        `<label class="hc" data-search="${esc((h.name + ' ' + h.id).toLowerCase())}"><input type="checkbox" data-h="${h.id}" ${S.sel.includes(h.id) ? 'checked' : ''}>${dia(h)}<span>${esc(h.name)}</span></label>`,
+        `<label class="hc" data-search="${esc((h.name + ' ' + h.id).toLowerCase())}"><input type="checkbox" data-h="${h.id}" ${S.sel.includes(h.id) ? 'checked' : ''}>${dia(h)}<span>${esc(h.name)}<small data-pool-label="${esc(h.id)}"></small></span></label>`,
     )
     .join(
       '',
-    )}</div><p class="search-empty" id="hero-search-empty" hidden>${t('noSearchResults')}</p></div>` +
+    )}</div><p class="search-empty" id="hero-search-empty" hidden>${t('noSearchResults')}</p><div class="pool-check" aria-live="polite">${poolCheck()}</div><button id="back-to-roll">${t('backToRoll')}</button></div>` +
     gameCard() +
     overlayCard();
   updateHeroSearch();
+  updatePreview();
+}
+function updatePreview() {
+  const el = $('#overlay-example');
+  if (!el) return;
+  const s = RT.overlay,
+    shop = s.mode === 'shop',
+    x = RT.cur && !RT.preview ? RT.cur : null;
+  const rows = x
+    ? x.conds.map((id) => loc(C(id).name))
+    : [t('exampleCondition1'), t('exampleCondition2'), t('exampleCondition3')];
+  const b = RT.build,
+    next = b?.items.find(
+      (id) => !b.purchased.includes(id) && !(RT.ban?.hero === b.hero && RT.ban.item === id),
+    );
+  const i = RT.data.items.find((i) => i.id === next);
+  el.style.opacity = s.opacity ?? 0.92;
+  el.style.width = Math.round((s.width || 360) * 0.8) + 'px';
+  el.innerHTML = [
+    s.showHero !== false && `<strong>${esc(x ? H(x.hero).name : 'Abrams')}</strong>`,
+    s.showStatus !== false && t('sessionActive'),
+    s.showConditions !== false && rows.map((r) => esc(r)).join('<br>'),
+    shop && RT.ban && esc(banRule(RT.ban)),
+    !shop && s.showTimer !== false && '02:15',
+    s.showBuild !== false &&
+      esc(t('nextPurchase') + ' · ' + (i ? i.name + ' · ' + i.cost : t('examplePurchase'))),
+  ]
+    .filter(Boolean)
+    .map((v) => `<div>${v}</div>`)
+    .join('');
 }
 function overlayCard() {
   if (!desktop?.overlayState) return '';
   const s = RT.overlay || {};
   const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'];
   return `<div class="card"><div class="section-heading"><div><h2>${t('overlayTitle')}</h2><p>${t('overlayHint')}</p></div>${icon('layers', 20)}</div>
-    <div class="overlay-controls">
-      <button id="overlay-toggle" class="pb">${icon('play', 16)}${t('overlayToggle')}</button>
+    <div class="overlay-controls"><div class="overlay-modes">${['shop', 'match', 'manual'].map((m) => `<button data-overlay-mode="${m}" aria-pressed="${(s.mode || 'shop') === m}">${t('overlayMode.' + m)}</button>`).join('')}</div><p>${t(s.mode === 'shop' || !s.mode ? 'shopModeHint' : 'normalModeHint')}</p><div id="overlay-example" aria-label="${t('previewTitle')}"></div>
+      <button ${s.mode === 'shop' ? 'hidden' : ''} id="overlay-toggle" class="pb">${icon('play', 16)}${t('overlayToggle')}</button>
       <label class="lab-field">${t('overlayOpacity')}<input type="range" id="overlay-opacity" min="0.35" max="1" step="0.01" value="${s.opacity ?? 0.92}"></label>
       <div class="overlay-position-grid">
         ${positions.map((p) => `<button type="button" class="overlay-pos ${p === s.position ? 'on' : ''}" data-overlay-pos="${p}" aria-pressed="${p === s.position}">${t('pos.' + p)}</button>`).join('')}
@@ -606,14 +687,12 @@ function overlayCard() {
       <label class="lab-field">${t('overlaySize')}<input type="range" id="overlay-size" min="70" max="160" step="1" value="${Math.round(((s.width || 360) / 360) * 100)}"></label>
       <div class="overlay-size-readout">${s.width || 360} × ${s.height || 440}</div>
       <button id="overlay-reset" class="ghost">${t('overlayReset')}</button>
-      <label class="chk"><input type="checkbox" id="overlay-clickthrough" ${s.clickThrough ? 'checked' : ''}>${t('overlayClickThrough')}</label>
-      <label class="chk"><input type="checkbox" id="overlay-autoshow" ${s.autoShow ? 'checked' : ''}>${t('overlayAutoShow')}</label>
-      <label class="chk"><input type="checkbox" id="overlay-autohide" ${s.autoHide ? 'checked' : ''}>${t('overlayAutoHide')}</label>
+      <label class="chk" ${s.mode === 'shop' ? 'hidden' : ''}><input type="checkbox" id="overlay-clickthrough" ${s.clickThrough ? 'checked' : ''}>${t('overlayClickThrough')}</label>
       <label class="chk"><input type="checkbox" id="overlay-show-hero" ${s.showHero !== false ? 'checked' : ''}>${t('overlayShowHero')}</label>
       <label class="chk"><input type="checkbox" id="overlay-show-conditions" ${s.showConditions !== false ? 'checked' : ''}>${t('overlayShowConditions')}</label>
-      <label class="chk"><input type="checkbox" id="overlay-show-timer" ${s.showTimer !== false ? 'checked' : ''}>${t('overlayShowTimer')}</label>
+      <label class="chk" ${s.mode === 'shop' ? 'hidden' : ''}><input type="checkbox" id="overlay-show-timer" ${s.showTimer !== false ? 'checked' : ''}>${t('overlayShowTimer')}</label>
       <label class="chk"><input type="checkbox" id="overlay-show-status" ${s.showStatus !== false ? 'checked' : ''}>${t('overlayShowStatus')}</label>
-      <label class="chk"><input type="checkbox" id="overlay-lock" ${s.lockPosition ? 'checked' : ''}>${t('overlayLock')}</label>
+      <label class="chk" ${s.mode === 'shop' ? 'hidden' : ''}><input type="checkbox" id="overlay-lock" ${s.lockPosition ? 'checked' : ''}>${t('overlayLock')}</label>
       <label class="chk"><input type="checkbox" id="overlay-show-build" ${s.showBuild !== false ? 'checked' : ''}>${t('overlayShowBuild')}</label>
     </div></div>`;
 }
@@ -653,6 +732,13 @@ function updateMatch(state) {
   if (!state) return;
   const previous = RT.match;
   RT.match = state;
+  if (RT.ban && previous?.phase === 'playing' && ['ended', 'interrupted'].includes(state.phase)) {
+    clearBan();
+    persist();
+    renderBan();
+    renderBuilder();
+    paintContract();
+  }
   const current = !RT.preview && RT.cur && state.key === resultKey(RT.cur) && !RT.finished;
   if (
     current &&
@@ -668,19 +754,40 @@ function updateMatch(state) {
     const timer = $('#tm');
     if (timer) timer.textContent = mmss(RT.timer.ms);
     desktop?.reportTimer?.(mmss(RT.timer.ms));
-    if (['done', 'fail'].includes(state.outcome)) finish(state.outcome);
+    if (['done', 'fail'].includes(state.outcome)) finish(state.outcome, 'match');
     else if (previous?.phase !== state.phase) paintContract();
   }
   $$('[data-match-status]').forEach((el) => {
     el.innerHTML = matchStatus();
   });
+  if ($('#connection-summary')) $('#connection-summary').innerHTML = connectionSummary();
   const toggle = $('#match-api-enabled');
   if (toggle) toggle.checked = state.enabled === true;
+}
+function connectionSummary() {
+  const m = RT.match || {};
+  const log = {
+    ready: 'logReady',
+    receiving: 'logReady',
+    missing: 'logMissing',
+    stale: 'logStale',
+    'not-running': 'logStopped',
+  };
+  const api = {
+    disabled: 'apiOff',
+    'no-account': 'apiAccount',
+    unavailable: 'apiError',
+    ready: 'apiReady',
+    verified: 'apiReady',
+    waiting: 'apiWait',
+    loading: 'apiWait',
+  };
+  return `<p>${t('matchDetection')} · ${t(log[m.logHealth] || 'statusUnknown')}</p><p>${t('matchHistory')} · ${t(api[m.api] || 'statusUnknown')}</p>`;
 }
 function gameCard() {
   if (!desktop?.game) return '';
   const en = S.lang === 'en';
-  return `<div class="card"><div class="section-heading"><div><h2>${t('gameTitle')}</h2><p>${t('gameHint')}</p></div>${icon('search', 20)}</div><div data-match-status>${matchStatus()}</div><label class="chk"><input type="checkbox" id="match-api-enabled" ${RT.match?.enabled ? 'checked' : ''}>${en ? 'Check my matches using Deadlock API' : 'Проверять мои матчи через Deadlock API'}</label><p class="lab-help">${en ? 'Sends the active Steam Account ID to api.deadlock-api.com. No API key required. Unsupported conditions stay manual; history may arrive late.' : 'Передаёт ID активного Steam-аккаунта на api.deadlock-api.com. Ключ не нужен. Недоступные в статистике условия проверяются вручную; данные могут задерживаться.'}</p><button id="match-refresh">${en ? 'Check match data' : 'Проверить данные матча'}</button><button id="game-probe">${icon('search', 14)}${t('gameFind')}</button><div id="game-result" class="game-result" aria-live="polite"></div></div>`;
+  return `<div class="card"><div class="section-heading"><div><h2>${t('gameTitle')}</h2><p>${t('gameHint')}</p></div>${icon('search', 20)}</div><div id="connection-summary">${connectionSummary()}</div><label class="chk"><input type="checkbox" id="match-api-enabled" ${RT.match?.enabled ? 'checked' : ''}>${en ? 'Check my matches using Deadlock API' : 'Проверять мои матчи через Deadlock API'}</label><p class="lab-help">${en ? 'Sends the active Steam Account ID to api.deadlock-api.com. No API key required. Unsupported conditions stay manual; history may arrive late.' : 'Передаёт ID активного Steam-аккаунта на api.deadlock-api.com. Ключ не нужен. Недоступные в статистике условия проверяются вручную; данные могут задерживаться.'}</p><button id="match-refresh">${en ? 'Check match data' : 'Проверить данные матча'}</button><details><summary>${t('diagnostics')}</summary><div data-match-status>${matchStatus()}</div><button id="game-probe">${icon('search', 14)}${t('gameFind')}</button><div id="game-result" class="game-result" aria-live="polite"></div></details></div>`;
 }
 
 async function probeGameDesktop() {
@@ -706,52 +813,101 @@ async function probeGameDesktop() {
     box.textContent = t('gameFailed');
   }
 }
+let journalSearch = '',
+  onlyFavorites = false;
+let journalRecords = [];
+function remaining(ts) {
+  const minutes = Math.max(0, Math.ceil((ts + CONTRACT_DAY - Date.now()) / 60000));
+  return t('journalLeft')
+    .replace('{h}', Math.floor(minutes / 60))
+    .replace('{m}', minutes % 60);
+}
+function journalStatus(x) {
+  if (!x.outcome) return remaining(x.ts);
+  if (x.reason === 'deadline') return t('journalExpired');
+  const label = t(x.outcome === 'done' ? 'completedStatus' : 'failedStatus');
+  return x.reason
+    ? label + ' · ' + t(x.reason === 'match' ? 'journalVerified' : 'journalManual')
+    : label;
+}
+function renderJournalRows() {
+  const list = $('#journal-list');
+  if (!list) return;
+  const open = new Set(
+    Array.from(list.querySelectorAll('details[open]')).map((el) => el.dataset.key),
+  );
+  const favorites = new Set(S.favs.map(resultKey));
+  const records = new Map(S.favs.map((x) => [resultKey(x), x]));
+  for (const x of S.history) records.set(resultKey(x), x);
+  journalRecords = Array.from(records.values())
+    .filter((x) => {
+      const text = [
+        H(x.hero)?.name || x.hero,
+        ...x.conds.map((id) => (C(id) ? loc(C(id).name) : id)),
+      ]
+        .join(' ')
+        .toLocaleLowerCase();
+      return (
+        (!onlyFavorites || favorites.has(resultKey(x))) &&
+        text.includes(journalSearch.trim().toLocaleLowerCase())
+      );
+    })
+    .sort(
+      (a, b) =>
+        Number(!!a.outcome) - Number(!!b.outcome) || (b.endedAt || b.ts) - (a.endedAt || a.ts),
+    );
+  let lastGroup = '';
+  list.innerHTML =
+    journalRecords
+      .map((x, index) => {
+        const hero = H(x.hero),
+          key = resultKey(x);
+        const group = x.outcome
+          ? new Date(x.endedAt || x.ts).toLocaleDateString(S.lang, { dateStyle: 'long' })
+          : t('journalActive');
+        const heading = group !== lastGroup ? `<h3>${esc(group)}</h3>` : '';
+        lastGroup = group;
+        return (
+          heading +
+          `<details class="journal-record" data-key="${esc(key)}" ${open.has(key) ? 'open' : ''}><summary>${hero ? dia(hero) : ''}<span><b>${esc(hero?.name || x.hero)}</b> ${favorites.has(key) ? icon('star', 14) : ''}<small>${modeName(x)} · ${t('diff.' + x.diff)}</small></span><strong ${!x.outcome ? `data-countdown="${Number(x.ts)}"` : ''}>${esc(journalStatus(x))}</strong></summary>
+      <p>${t('journalStarted')} · ${esc(new Date(x.ts).toLocaleString(S.lang))}</p>
+      <ol>${x.conds
+        .map((id) => {
+          const c = C(id);
+          return `<li><b>${x.checked?.includes(id) ? '✓ ' : ''}${esc(c ? loc(c.name) : id)}</b><p>${esc(c ? loc(c.desc) : '')}</p></li>`;
+        })
+        .join('')}</ol>
+      <div class="journal-actions">${x.outcome ? `<button data-journal-stamp="${index}">${t('reviewStamp')}</button><button data-journal-repeat="${index}">${t('journalRepeat')}</button>` : `<button data-journal-resume="${index}">${t('journalResume')}</button>`}</div></details>`
+        );
+      })
+      .join('') ||
+    `<p>${t(journalSearch ? 'noSearchResults' : onlyFavorites ? 'noFavs' : 'noHist')}</p>`;
+}
 function viewHistory() {
-  const p = $('#p-history'),
-    rtf = new Intl.RelativeTimeFormat(S.lang === 'ru' ? 'ru' : 'en', { numeric: 'auto' }),
-    // A contract keeps its date now, so the list can say when it happened.
-    when = (ts) => {
-      if (!Number.isFinite(ts)) return '';
-      const days = Math.round((ts - Date.now()) / 86400000);
-      return rtf.format(Math.abs(days) < 1 ? 0 : days, 'day');
-    },
-    row = (x) =>
-      `<li><a href="${linkFor(x)}">${H(x.hero) ? dia(H(x.hero)) : ''}<div class="history-copy"><div class="fx" style="gap:6px"><b>${esc(H(x.hero)?.name || x.hero)}</b>${difficultyBadge(x)}</div><small class="history-mode">${modeName(x)}${when(x.ts) ? ' · ' + esc(when(x.ts)) : ''}</small><small>${x.conds.map((id) => esc(loc(C(id)?.name || id))).join(' · ')}</small></div></a><span class="history-status ${x.outcome === 'fail' ? 'failed' : ''}">${x.outcome === 'done' ? '✓' : x.outcome === 'fail' ? '×' : t('pending')}</span></li>`;
   const total = S.stats.done + S.stats.fail;
-  const rate = total ? Math.round((S.stats.done / total) * 100) : 0;
-  // Pending contracts do not break a run; the first failure does.
-  let streak = 0;
-  for (const x of S.history) {
-    if (!x.outcome) continue;
-    if (x.outcome !== 'done') break;
-    streak++;
-  }
-  const heroCounts = new Map();
-  for (const x of S.history)
-    if (x.outcome === 'done') heroCounts.set(x.hero, (heroCounts.get(x.hero) || 0) + 1);
-  const topHeroes = [...heroCounts.entries()]
-    .sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])))
+  const recent = S.history.filter((x) => x.outcome);
+  const firstFailure = recent.findIndex((x) => x.outcome === 'fail');
+  const streak = firstFailure < 0 ? recent.length : firstFailure;
+  const counts = new Map();
+  for (const x of recent)
+    if (x.outcome === 'done') counts.set(x.hero, (counts.get(x.hero) || 0) + 1);
+  const top = Array.from(counts)
+    .sort((a, b) => b[1] - a[1])
     .slice(0, 3);
-  const topHeroesHtml = topHeroes.length
-    ? topHeroes
-        .map(([id, count]) => `<li><span>${esc(H(id)?.name || id)}</span><b>${count}</b></li>`)
-        .join('')
-    : `<li class="history-empty">${t('noStats')}</li>`;
-  p.innerHTML =
+  $('#p-history').innerHTML =
     intro(t('historyTitle'), t('historyIntro')) +
-    `<div class="stat">${[
-      ['won', S.stats.done, 'check'],
-      ['lost', S.stats.fail, 'close'],
-      ['successRate', rate + '%', 'spark'],
-      ['streak', streak, 'shield'],
+    `
+    <section class="card"><div class="journal-tools"><input id="journal-search" type="search" aria-label="${t('journalSearch')}" placeholder="${t('journalSearch')}" value="${esc(journalSearch)}"><button id="journal-favorites" aria-pressed="${onlyFavorites}">${icon('star', 16)} ${t('favs')}</button></div><div id="journal-list"></div></section>
+    <section class="card"><h2>${t('journalAllTime')}</h2><div class="journal-stats">${[
+      ['won', S.stats.done],
+      ['lost', S.stats.fail],
+      ['successRate', total ? Math.round((S.stats.done * 100) / total) + '%' : '—'],
     ]
-      .map(
-        ([label, value, glyph]) =>
-          `<div class="card"><div><span>${t(label)}</span><b>${value}</b></div>${icon(glyph, 30)}</div>`,
-      )
-      .join(
-        '',
-      )}</div><div class="card"><div class="section-heading"><h2>${t('topHeroes')}</h2>${icon('trophy', 18)}</div><ul class="hl">${topHeroesHtml}</ul></div><div class="card"><div class="section-heading"><div><h2>${t('backupTitle')}</h2><p>${t('backupHint')}</p></div>${icon('download', 18)}</div><div class="backup-actions"><button id="export-data">${icon('download', 14)}${t('exportData')}</button><button id="import-data">${icon('refresh', 14)}${t('importData')}</button><input id="import-file" type="file" accept="application/json,.json" hidden></div></div><div class="history-columns"><div class="card"><div class="section-heading"><h2>${t('hist')}</h2>${icon('history', 18)}</div><ul class="hl">${S.history.map(row).join('') || `<li class="history-empty">${t('noHist')}</li>`}</ul></div><div class="card"><div class="section-heading"><h2>${t('favs')}</h2>${icon('star', 18)}</div><ul class="hl">${S.favs.map(row).join('') || `<li class="history-empty">${t('noFavs')}</li>`}</ul></div></div>`;
+      .map(([k, v]) => `<div>${t(k)} <b>${v}</b></div>`)
+      .join('')}</div></section>
+    <section class="card"><h2>${t('journalRecent')}</h2><p>${t('streak')} · ${streak}</p><h3>${t('topHeroes')}</h3>${top.length ? top.map(([id, n]) => `<p>${esc(H(id)?.name || id)} · ${n}</p>`).join('') : t('noStats')}</section>
+    <details class="card"><summary>${t('backupTitle')}</summary><p>${t('backupHint')}</p><div class="backup-actions"><button id="export-data">${t('exportData')}</button><button id="import-data">${t('importData')}</button><input id="import-file" type="file" accept="application/json,.json" hidden></div></details>`;
+  renderJournalRows();
 }
 // Local-only data never leaves the browser on its own: give the player a file.
 function exportData() {
@@ -786,6 +942,11 @@ async function importData(file) {
   const dedupe = (list) => {
     const seen = new Set();
     return list.filter((x) => {
+      try {
+        restoreResult(x, RT.data.heroes, RT.data.challenges);
+      } catch {
+        return false;
+      }
       const key = resultKey(x);
       if (seen.has(key)) return false;
       seen.add(key);
@@ -828,9 +989,61 @@ function bind() {
       return;
     }
     const d = b.dataset;
-    if (d.tab) return show(d.tab);
+    if (b.id === 'back-to-roll') {
+      show('roulette');
+      $('#configure-pool')?.focus();
+      return;
+    }
+    if (b.id === 'journal-favorites') {
+      onlyFavorites = !onlyFavorites;
+      b.setAttribute('aria-pressed', String(onlyFavorites));
+      renderJournalRows();
+      return;
+    }
+    if (d.journalStamp !== undefined) {
+      const x = journalRecords[Number(d.journalStamp)];
+      if (x?.outcome) showCelebration(x, H(x.hero), RT.data.challenges);
+      return;
+    }
+    if (d.journalRepeat !== undefined || d.journalResume !== undefined) {
+      const x = journalRecords[Number(d.journalRepeat ?? d.journalResume)];
+      if (!x) return;
+      const next = d.journalRepeat !== undefined ? { ...x, seed: crypto.randomUUID(), r: 0 } : x;
+      return fromHash(parseHash(new URL(linkFor(next)).hash));
+    }
+    if (d.tab) {
+      show(d.tab);
+      if (b.id === 'configure-pool') $('#hero-search')?.focus();
+
+      return;
+    }
+    if (d.filterFix) {
+      if (d.filterFix.includes('heroes')) {
+        S.sel = [];
+        S.heroMode = 'exclude';
+        applyHeroSel();
+      }
+      if (d.filterFix.includes('cats')) S.cats = [...ALL_CATS];
+      if (d.filterFix.includes('team')) S.team = true;
+      persist();
+      viewCustom();
+      return;
+    }
+    if (d.overlayMode) {
+      RT.overlay.mode = d.overlayMode;
+      await desktop?.setOverlaySettings?.({ mode: d.overlayMode });
+      viewCustom();
+      return;
+    }
     if (RT.busy) return;
-    if ((await builderClick(b, toast, persist)) || (await banClick(b, toast, persist))) return;
+    if (await builderClick(b, toast, persist)) return;
+    if (await banClick(b, toast, persist)) {
+      if (['apply-ban', 'clear-ban'].includes(b.id)) {
+        renderBuilder();
+        paintContract();
+      }
+      return;
+    }
     if (b.id === 'match-refresh') {
       updateMatch(await desktop?.refreshMatch?.());
       return;
@@ -921,6 +1134,7 @@ function bind() {
       RT.cur.ts = Date.now();
       RT.preview = false;
       useContractHero(RT.cur);
+      syncBanHero(RT.cur);
       S.history = [RT.cur, ...S.history.filter((x) => resultKey(x) !== resultKey(RT.cur))].slice(
         0,
         50,
@@ -974,6 +1188,7 @@ function bind() {
       return viewCustom();
     }
     if (b.id === 'hreset') {
+      S.heroMode = 'exclude';
       S.sel = [];
       applyHeroSel();
       return viewCustom();
@@ -1053,7 +1268,9 @@ function bind() {
       };
       RT.overlay = { ...RT.overlay, ...settings };
       desktop?.setOverlaySettings?.(settings);
+      updatePreview();
     }
+    if (i.dataset.cat || i.dataset.h || i.id === 'team') $('.pool-check').innerHTML = poolCheck();
   });
   document.addEventListener('input', (e) => {
     const i = e.target;
@@ -1061,6 +1278,7 @@ function bind() {
       const opacity = Number(i.value);
       RT.overlay.opacity = opacity;
       desktop?.setOverlaySettings?.({ opacity });
+      updatePreview();
     } else if (i.id === 'overlay-size') {
       const scale = Number(i.value) / 100;
       const width = Math.round(360 * scale);
@@ -1068,10 +1286,16 @@ function bind() {
       RT.overlay = { ...RT.overlay, width, height, bounds: null };
       desktop?.setOverlaySettings?.({ width, height });
       const readout = document.querySelector('.overlay-size-readout');
+      updatePreview();
       if (readout) readout.textContent = width + ' × ' + height;
     }
   });
   document.addEventListener('input', (e) => {
+    if (e.target.id === 'journal-search') {
+      journalSearch = e.target.value;
+      renderJournalRows();
+      return;
+    }
     if (e.target.id === 'hero-search') {
       RT.heroSearch = e.target.value;
       updateHeroSearch();
@@ -1186,6 +1410,8 @@ export async function boot() {
             {
               ...restoreResult(x, h.heroes, c.challenges),
               outcome: x.outcome,
+              reason: x.reason,
+              endedAt: x.endedAt,
               checked: x.checked || [],
             },
           ];
@@ -1220,7 +1446,14 @@ export async function boot() {
       await doRoll(false, { seed: dailySeed() });
   }
   checkDeadlines();
-  setInterval(checkDeadlines, 1000);
+  setInterval(() => {
+    checkDeadlines();
+    if (RT.tab === 'history')
+      $$('[data-countdown]').forEach((el) => {
+        const value = remaining(Number(el.dataset.countdown));
+        if (el.textContent !== value) el.textContent = value;
+      });
+  }, 1000);
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) checkDeadlines();
   });
@@ -1285,7 +1518,10 @@ export async function boot() {
   desktop?.onCompact?.(applyCompact);
   desktop?.compactState?.().then(applyCompact);
   desktop?.overlayState?.().then((state) => {
-    if (state) RT.overlay = { ...RT.overlay, ...state };
+    if (state) {
+      RT.overlay = { ...RT.overlay, ...state };
+      if (RT.tab === 'custom') viewCustom();
+    }
   });
   if (desktop) {
     const exit = document.createElement('button');

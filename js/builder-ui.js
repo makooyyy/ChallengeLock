@@ -23,7 +23,9 @@ let replacing = null;
 let choices = [];
 let undo = null;
 let undoTimer;
-const nextPurchase = (b) => item(b.items.find((id) => !b.purchased.includes(id)));
+const bannedItem = (b) => (RT.ban?.hero === b.hero ? RT.ban.item : null);
+const nextPurchase = (b) =>
+  item(b.items.find((id) => !b.purchased.includes(id) && id !== bannedItem(b)));
 function clearTransient() {
   clearTimeout(undoTimer);
   undo = null;
@@ -51,6 +53,8 @@ export function renderBuilder() {
     b = RT.build,
     stage = BUILD_STAGES[s.stage],
     pool = heroPool(RT.data.heroes, S);
+  const previousAdvanced = p.querySelector('#build-advanced');
+  if (previousAdvanced) advanced = previousAdvanced.open;
   const restoreFocus = rememberFocus(p);
   const stale =
     b &&
@@ -99,7 +103,8 @@ function reportBuild() {
         budget: RT.build.budget,
         spent: RT.build.spent,
         displayItems: RT.build.items.map((id) => ({
-          name: item(id)?.name || id,
+          name:
+            (id === bannedItem(RT.build) ? t('forbidden') + ' · ' : '') + (item(id)?.name || id),
           purchased: RT.build.purchased.includes(id),
         })),
         items: RT.build.items,
@@ -180,7 +185,7 @@ function result(b, stale) {
    .map((group) => {
      const list = rows.filter(({ i }) => (i.tier <= 2 ? 1 : i.tier === 3 ? 2 : 3) === group);
      return list.length
-       ? `<section class="lab-phase"><div class="lab-phase-heading"><span>0${group}</span><h3>${t('buyPhase.' + group)}</h3><small>${money(list.reduce((s, { i }) => s + i.cost, 0))} ${t('soulsLabel')}</small></div><ol class="lab-items">${list.map(({ i, index, cumulative }) => `<li class="lab-item ${b.purchased.includes(i.id) ? 'bought' : ''}" style="--item-branch:${branchColor[i.branch]}"><label class="lab-buy" title="${t('markPurchased')}"><input type="checkbox" data-build-buy="${i.id}" ${b.purchased.includes(i.id) ? 'checked' : ''} aria-label="${t('markPurchased')}: ${esc(i.name)}"><span>${String(index + 1).padStart(2, '0')}</span></label><div class="lab-item-art"><img class="asset-img" src="${esc(i.icon)}" alt="" loading="lazy"></div><div class="lab-item-name"><small>${t('branch.' + i.branch)} · T${i.tier}${i.isActive ? ' · ' + t('activeItem') : ''}</small><h3>${esc(i.name)}</h3><span>${t('cumulative')}: ${money(cumulative)}</span></div><div class="lab-item-price"><b>${money(i.cost)}</b><small>${t('soulsLabel')}</small></div><div class="lab-item-actions"><button data-build-lock="${i.id}" aria-pressed="${b.locked.includes(i.id)}" aria-label="${t(b.locked.includes(i.id) ? 'unpin' : 'pin')}: ${esc(i.name)}" title="${t(b.locked.includes(i.id) ? 'unpin' : 'pin')}">${icon(b.locked.includes(i.id) ? 'lock' : 'unlock', 16)}</button><button data-build-replace="${i.id}" ${b.locked.includes(i.id) || b.purchased.includes(i.id) ? 'disabled' : ''} aria-label="${t('replaceItem')}: ${esc(i.name)}" title="${t('replaceItem')}">${icon('refresh', 16)}</button></div></li>${replacementMenu(i.id)}`).join('')}</ol></section>`
+       ? `<section class="lab-phase"><div class="lab-phase-heading"><span>0${group}</span><h3>${t('buyPhase.' + group)}</h3><small>${money(list.reduce((s, { i }) => s + i.cost, 0))} ${t('soulsLabel')}</small></div><ol class="lab-items">${list.map(({ i, index, cumulative }) => `<li class="lab-item ${b.purchased.includes(i.id) ? 'bought' : ''}" style="--item-branch:${branchColor[i.branch]}"><label class="lab-buy" title="${t('markPurchased')}"><input type="checkbox" data-build-buy="${i.id}" ${bannedItem(b) === i.id ? 'disabled' : ''} ${b.purchased.includes(i.id) ? 'checked' : ''} aria-label="${t('markPurchased')}: ${esc(i.name)}"><span>${String(index + 1).padStart(2, '0')}</span></label><div class="lab-item-art"><img class="asset-img" src="${esc(i.icon)}" alt="" loading="lazy"></div><div class="lab-item-name"><small>${t('branch.' + i.branch)} · T${i.tier}${i.isActive ? ' · ' + t('activeItem') : ''}</small><h3>${esc(i.name)}</h3>${bannedItem(b) === i.id ? `<strong>${t('forbidden')}</strong><button data-build-replace="${i.id}">${t('replaceItem')}</button>` : ''}<span>${t('cumulative')}: ${money(cumulative)}</span></div><div class="lab-item-price"><b>${money(i.cost)}</b><small>${t('soulsLabel')}</small></div><div class="lab-item-actions"><button data-build-lock="${i.id}" aria-pressed="${b.locked.includes(i.id)}" aria-label="${t(b.locked.includes(i.id) ? 'unpin' : 'pin')}: ${esc(i.name)}" title="${t(b.locked.includes(i.id) ? 'unpin' : 'pin')}">${icon(b.locked.includes(i.id) ? 'lock' : 'unlock', 16)}</button><button data-build-replace="${i.id}" ${b.locked.includes(i.id) || b.purchased.includes(i.id) ? 'disabled' : ''} aria-label="${t('replaceItem')}: ${esc(i.name)}" title="${t('replaceItem')}">${icon('refresh', 16)}</button></div></li>${replacementMenu(i.id)}`).join('')}</ol></section>`
        : '';
    })
    .join('')}
@@ -257,6 +262,7 @@ export async function builderClick(button, notify, save) {
     const b = makeBuild(newSeed(), RT.data.heroes, RT.data.items, budget, S, {
       ...s,
       heroId,
+      excluded: heroId && RT.ban?.hero === heroId && RT.ban.item ? [RT.ban.item] : [],
       locked,
     });
     if (!b) {
@@ -325,7 +331,12 @@ export async function builderClick(button, notify, save) {
   }
   if (d.buildReplace && RT.build) {
     replacing = d.buildReplace;
-    choices = replacementOptions(RT.build, replacing, RT.data.heroes, RT.data.items);
+    choices = replacementOptions(
+      RT.build,
+      replacing,
+      RT.data.heroes,
+      RT.data.items.filter((i) => i.id !== bannedItem(RT.build) || RT.build.items.includes(i.id)),
+    );
     if (!choices.length) notify(t('noReplacement'));
     renderBuilder();
     return true;

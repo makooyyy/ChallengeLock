@@ -5,7 +5,7 @@ const esc = (s) =>
     /[&<>"]/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
   );
-let dialog, sealObserver;
+let dialog, sealObserver, returnFocus;
 export function closeCelebration() {
   if (dialog?.open) dialog.close();
 }
@@ -31,7 +31,11 @@ export function showCelebration(result, hero, challenges) {
     dialog.addEventListener('close', () => {
       sealObserver?.disconnect();
       document.body.classList.remove('completion-open');
-      document.getElementById('spin')?.focus({ preventScroll: true });
+      const target =
+        returnFocus?.isConnected && returnFocus.getClientRects().length
+          ? returnFocus
+          : document.getElementById('spin');
+      target?.focus({ preventScroll: true });
     });
   }
   if (dialog.open) dialog.close();
@@ -58,6 +62,7 @@ export function showCelebration(result, hero, challenges) {
     <div class="completion-bottom"><span>${icon('history', 16)}${t('resultRecorded')}</span><button class="completion-continue" data-close-completion>${t('continuePlaying')}${icon('arrow', 16)}</button></div>
   </article>`;
   document.body.classList.add('completion-open');
+  returnFocus = document.activeElement;
   dialog.showModal();
   // Long mobile contracts stamp only when their seal area actually enters view.
   sealObserver = new IntersectionObserver(

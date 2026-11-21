@@ -162,7 +162,8 @@ export function expireContracts(state, now = Date.now()) {
     if (!x.outcome && now >= x.ts + CONTRACT_DAY) failed.add(resultKey(x));
   }
   for (const x of records) {
-    if (!x.outcome && failed.has(resultKey(x))) x.outcome = 'fail';
+    if (!x.outcome && failed.has(resultKey(x)))
+      Object.assign(x, { outcome: 'fail', reason: 'deadline', endedAt: x.ts + CONTRACT_DAY });
   }
   state.stats.fail += failed.size;
   return failed;

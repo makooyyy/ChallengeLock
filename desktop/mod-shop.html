@@ -56,6 +56,7 @@
   <main>
     <h1 id="hero">ChallengeLock</h1>
     <small id="status">Подключение…</small>
+    <p id="ban" hidden></p>
     <ol id="conditions"></ol>
     <section id="build" hidden>
       <h2>Следующая покупка</h2>
@@ -68,6 +69,9 @@
     const el = (id) => document.getElementById(id);
     let previous;
     function render(s) {
+      el('ban').textContent = s.ban || '';
+      el('ban').hidden = !s.ban;
+      for (const id of ['hero', 'status', 'conditions']) el(id).hidden = s.display?.[id] === false;
       el('hero').textContent = s.hero || 'ChallengeLock';
       el('status').textContent =
         { done: 'Выполнено', fail: 'Провалено' }[s.outcome] ||
@@ -83,7 +87,7 @@
           return li;
         }),
       );
-      el('build').hidden = !(s.next || s.complete);
+      el('build').hidden = s.display?.build === false || !(s.next || s.complete);
       el('next').textContent = s.complete ? 'Билд собран' : s.next;
       el('price').textContent = [s.buildHero, s.next ? s.cost + ' душ' : '']
         .filter(Boolean)
@@ -101,6 +105,7 @@
         }
         document.title = 'CL-ready-' + Date.now();
       } catch {
+        el('ban').hidden = true;
         previous = null;
         el('hero').textContent = 'ChallengeLock';
         el('status').textContent = 'Открой приложение ChallengeLock';
