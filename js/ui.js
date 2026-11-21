@@ -132,6 +132,8 @@ function setBusy(busy) {
         (b.dataset.lock !== undefined &&
           (!RT.cur || (+b.dataset.lock > 0 && !RT.cur.conds[+b.dataset.lock - 1])))),
   );
+  const accept = $('#accept-contract');
+  if (accept) accept.disabled = busy;
   const reroll = $('#reroll');
   if (reroll) {
     const possible =
@@ -245,6 +247,25 @@ function show(tab) {
 }
 
 /* ---------- ROULETTE ---------- */
+function stampAcceptance(contract) {
+  const panel = $('#p-roulette');
+  const receipt = document.createElement('div');
+  receipt.className = 'acceptance-receipt';
+  receipt.setAttribute('role', 'status');
+  const seal = document.createElement('div');
+  seal.className = 'acceptance-seal';
+  const game = document.createElement('small');
+  game.textContent = 'CHALLENGELOCK';
+  const verdict = document.createElement('strong');
+  verdict.textContent = t('acceptedSeal');
+  const signature = document.createElement('span');
+  signature.textContent =
+    H(contract.hero).name + ' · ' + new Date(contract.ts).toLocaleDateString(S.lang);
+  seal.append(game, verdict, signature);
+  receipt.append(seal);
+  panel.append(receipt);
+  setTimeout(() => receipt.remove(), 1500);
+}
 function viewRoulette() {
   const p = $('#p-roulette');
   p.innerHTML =
@@ -1195,6 +1216,7 @@ function bind() {
       );
       persist();
       viewRoulette();
+      stampAcceptance(RT.cur);
       return;
     }
     if (b.dataset.progress && RT.cur && !RT.preview && !RT.finished) {

@@ -8,7 +8,7 @@ import { heroPool, resultKey } from './roulette.js';
 import { newSeed } from './rng.js';
 import { copy } from './share.js';
 import { BUILD_STAGES, buildSettings } from './build-config.js';
-import { makeBuild, restoreBuild, replacementOptions, BRANCHES } from './builds.js';
+import { abilityPlan, makeBuild, restoreBuild, replacementOptions, BRANCHES } from './builds.js';
 const esc = (s) =>
   String(s).replace(
     /[&<>"]/g,
@@ -158,6 +158,14 @@ function budgetReason(b) {
     .replace('{slots}', b.settings.maxItems)
     .replace('{tier}', BUILD_STAGES[b.settings.stage].maxTier);
 }
+function skillLabel(step) {
+  return step.tier ? 'T' + step.tier : t('abilityUnlock');
+}
+function skillCard(build, hero) {
+  const steps = abilityPlan(build, hero);
+  if (!steps.length) return '';
+  return `<section class="card skill-plan"><h2>${t('abilityPlan')}</h2><ol>${steps.map((s) => `<li><b>${s.slot} · ${esc(s.name)}</b><small>${skillLabel(s)}</small></li>`).join('')}</ol></section>`;
+}
 function result(b, stale) {
   const h = hero(b.hero),
     purchased = b.items.filter((id) => b.purchased.includes(id)),
@@ -180,6 +188,7 @@ function result(b, stale) {
   ).join(
     '',
   )}</div><div class="lab-branch-labels">${BRANCHES.map((branch) => `<span><i style="background:${branchColor[branch]}"></i>${t('branch.' + branch)} <b>${b.items.filter((id) => item(id).branch === branch).length}</b></span>`).join('')}</div>${b.budget > b.spent ? `<p class="lab-help lab-budget-note">${icon('layers', 14)}${budgetReason(b)}</p>` : ''}</div>
+ ${skillCard(b, h)}
  <div class="lab-order-title"><div><h2>${t('purchasePlan')}</h2><p>${t('purchaseHelp')}</p></div>${b.locked.length ? `<button id="build-unlock">${icon('unlock', 14)}${t('unpinAll')}</button>` : ''}</div>
  ${[1, 2, 3]
    .map((group) => {
@@ -316,7 +325,18 @@ export async function builderClick(button, notify, save) {
   if (button.id === 'cb' && RT.build) {
     const b = RT.build;
     const text = `${hero(b.hero).name} — ${t('phase.' + b.settings.stage)}\n${t('focus.' + b.settings.focus)} · ${money(b.spent)} / ${money(b.budget)} ${t('soulsLabel')}\n${b.items.map((id, i) => `${b.purchased.includes(id) ? '[✓]' : '[ ]'} ${i + 1}. ${item(id).name} — ${money(item(id).cost)}`).join('\n')}`;
-    notify((await copy(text)) ? t('copied') : t('error'));
+    notify(
+      (await copy(
+        [
+          text,
+          ...abilityPlan(b, hero(b.hero)).map(
+            (s, i) => i + 1 + '. ' + s.name + ' · ' + skillLabel(s),
+          ),
+        ].join('\n'),
+      ))
+        ? t('copied')
+        : t('error'),
+    );
     return true;
   }
   if (d.buildLock && RT.build) {

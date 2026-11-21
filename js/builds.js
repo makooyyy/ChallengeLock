@@ -3,6 +3,30 @@ import { makeRng, pick, shuffle } from './rng.js';
 import { heroPool } from './roulette.js';
 import { BUILD_STAGES, buildSettings, savedBuild } from './build-config.js';
 export const BRANCHES = ['weapon', 'vitality', 'spirit'];
+// The ultimate unlocks last. Interleave early unlocks with the first two upgrades.
+export function abilityPlan(build, hero) {
+  if (hero?.abilityDetails?.length !== 4 || hero.abilityDetails.some((a) => !a?.apiId)) return [];
+  const [a, b, c] = shuffle(makeRng(build.hero + ':' + build.seed), [0, 1, 2]);
+  const steps = [
+    [a, 0],
+    [b, 0],
+    [a, 1],
+    [c, 0],
+    [a, 2],
+    [3, 0],
+    [b, 1],
+    [3, 1],
+    [a, 3],
+    [c, 1],
+    [b, 2],
+    [3, 2],
+    [b, 3],
+    [c, 2],
+    [3, 3],
+    [c, 3],
+  ];
+  return steps.map(([slot, tier]) => ({ ...hero.abilityDetails[slot], slot: slot + 1, tier }));
+}
 function catalog(items) {
   const byId = new Map(items.filter((i) => i.active !== false).map((i) => [i.id, i]));
   const ancestors = (id, seen = new Set()) => {

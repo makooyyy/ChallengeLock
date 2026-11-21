@@ -628,3 +628,98 @@ html:not(.desktop-compact) .playing-contract .mach .reel-stage {
 #app .mode-option {
   border-radius: 6px;
 }
+
+/* A brief stamped receipt uses no input layer, including in compact mode. */
+.acceptance-receipt {
+  position: fixed;
+  top: clamp(76px, 23vh, 210px);
+  left: 50%;
+  z-index: 90;
+  pointer-events: none;
+  translate: -50% 0;
+  animation: receipt-leaves 1450ms both;
+}
+.acceptance-seal {
+  position: relative;
+  width: min(250px, 80vw);
+  padding: 13px 18px 14px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  background: repeating-linear-gradient(2deg, transparent 0 3px, #9b76400a 4px), #eddbb7;
+  color: #80392f;
+  outline: 1px solid #a98d65;
+  outline-offset: -2px;
+  box-shadow: 0 12px 28px #20151c4d;
+  transform: rotate(-6deg);
+  animation: receipt-press 530ms both;
+}
+.acceptance-seal::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 3px double currentColor;
+}
+.acceptance-seal small,
+.acceptance-seal span {
+  font:
+    600 11px/1.4 Oswald,
+    sans-serif;
+  letter-spacing: 0.12em;
+}
+.acceptance-seal strong {
+  font:
+    700 clamp(30px, 6vw, 42px)/1.1 Georgia,
+    serif;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-block: 1px solid currentColor;
+  padding-inline: 10px;
+}
+@keyframes receipt-press {
+  0% {
+    transform: translateY(-22px) rotate(-13deg) scale(1.22);
+    opacity: 0;
+  }
+  52% {
+    transform: translateY(2px) rotate(-6deg) scale(0.96);
+    opacity: 1;
+  }
+  72% {
+    transform: translateY(-1px) rotate(-6deg) scale(1.025);
+  }
+  100% {
+    transform: rotate(-6deg);
+  }
+}
+@keyframes receipt-leaves {
+  0%,
+  76% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acceptance-receipt,
+  .acceptance-seal {
+    animation: none;
+  }
+}
+
+#overlay-example + #overlay-toggle {
+  margin-block-start: 14px;
+}
+.skill-plan {
+  padding: clamp(16px, 3vw, 28px);
+}
+.skill-plan ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 12px 28px;
+  padding-inline-start: 28px;
+}
+.skill-plan li small {
+  display: block;
+}

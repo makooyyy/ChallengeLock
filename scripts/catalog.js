@@ -89,7 +89,11 @@ export function buildCatalog({
       abilityDetails: slots.map((key) => {
         const ability = rawItems.find((i) => i.class_name === key);
         return ability
-          ? { name: ability.name, icon: ability.image_webp || ability.image || '' }
+          ? {
+              name: ability.name,
+              icon: ability.image_webp || ability.image || '',
+              apiId: ability.id,
+            }
           : null;
       }),
       icon: https(h.images?.icon_image_small_webp || h.images?.icon_image_small),

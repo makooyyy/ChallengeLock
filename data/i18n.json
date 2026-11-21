@@ -395,7 +395,10 @@
     "checkMarked": "Отмечено вручную",
     "buildOptions": "Ограничения и стиль сборки",
     "browserOverlayHint": "В браузере можно настроить образец ниже. Чтобы применить настройки поверх игры, открой приложение для ПК.",
-    "desktopGameHint": "Подключение к игре и проверка журнала доступны в приложении для ПК."
+    "desktopGameHint": "Подключение к игре и проверка журнала доступны в приложении для ПК.",
+    "acceptedSeal": "Принято",
+    "abilityPlan": "Порядок прокачки",
+    "abilityUnlock": "Открыть"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -793,6 +796,9 @@
     "checkMarked": "Marked manually",
     "buildOptions": "Build limits and focus",
     "browserOverlayHint": "Adjust the sample below in your browser. Open the desktop app to apply settings over the game.",
-    "desktopGameHint": "Game connection and log diagnostics are available in the desktop app."
+    "desktopGameHint": "Game connection and log diagnostics are available in the desktop app.",
+    "acceptedSeal": "Accepted",
+    "abilityPlan": "Ability leveling order",
+    "abilityUnlock": "Unlock"
   }
 }

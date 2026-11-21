@@ -3,7 +3,7 @@ import { Decompress } from './vendor/fzstd.js';
 // Schema: SteamTracking/Protobufs/deadlock/citadel_gcmessages_common.proto.
 // Zstandard raw blocks are defined by RFC 8878; no server or runtime dependency is needed.
 import { restoreResult } from './roulette.js';
-import { restoreBuild } from './builds.js';
+import { abilityPlan, restoreBuild } from './builds.js';
 import { buildSettings, BUILD_STAGES } from './build-config.js';
 const utf8 = new TextEncoder();
 const uint32 = (n) => {
@@ -79,6 +79,22 @@ export function encodeGameBuild(build, heroes, items, challenge = null) {
       ),
     ]),
   );
+  const plan = abilityPlan(valid, hero);
+  if (plan.length) {
+    const changes = plan.flatMap(({ apiId, tier }) => {
+      const cost = [1, 1, 2, 5][tier];
+      // Protobuf int32 sign-extends negative deltas into ten-byte varints.
+      return bytes(1, [
+        ...number(1, apiId),
+        ...number(2, tier ? 1 : 2),
+        24,
+        256 - cost,
+        ...Array(8).fill(255),
+        1,
+      ]);
+    });
+    details.push(...bytes(2, changes));
+  }
   // The game's clipboard importer ignores builds with an absent/zero local ID.
   // 1 is a clipboard placeholder, not a published build ID. No account/origin ID is sent.
   // Explicit category sizes prevent the editor from clipping items into a tiny box.
@@ -88,7 +104,7 @@ export function encodeGameBuild(build, heroes, items, challenge = null) {
     ...text(5, `ChallengeLock | ${hero.name} | ${stage}`),
     ...text(
       6,
-      `Experimental ${valid.settings.focus} build. Budget: ${valid.budget} souls; items: ${valid.spent} souls. Purchase order from ChallengeLock.${challenge ? '\n\n' + challenge.text : ''}`,
+      `Experimental ${valid.settings.focus} build. Budget: ${valid.budget} souls; items: ${valid.spent} souls. Purchase order from ChallengeLock.${plan.length ? '\nCL seed: ' + encodeURIComponent(valid.seed) : ''}${challenge ? '\n\n' + challenge.text : ''}`,
     ),
     ...number(7, challenge?.language ?? 0),
     ...number(8, 0),
@@ -301,7 +317,9 @@ export function decodeGameBuild(code, heroes, items) {
   });
   const build = {
     hero: hero.id,
-    seed: 'imported-' + Date.now(),
+    seed:
+      description.match(/\nCL seed: ([a-zA-Z0-9._~-]{1,256})(?:\n|$)/)?.[1] ||
+      'imported-' + Date.now(),
     items: [...new Set(ids)],
     budget: settings.budget,
     settings,

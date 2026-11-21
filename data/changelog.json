@@ -1,6 +1,24 @@
 {
-  "installerVersion": "1.31.0",
+  "installerVersion": "1.32.0",
   "releases": [
+    {
+      "version": "1.29.0",
+      "date": "2026-11-21",
+      "title": {
+        "ru": "Прокачка в билдах",
+        "en": "Ability leveling"
+      },
+      "items": {
+        "ru": [
+          "Случайный билд показывает порядок открытия и улучшения способностей героя. Он также переносится в игровой билд.",
+          "Добавлена анимация принятия контракта и увеличен отступ у кнопки показа оверлея."
+        ],
+        "en": [
+          "Random builds include a hero ability leveling order in the app and game export.",
+          "Added a contract acceptance animation and improved overlay preview spacing."
+        ]
+      }
+    },
     {
       "version": "1.28.0",
       "date": "2026-11-21",
