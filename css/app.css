@@ -6826,3 +6826,33 @@ body.desktop .pad::-webkit-scrollbar {
 .paper .friend-challenge {
   margin-block-start: 8px;
 }
+
+.playing-contract
+  :is(
+    .studio-intro,
+    .session-toolbar,
+    .mode-picker,
+    .board-toolbar,
+    .board-options,
+    .board-actions,
+    .filter-summary
+  ) {
+  display: none;
+}
+#p-roulette .progress-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  min-height: 38px;
+  padding: 6px 12px;
+}
+.progress-check[aria-pressed='true'] {
+  font-weight: 700;
+}
+.desktop-compact .paper .preview-actions {
+  display: flex;
+}
+#reroll-hint:empty {
+  display: none;
+}

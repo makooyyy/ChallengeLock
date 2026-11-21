@@ -18,6 +18,7 @@ export const RT = {
   tab: 'roulette',
   data: null,
   cur: null,
+  preview: false,
   locks: [false, false, false, false],
   rerolls: 2,
   maxRerolls: 2,

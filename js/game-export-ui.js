@@ -5,7 +5,13 @@ import { t, getDict } from './i18n.js';
 import { icon } from './icons.js';
 let dialog, sourceButton;
 export async function showGameExport(build, heroes, items) {
-  const challenge = challengeForExport(RT.cur, heroes, RT.data.challenges, getDict(), S.lang);
+  const challenge = challengeForExport(
+    RT.preview ? null : RT.cur,
+    heroes,
+    RT.data.challenges,
+    getDict(),
+    S.lang,
+  );
   const code = gameBuildCode(build, heroes, items, challenge),
     hero = heroes.find((h) => h.id === build.hero);
   sourceButton = document.getElementById('copy-game-build');

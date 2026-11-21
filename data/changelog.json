@@ -1,6 +1,24 @@
 {
   "releases": [
     {
+      "version": "1.27.0",
+      "date": "2026-11-21",
+      "title": {
+        "ru": "Предпросмотр и принятие челленджа",
+        "en": "Preview and accept challenges"
+      },
+      "items": {
+        "ru": [
+          "24 часа начинаются с принятия. Закрепляй понравившиеся условия перед перебросом и отмечай их во время игры.",
+          "Уровень сложности задаёт сочетание основной цели и дополнительных условий."
+        ],
+        "en": [
+          "Your 24 hours start on acceptance. Pin slots before rerolling and track conditions during play.",
+          "Difficulty sets the mix of primary and secondary goals."
+        ]
+      }
+    },
+    {
       "version": "1.25.0",
       "date": "2026-11-21",
       "title": {

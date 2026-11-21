@@ -58,6 +58,7 @@ export function normalizeState(x, def) {
         player: count(r.player),
         opts: options(r.opts),
         ts: r.ts,
+        checked: strings(r.checked).filter((id) => r.conds.includes(id)),
         outcome: ['done', 'fail'].includes(r.outcome) ? r.outcome : null,
       }));
   out.banSettings = banSettings(x.banSettings);

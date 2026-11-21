@@ -63,6 +63,7 @@ export function rollDetailed({
   o,
   locks = [],
   prev = null,
+  requireChange = false,
   player = 0,
   same = true,
 }) {
@@ -83,38 +84,64 @@ export function rollDetailed({
   if (prev && locks[0] && !keptHero) return fail('locked-hero');
   if (!eligible.length) return fail(locked.some(Boolean) ? 'locked-condition' : 'no-conditions');
   if (keptHero && !eligible.includes(keptHero)) return fail('locked-condition');
-  const hero = keptHero || pick(hr, eligible);
-  if (!hero) return fail('locked-hero');
-  const conds = Array.from({ length: n }, (_, i) => locked[i] || null);
-  const cand = shuffle(
-    rng,
-    challenges.filter((c) => ok(c, hero, o)),
-  );
-  function fill(i) {
-    if (i === n) return true;
-    if (conds[i]) return fill(i + 1);
-    for (const c of cand)
-      if (conds.every((other) => !other || compatible(c, other))) {
-        conds[i] = c;
+  const first = keptHero || pick(hr, eligible);
+  const order = keptHero ? [first] : [first, ...eligible.filter((h) => h !== first)];
+  const ranges = {
+    easy: [[1, 1]],
+    mid: [[2, 2]],
+    hard: [
+      [3, 4],
+      [1, 2],
+    ],
+    insane: [
+      [4, 5],
+      [2, 3],
+      [1, 2],
+    ],
+  }[o.diff];
+  for (const hero of order) {
+    const cand = shuffle(
+      rng,
+      challenges.filter((c) => ok(c, hero, o)),
+    );
+    const list = [];
+    function fill(i) {
+      if (i === n)
+        return (
+          !requireChange ||
+          !prev ||
+          hero.id !== prev.hero ||
+          list.some((c) => !prev.conds.includes(c.id))
+        );
+      const [min, max] = ranges[i];
+      for (const c of locked[i] ? [locked[i]] : cand) {
+        if (
+          c.difficulty < min ||
+          c.difficulty > max ||
+          !list.every((other) => compatible(c, other))
+        )
+          continue;
+        list.push(c);
         if (fill(i + 1)) return true;
-        conds[i] = null;
+        list.pop();
       }
-    return false;
+      return false;
+    }
+    if (fill(0))
+      return {
+        result: resultFor({
+          seed,
+          r,
+          diff: o.diff,
+          hero: hero.id,
+          conds: list.map((c) => c.id),
+          player: same ? 0 : player,
+          opts: o,
+        }),
+        reason: null,
+      };
   }
-  if (!fill(0)) return fail('no-conditions');
-  const list = conds;
-  return {
-    result: resultFor({
-      seed,
-      r,
-      diff: o.diff,
-      hero: hero.id,
-      conds: list.map((c) => c.id),
-      player: same ? 0 : player,
-      opts: o,
-    }),
-    reason: null,
-  };
+  return fail(requireChange ? 'no-alternative' : 'no-conditions');
 }
 export function rollBan(seed, heroes, items, o, type) {
   items = items.filter((i) => i.active !== false);

@@ -43,6 +43,7 @@ const TABS = ['roulette', 'build', 'ban', 'custom', 'history', 'updates'];
 const desktop = globalThis.challengeLockDesktop;
 // Why a roll produced nothing, phrased as an i18n key the player can act on.
 const ROLL_FAILURE = {
+  'no-alternative': 'noAlternative',
   'no-heroes': 'noHeroes',
   'locked-hero': 'lockedHeroGone',
   'locked-condition': 'lockedConditionBlocked',
@@ -72,7 +73,7 @@ function saveTimer() {
   }
 }
 function restoreTimer() {
-  if (!RT.cur || RT.finished) return;
+  if (!RT.cur || RT.preview || RT.finished) return;
   try {
     const s = JSON.parse(localStorage.getItem(TIMER_KEY) || 'null');
     if (!s || s.key !== resultKey(RT.cur) || !Number.isFinite(s.ms) || s.ms < 0) return;
@@ -113,11 +114,34 @@ function setBusy(busy) {
     (b) =>
       (b.disabled =
         busy ||
+        (!!RT.cur && !RT.preview && !RT.finished) ||
         (b.dataset.lock !== undefined &&
           (!RT.cur || (+b.dataset.lock > 0 && !RT.cur.conds[+b.dataset.lock - 1])))),
   );
   const reroll = $('#reroll');
-  if (reroll) reroll.disabled = busy || RT.finished || !RT.cur || RT.rerolls <= 0;
+  if (reroll) {
+    const possible =
+      !busy &&
+      RT.preview &&
+      RT.cur &&
+      RT.rerolls > 0 &&
+      rollDetailed({
+        seed: RT.seed,
+        r: RT.r + 1,
+        heroes: RT.data.heroes,
+        challenges: RT.data.challenges,
+        o: S,
+        locks: RT.locks,
+        prev: RT.cur,
+        requireChange: true,
+        player: S.friend.player,
+        same: S.friend.same,
+      }).result;
+    reroll.disabled = !possible;
+    reroll.title = RT.preview && !possible && !busy && RT.rerolls > 0 ? t('noAlternative') : '';
+    const hint = $('#reroll-hint');
+    if (hint) hint.textContent = reroll.title;
+  }
   $$('#done,#failb,#tgl').forEach((b) => (b.disabled = busy || RT.finished));
   const label = $('#spin-label');
   if (label) label.textContent = t(busy ? 'rolling' : 'spin');
@@ -228,9 +252,10 @@ function viewRoulette() {
     <div class="reel-stage"><div class="reel hero-reel" data-i="0"><div class="reel-title"><span>${t('yourHero')}</span>${icon('shield', 13)}</div><div class="strip"></div><button class="lk" data-lock="0" aria-label="${t('lock')} — ${t('hero')}"></button></div>
     <div class="conditions">${[1, 2, 3].map((i) => `<div class="reel condition-reel" data-i="${i}"><div class="condition-top"><div class="reel-title"><span class="condition-number">0${i}</span><span>${t('cond')} ${ROMAN[i - 1]}</span></div><button class="lk" data-lock="${i}" aria-label="${t('lock')} — ${t('cond')} ${ROMAN[i - 1]}"></button></div><div class="strip"></div></div>`).join('')}</div></div>
     <div class="filter-summary"><span>${icon('shield', 12)}${heroPool(RT.data.heroes, S).length} ${t('heroesCount')}</span><span class="sep">/</span><span>${S.cats.length} ${t('categoriesCount')}</span><button data-tab="custom">${t('configure')}${icon('arrow', 12)}</button></div>
-    <div class="board-actions"><button class="spin" id="spin">${icon('shuffle')}<span id="spin-label">${t('spin')}</span><kbd>SPACE</kbd></button><button class="reroll-button" id="reroll">${icon('refresh', 17)}${t('reroll')}<small id="rr">${RT.rerolls}</small></button></div>
+    <div class="board-actions"><button class="spin" id="spin">${icon('shuffle')}<span id="spin-label">${t('spin')}</span><kbd>SPACE</kbd></button></div>
     <details class="board-options"><summary><span>${icon('settings', 14)}${t('extraSettings')}</span>${icon('chevron', 14)}</summary><div class="options-content"><label class="chk"><input type="checkbox" id="snd" ${S.sound ? 'checked' : ''}>${t('soundOn')}</label><label class="chk"><input type="checkbox" id="fsame" ${S.friend.same ? 'checked' : ''}>${t('sameHero')}</label><label class="chk">${t('player')}<input type="number" id="fpl" min="1" max="9" value="${S.friend.player}" class="num" ${S.friend.same ? 'disabled' : ''}></label><p class="keyboard-hint">${t('keys')}</p></div></details>
   </section><section class="paper" id="contract" aria-live="polite" tabindex="-1"></section></div>`;
+  $('#p-roulette').classList.toggle('playing-contract', !!RT.cur && !RT.preview && !RT.finished);
   paintReels(RT.cur, false);
   paintContract();
   setBusy(RT.busy);
@@ -264,7 +289,14 @@ function paintReels(res, animate) {
     lock.classList.toggle('on', RT.locks[i]);
     lock.setAttribute('aria-pressed', String(RT.locks[i]));
     lock.disabled = !entry || RT.busy;
-    lock.hidden = !entry;
+    lock.hidden = !entry || !RT.preview;
+    if (entry && i > 0 && !RT.preview && !RT.finished && res.conds.length > 1) {
+      const checked = !!res.checked?.includes(entry.id);
+      el.insertAdjacentHTML(
+        'beforeend',
+        `<button class="progress-check" data-progress="${esc(entry.id)}" aria-pressed="${checked}">${icon(checked ? 'check' : 'plus', 14)} ${t(checked ? 'markedCondition' : 'markCondition')}</button>`,
+      );
+    }
     if (animate && !reduce && entry && !RT.locks[i])
       promises.push(
         el.animate(
@@ -280,7 +312,7 @@ function paintReels(res, animate) {
 }
 function paintContract() {
   desktop?.reportContract?.(
-    RT.cur
+    RT.cur && !RT.preview
       ? {
           key: resultKey(RT.cur),
           label: `${H(RT.cur.hero).name} · ${t('diff.' + RT.cur.diff)}`,
@@ -306,6 +338,10 @@ function paintContract() {
   el.classList.toggle('has-result', !!x);
   if (!x) {
     el.innerHTML = `<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${icon('shield', 16)}</div><div class="contract-empty"><div class="contract-illustration">${icon('lock', 28)}</div><h2>${t('emptyTitle')}</h2><p>${t('empty')}</p><div class="steps"><b>1</b>${t('stepSpin')}<span>→</span><b>2</b>${t('stepPlay')}<span>→</span><b>3</b>${t('stepEarn')}</div></div>`;
+    return;
+  }
+  if (RT.preview) {
+    el.innerHTML = `<div class="contract-top"><h2>${t('previewTitle')}</h2></div><p class="contract-note">${t('previewNote')}</p><div class="result-actions preview-actions"><button class="pb" id="accept-contract">${t('acceptContract')}</button><button class="reroll-button" id="reroll">${icon('refresh', 17)}${t('reroll')}<small id="rr">${RT.rerolls}</small></button></div><small id="reroll-hint" role="status"></small><div class="share-actions"><button id="cl">${t('copyLink')}</button></div>`;
     return;
   }
   const h = H(x.hero),
@@ -336,7 +372,9 @@ function particles(col) {
 async function doRoll(reroll, opt = {}) {
   checkDeadlines();
   if (RT.busy) return;
-  if (reroll && RT.finished) return;
+  if (RT.cur && !RT.preview && !RT.finished && !opt.result && !opt.seed) return;
+  if (reroll && !RT.preview) return;
+  if (reroll && $('#reroll')?.title) return toast(t('noAlternative'));
   if (reroll && (!RT.cur || RT.rerolls <= 0)) return toast(t('noRerolls'));
   const seed = reroll ? RT.seed : opt.seed || newSeed(),
     r = reroll ? RT.r + 1 : opt.r || 0;
@@ -354,6 +392,7 @@ async function doRoll(reroll, opt = {}) {
         o: S,
         locks,
         prev: reroll ? RT.cur : null,
+        requireChange: reroll,
         player: S.friend.player,
         same: S.friend.same,
       }));
@@ -367,37 +406,11 @@ async function doRoll(reroll, opt = {}) {
   RT.locks = locks;
   RT.rerolls = reroll ? RT.rerolls - 1 : Math.max(0, RT.maxRerolls - r);
   const existing = [...S.history, ...S.favs].find((x) => resultKey(x) === resultKey(res));
-  res.ts = existing?.ts ?? (reroll ? RT.cur.ts : Date.now());
-  if (existing) res.outcome = existing.outcome;
-  S.history = S.history.filter((x) => resultKey(x) !== resultKey(res));
-  if (reroll && S.history[0]?.seed === res.seed && !S.history[0].outcome) S.history.shift();
-  S.history.unshift(res);
-  S.history = S.history.slice(0, 50);
-  RT.cur = res;
-  RT.finished = !!res.outcome;
+  RT.cur = existing || res;
+  RT.preview = !existing;
+  RT.finished = !!RT.cur.outcome;
   RT.timer = { ms: 0, run: false, t0: 0 };
-  persist();
-  setHash(res);
-  desktop?.reportContract?.(
-    RT.finished
-      ? null
-      : {
-          key: resultKey(res),
-          label: `${H(res.hero).name} · ${t('diff.' + res.diff)}`,
-          hero: H(res.hero)?.name || res.hero,
-          heroId: H(res.hero)?.apiId,
-          gameMode: options(res.opts).gameMode,
-          difficulty: t('diff.' + res.diff),
-          conditions: res.conds.map((id) => {
-            const c = C(id);
-            return { id, name: loc(c?.name || id), desc: loc(c?.desc || '') };
-          }),
-          mode: modeName(res),
-          timer: mmss(RT.timer.ms),
-          outcome: RT.cur?.outcome,
-          lang: S.lang,
-        },
-  );
+  setHash(RT.cur);
   show('roulette');
   RT.busy = true;
   setBusy(true);
@@ -429,6 +442,7 @@ function checkDeadlines() {
   if (!failed.size) return;
   persist();
   if (RT.cur && failed.has(resultKey(RT.cur))) {
+    $('#p-roulette')?.classList.remove('playing-contract');
     RT.cur.outcome = 'fail';
     RT.finished = true;
     setBusy(RT.busy);
@@ -442,7 +456,7 @@ function checkDeadlines() {
 function finish(o) {
   checkDeadlines();
   const x = RT.cur;
-  if (!x || RT.finished) return;
+  if (!x || RT.preview || RT.finished) return;
   RT.finished = true;
   setBusy(RT.busy);
   RT.timer.run = false;
@@ -452,7 +466,7 @@ function finish(o) {
     S.stats.done++;
   } else S.stats.fail++;
   persist();
-  paintContract();
+  viewRoulette();
   paintHeader();
   // paintContract reports the final result; the shell excludes it from match tracking.
   beep(o === 'done' ? 880 : 140, 0.2);
@@ -629,7 +643,7 @@ function updateMatch(state) {
   if (!state) return;
   const previous = RT.match;
   RT.match = state;
-  const current = RT.cur && state.key === resultKey(RT.cur) && !RT.finished;
+  const current = !RT.preview && RT.cur && state.key === resultKey(RT.cur) && !RT.finished;
   if (
     current &&
     state.phase === 'playing' &&
@@ -858,6 +872,7 @@ function bind() {
     if (d.gameMode && GAME_MODES.includes(d.gameMode)) {
       if (S.gameMode === d.gameMode) return;
       S.gameMode = d.gameMode;
+      RT.preview = false;
       RT.cur = null;
       RT.seed = null;
       RT.r = 0;
@@ -876,6 +891,7 @@ function bind() {
       RT.locks = [false, false, false, false];
       paintReels(RT.cur, false);
       persist();
+      setBusy(false);
       return $$('[data-diff]').forEach((x) => {
         x.classList.toggle('on', x === b);
         x.setAttribute('aria-pressed', x === b);
@@ -886,10 +902,34 @@ function bind() {
       if (!RT.cur || (i > 0 && !RT.cur.conds[i - 1])) return;
       RT.locks[i] = !RT.locks[i];
       paintReels(RT.cur, false);
+      setBusy(false);
       return;
     }
     if (b.id === 'review-stamp' && RT.cur && RT.finished)
       return showCelebration(RT.cur, H(RT.cur.hero), RT.data.challenges);
+    if (b.id === 'accept-contract' && RT.cur && RT.preview) {
+      RT.cur.ts = Date.now();
+      RT.preview = false;
+      S.history = [RT.cur, ...S.history.filter((x) => resultKey(x) !== resultKey(RT.cur))].slice(
+        0,
+        50,
+      );
+      persist();
+      viewRoulette();
+      return;
+    }
+    if (b.dataset.progress && RT.cur && !RT.preview && !RT.finished) {
+      const id = b.dataset.progress;
+      const checked = RT.cur.checked || [];
+      RT.cur.checked = checked.includes(id)
+        ? checked.filter((value) => value !== id)
+        : [...checked, id];
+      for (const f of S.favs) if (resultKey(f) === resultKey(RT.cur)) f.checked = RT.cur.checked;
+      persist();
+      paintReels(RT.cur, false);
+      document.querySelector('[data-progress="' + CSS.escape(id) + '"]')?.focus();
+      return;
+    }
     if (b.id === 'done') return finish('done');
     if (b.id === 'failb') return finish('fail');
     if (b.id === 'tgl') {
@@ -1131,7 +1171,13 @@ export async function boot() {
     for (const key of ['history', 'favs'])
       S[key] = S[key].flatMap((x) => {
         try {
-          return [{ ...restoreResult(x, h.heroes, c.challenges), outcome: x.outcome }];
+          return [
+            {
+              ...restoreResult(x, h.heroes, c.challenges),
+              outcome: x.outcome,
+              checked: x.checked || [],
+            },
+          ];
         } catch {
           return [];
         }
@@ -1154,6 +1200,9 @@ export async function boot() {
   const h = parseHash();
   if (h) await fromHash(h);
   else {
+    const pending = S.history.find((x) => !x.outcome);
+    if (pending && !new URLSearchParams(location.search).has('daily'))
+      await fromHash(parseHash(new URL(linkFor(pending)).hash));
     show(initialTab());
     // A PWA shortcut for the daily challenge opens the app with the roll already made.
     if (new URLSearchParams(location.search).has('daily'))

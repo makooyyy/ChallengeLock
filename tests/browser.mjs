@@ -80,15 +80,18 @@ try {
     });
   const initial = (await state()).cur;
   await page.click('[data-tab="history"]');
-  await page.click('.hl a');
+  assert.equal(await page.locator('.hl a').count(), 0);
+  await page.click('[data-tab="roulette"]');
   assert(await page.locator('#spin').isVisible());
   await page.click('[data-lock="0"]');
+  await page.click('[data-lock="1"]');
+  assert(await page.locator('#reroll').isDisabled());
   await page.click('[data-lock="1"]');
   await page.click('#reroll');
   await page.waitForFunction(async () => !(await import('/js/state.js')).RT.busy);
   const rerolled = await state();
   assert.equal(rerolled.cur.hero, initial.hero);
-  assert.equal(rerolled.cur.conds[0], initial.conds[0]);
+  assert.notEqual(rerolled.cur.conds[0], initial.conds[0]);
   const url = page.url();
   const second = await browser.newContext({ reducedMotion: 'reduce' });
   const receiver = await second.newPage();
@@ -109,6 +112,7 @@ try {
   assert.equal(received.hero, rerolled.cur.hero);
   assert.deepEqual(received.conds, rerolled.cur.conds);
   assert.deepEqual(received.opts, rerolled.cur.opts);
+  await page.click('#accept-contract');
   await page.click('#done');
   const completed = (await state()).stats.done;
   assert(await page.locator('#completion-dialog').isVisible());
@@ -140,6 +144,7 @@ try {
   await page.waitForFunction(async () => (await import('/js/state.js')).S.friend.player === 3);
   assert.equal((await state()).diff, 'hard');
   const beforeFailure = (await state()).stats;
+  await page.click('#accept-contract');
   await page.click('#failb');
   assert.equal(await page.locator('#completion-dialog').getAttribute('data-outcome'), 'fail');
   assert(await page.locator('.result-seal').isVisible());
@@ -370,6 +375,8 @@ try {
       }
     }
   }
+  await page.click('[data-tab="roulette"]');
+  await page.click('#accept-contract');
   // Export the displayed build, even after editing the next build's budget.
   await page.click('[data-tab="build"]');
   await page.fill('#bud', '4800');
@@ -454,6 +461,10 @@ try {
   assert((await compactPage.locator('.hero-display').boundingBox()).y < 180);
   assert((await compactPage.locator('.condition-result').first().boundingBox()).y < 260);
   assert(await compactPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await compactPage.click('#accept-contract');
+  await compactPage.locator('[data-progress]').first().click();
+  await compactPage.reload();
+  await compactPage.waitForSelector('[data-progress][aria-pressed="true"]');
   await compactPage.evaluate(() =>
     window.__match({
       key: window.__contract.key,

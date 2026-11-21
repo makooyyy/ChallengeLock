@@ -232,8 +232,10 @@ test('difficulty ceilings and contract size protect easy and normal games', () =
         const x = roll({ ...base, seed: 'balance-' + i, o: { ...o, gameMode, diff } });
         assert(x);
         assert.equal(x.conds.length, sizes[diff]);
-        for (const id of x.conds)
-          assert(challenges.find((c) => c.id === id).difficulty <= ceilings[diff]);
+        const levels = x.conds.map((id) => challenges.find((c) => c.id === id).difficulty);
+        assert(levels[0] >= { easy: 1, mid: 2, hard: 3, insane: 4 }[diff]);
+        assert(levels.every((level) => level <= ceilings[diff]));
+        if (levels.length > 1) assert(levels.slice(1).every((level) => level < levels[0]));
         for (const key of ['points', 'mult', 'sum', 'rarity']) assert(!(key in x));
       }
   for (const id of [

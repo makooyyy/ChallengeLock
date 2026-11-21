@@ -891,7 +891,7 @@
     {
       "id": "street_rounds",
       "cat": "go",
-      "difficulty": 4,
+      "difficulty": 5,
       "name": {
         "ru": "В каждом раунде",
         "en": "Every round counts"
@@ -1315,7 +1315,7 @@
     {
       "id": "ranked_calls",
       "cat": "tm",
-      "difficulty": 1,
+      "difficulty": 2,
       "name": {
         "ru": "Полезный сигнал",
         "en": "Useful callouts"
@@ -1743,7 +1743,7 @@
     {
       "id": "street_kill_streak",
       "cat": "go",
-      "difficulty": 1,
+      "difficulty": 3,
       "name": {
         "ru": "Двойка подряд",
         "en": "Two in a row"
@@ -1806,7 +1806,7 @@
     {
       "id": "street_guardian_finish",
       "cat": "go",
-      "difficulty": 1,
+      "difficulty": 4,
       "name": {
         "ru": "Последний по Guardian",
         "en": "Guardian finisher"
@@ -1829,7 +1829,7 @@
     {
       "id": "street_first_round_win",
       "cat": "go",
-      "difficulty": 1,
+      "difficulty": 3,
       "name": {
         "ru": "Первый раунд",
         "en": "First round"
@@ -1850,7 +1850,7 @@
     {
       "id": "street_first_round_survive",
       "cat": "ch",
-      "difficulty": 1,
+      "difficulty": 2,
       "name": {
         "ru": "Живой в дебюте",
         "en": "Alive in the opener"
@@ -1871,7 +1871,7 @@
     {
       "id": "street_low_hp_kill",
       "cat": "gp",
-      "difficulty": 1,
+      "difficulty": 4,
       "name": {
         "ru": "На грани",
         "en": "A sliver of health"
@@ -1989,7 +1989,7 @@
     {
       "id": "map_early_impact",
       "cat": "go",
-      "difficulty": 1,
+      "difficulty": 2,
       "name": {
         "ru": "Быстрый старт",
         "en": "Fast start"
@@ -2011,7 +2011,7 @@
     {
       "id": "map_survive_10",
       "cat": "ch",
-      "difficulty": 1,
+      "difficulty": 3,
       "name": {
         "ru": "Сухой старт",
         "en": "Clean start"
@@ -2079,7 +2079,7 @@
     {
       "id": "ranked_first_blood",
       "cat": "go",
-      "difficulty": 1,
+      "difficulty": 5,
       "name": {
         "ru": "Первая кровь",
         "en": "First blood"
@@ -2100,7 +2100,7 @@
     {
       "id": "ranked_revenge",
       "cat": "go",
-      "difficulty": 1,
+      "difficulty": 3,
       "name": {
         "ru": "Ответка",
         "en": "Payback"
@@ -2471,6 +2471,216 @@
       ],
       "mode": "solo",
       "verified": true
+    },
+    {
+      "id": "street_reload",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Подготовка",
+        "en": "Ready again"
+      },
+      "desc": {
+        "ru": "Перезаряди оружие за укрытием перед следующим выходом в бой.",
+        "en": "Reload behind cover before rejoining a fight."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_ping",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Общая цель",
+        "en": "Shared target"
+      },
+      "desc": {
+        "ru": "Во время раунда отметь пингом видимого вражеского героя.",
+        "en": "Ping a visible enemy hero during a round."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_draft_read",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Выбор драфта",
+        "en": "Draft choice"
+      },
+      "desc": {
+        "ru": "Во время драфта сравни описания двух предложенных предметов перед выбором.",
+        "en": "Compare two item descriptions before making a draft pick."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_melee",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Ближний контакт",
+        "en": "Close contact"
+      },
+      "desc": {
+        "ru": "Попади лёгкой атакой ближнего боя по вражескому солдату.",
+        "en": "Hit an enemy trooper with a light melee attack."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "street_follow",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Вторая линия",
+        "en": "Follow-up"
+      },
+      "desc": {
+        "ru": "После попадания союзника нанеси урон тому же вражескому герою в этом бою.",
+        "en": "Damage an enemy hero after an ally hits them in the same fight."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "street"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_signal_back",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Отход",
+        "en": "Fall back"
+      },
+      "desc": {
+        "ru": "Отметь отступление пингом, когда сам отходишь с линии после размена.",
+        "en": "Signal retreat when you leave your lane after a trade."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_rejoin",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Возвращение",
+        "en": "Regroup"
+      },
+      "desc": {
+        "ru": "После посещения магазина вернись к союзнику на линию.",
+        "en": "Rejoin an ally in lane after visiting the shop."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_secure",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Своя сфера",
+        "en": "Secure a soul"
+      },
+      "desc": {
+        "ru": "Подстрели одну союзную сферу душ до того, как её перехватит враг.",
+        "en": "Secure one friendly soul orb before an enemy denies it."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_chip",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Осадный выстрел",
+        "en": "Siege shot"
+      },
+      "desc": {
+        "ru": "Нанеси урон вражеской постройке, пока рядом есть союзные солдаты.",
+        "en": "Damage an enemy structure while allied troopers are nearby."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
+    },
+    {
+      "id": "ranked_scout",
+      "cat": "go",
+      "difficulty": 1,
+      "name": {
+        "ru": "Разведка",
+        "en": "Scout the lane"
+      },
+      "desc": {
+        "ru": "Перед первой покупкой посмотри предметы соперника на своей линии.",
+        "en": "Inspect a lane opponent’s items before your first purchase."
+      },
+      "tags": [],
+      "conflicts": [],
+      "heroes": "all",
+      "mode": "solo",
+      "gameModes": [
+        "ranked"
+      ],
+      "verified": false
     }
   ]
 }

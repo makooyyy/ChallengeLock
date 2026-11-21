@@ -321,7 +321,13 @@
     "gameNotFound": "Установка Deadlock не найдена. Проверенные пути:",
     "gameNoLog": "Игра найдена, но console.log ещё нет — добавьте -condebug в параметры запуска и зайдите в матч.",
     "gameLogFound": "Лог найден. Последние строки:",
-    "gameFailed": "Не удалось прочитать данные игры."
+    "gameFailed": "Не удалось прочитать данные игры.",
+    "previewTitle": "Предпросмотр",
+    "previewNote": "Срок начнётся после принятия. Можно закрепить героя или условия и перебросить остальные.",
+    "acceptContract": "Принять на 24 часа",
+    "noAlternative": "Другого варианта нет. Сними закрепление или расширь фильтры.",
+    "markCondition": "Отметить условие",
+    "markedCondition": "Условие отмечено"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -645,6 +651,12 @@
     "gameNotFound": "Deadlock is not installed here. Paths checked:",
     "gameNoLog": "The game is installed, but there is no console.log yet — add -condebug to the launch options and play a match.",
     "gameLogFound": "Log found. Last lines:",
-    "gameFailed": "Could not read the game data."
+    "gameFailed": "Could not read the game data.",
+    "previewTitle": "Preview",
+    "previewNote": "Your time starts when you accept. Pin a hero or conditions to keep them on a reroll.",
+    "acceptContract": "Accept for 24 hours",
+    "noAlternative": "No alternative. Unpin a slot or broaden your filters.",
+    "markCondition": "Mark condition",
+    "markedCondition": "Condition checked"
   }
 }
