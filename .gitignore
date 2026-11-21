@@ -27,3 +27,9 @@ playwright-report/
 desktop/node_modules/
 desktop/dist/
 desktop/web/
+
+# Generated mod assets and local game extracts
+mod/build/
+mod/dist/
+mod/__pycache__/
+mod/vendor/__pycache__/

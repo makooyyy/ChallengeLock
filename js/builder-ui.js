@@ -74,6 +74,10 @@ export function renderBuilder() {
         nextTier: next ? (S.lang === 'en' ? 'Tier ' : 'Тир ') + next.tier : null,
         budget: RT.build.budget,
         spent: RT.build.spent,
+        displayItems: RT.build.items.map((id) => ({
+          name: item(id)?.name || id,
+          purchased: RT.build.purchased.includes(id),
+        })),
         items: RT.build.items,
         purchased: RT.build.purchased,
       });

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+  <meta charset="utf-8" /><title>ChallengeLock</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font:
+        15px/1.35 'Segoe UI',
+        sans-serif;
+      color: #f3f6ff;
+      background: transparent;
+    }
+    main {
+      padding: 16px;
+      background: #10192aef;
+      border: 1px solid #456088;
+      border-radius: 12px;
+    }
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+    h1 {
+      font-size: 19px;
+    }
+    h2 {
+      font-size: 14px;
+      color: #9cbcff;
+      margin-top: 12px;
+    }
+    ol {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+    li {
+      margin: 5px 0;
+    }
+    small {
+      display: block;
+      color: #c4d1e5;
+    }
+    #next {
+      font-size: 17px;
+      font-weight: 600;
+    }
+    #items {
+      color: #c4d1e5;
+      margin-top: 5px;
+      font-size: 13px;
+    }
+  </style>
+  <main>
+    <h1 id="hero">ChallengeLock</h1>
+    <small id="status">Подключение…</small>
+    <ol id="conditions"></ol>
+    <section id="build" hidden>
+      <h2>Следующая покупка</h2>
+      <p id="next"></p>
+      <small id="price"></small>
+      <p id="items"></p>
+    </section>
+  </main>
+  <script>
+    const el = (id) => document.getElementById(id);
+    let previous;
+    function render(s) {
+      el('hero').textContent = s.hero || 'ChallengeLock';
+      el('status').textContent =
+        { done: 'Выполнено', fail: 'Провалено' }[s.outcome] ||
+        s.mode ||
+        'Выбери челлендж в приложении';
+      el('conditions').replaceChildren(
+        ...s.conditions.map((c) => {
+          const li = document.createElement('li'),
+            desc = document.createElement('small');
+          li.textContent = c.name;
+          desc.textContent = c.desc;
+          li.append(desc);
+          return li;
+        }),
+      );
+      el('build').hidden = !(s.next || s.complete);
+      el('next').textContent = s.complete ? 'Билд собран' : s.next;
+      el('price').textContent = [s.buildHero, s.next ? s.cost + ' душ' : '']
+        .filter(Boolean)
+        .join(' · ');
+      el('items').textContent = s.items.map((i) => (i.purchased ? '✓ ' : '') + i.name).join(' · ');
+    }
+    async function tick() {
+      try {
+        const response = await fetch('/mod/state', { cache: 'no-store' });
+        if (!response.ok) throw Error();
+        const value = await response.text();
+        if (value !== previous) {
+          render(JSON.parse(value));
+          previous = value;
+        }
+        document.title = 'CL-ready-' + Date.now();
+      } catch {
+        previous = null;
+        el('hero').textContent = 'ChallengeLock';
+        el('status').textContent = 'Открой приложение ChallengeLock';
+        el('conditions').replaceChildren();
+        el('build').hidden = true;
+      }
+      setTimeout(tick, 1500);
+    }
+    tick();
+  </script>
+</html>

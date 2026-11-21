@@ -1,0 +1,42 @@
+(function () {
+    var context = $.GetContextPanel();
+    var hud = context;
+    while (hud.GetParent()) hud = hud.GetParent();
+    var root = $.CreatePanelWithProperties('Panel', hud, 'ChallengeLockShop', {hittest:false,hittestchildren:false});
+    root.style.position = '24px 155px 0px';
+    root.style.width = '330px';
+    root.style.height = '680px';
+    root.style.zIndex = '110';
+    root.visible = false;
+    var page = $.CreatePanelWithProperties('CitadelHTMLPanel', root, 'ChallengeLockPage', {hittest:false,hittestchildren:false});
+    page.style.width = '100%';
+    page.style.height = '100%';
+    var gameplay, open = false, lastAttempt = 0, lastReady = 0;
+    $.RegisterEventHandler('HTMLTitle', page, function () {
+        for (var i = 0; i < arguments.length; i++) {
+            if (String(arguments[i]).indexOf('CL-ready-') === 0) {
+                if (!lastReady) $.Msg('[ChallengeLock] shop data received');
+                lastReady = Date.now();
+            }
+        }
+    });
+    function update() {
+        if (!root.IsValid()) return;
+        if (!context.IsValid()) { root.DeleteAsync(0); return; }
+        if (!gameplay || !gameplay.IsValid()) gameplay = hud.FindChildTraverse('gameplay_hud');
+        var visible = !!(gameplay && gameplay.BHasClass('gShopOpen'));
+        if (visible !== open) {
+            open = visible;
+            root.visible = open;
+            $.Msg('[ChallengeLock] shop=' + (open ? 'open' : 'closed'));
+        }
+        var now = Date.now();
+        if (open && now - lastAttempt > 15000 && now - lastReady > 15000) {
+            lastAttempt = now;
+            page.SetURL('http://127.0.0.1:47821/mod/bridge');
+        }
+        $.Schedule(0.25, update);
+    }
+    $.Msg('[ChallengeLock] shop companion loaded 0.1.1');
+    update();
+})();

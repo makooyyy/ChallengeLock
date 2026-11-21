@@ -1,6 +1,22 @@
 {
   "releases": [
     {
+      "version": "1.25.0",
+      "date": "2026-11-21",
+      "title": {
+        "ru": "Панель магазина Deadlock",
+        "en": "Deadlock shop panel"
+      },
+      "items": {
+        "ru": [
+          "Десктопное приложение передаёт условия челленджа и билд локальному моду магазина."
+        ],
+        "en": [
+          "The desktop app shares challenge conditions and build purchases with the local shop mod."
+        ]
+      }
+    },
+    {
       "version": "1.24.0",
       "date": "2026-11-21",
       "title": {

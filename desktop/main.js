@@ -22,6 +22,7 @@ const path = require('path');
 const { execFile } = require('child_process');
 const game = require('./game.js');
 const logWatch = require('./log-watch.js');
+const modBridge = require('./mod-bridge.js');
 const { MatchMonitor, fetchHistory } = require('./match-monitor.js');
 
 // The interface is 2D, so software compositing costs nothing and removes the GPU
@@ -124,6 +125,24 @@ const server = http.createServer((req, res) => {
   } catch {
     res.statusCode = 400;
     res.end('Bad request');
+    return;
+  }
+  if (urlPath === '/mod/state' || urlPath === '/mod/bridge') {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'",
+    );
+    res.setHeader(
+      'Content-Type',
+      urlPath === '/mod/state' ? 'application/json; charset=utf-8' : 'text/html; charset=utf-8',
+    );
+    const body =
+      urlPath === '/mod/state'
+        ? JSON.stringify(modBridge.snapshot(overlayContract, overlayBuild))
+        : modBridge.bridgePage;
+    res.end(req.method === 'HEAD' ? undefined : body);
     return;
   }
   if (urlPath === '/' || urlPath === '') urlPath = '/index.html';
