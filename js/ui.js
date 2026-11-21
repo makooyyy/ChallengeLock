@@ -6,7 +6,15 @@ import { applyTheme, toggleTheme } from './theme.js';
 import { showCelebration, closeCelebration, celebrationOpen } from './celebration.js';
 import { S, RT, persist as saveState, ALL_CATS } from './state.js';
 import { t, loc, setDict, setLang } from './i18n.js';
-import { rollDetailed, DIFF, restoreResult, resultKey, heroPool } from './roulette.js';
+import {
+  rollDetailed,
+  CONTRACT_DAY,
+  expireContracts,
+  DIFF,
+  restoreResult,
+  resultKey,
+  heroPool,
+} from './roulette.js';
 import { newSeed, dailySeed } from './rng.js';
 import { validateData, normalizeState, options, GAME_MODES } from './validation.js';
 import { parseHash, linkFor, setHash, copy, drawCard } from './share.js';
@@ -64,7 +72,7 @@ function saveTimer() {
   }
 }
 function restoreTimer() {
-  if (!RT.cur) return;
+  if (!RT.cur || RT.finished) return;
   try {
     const s = JSON.parse(localStorage.getItem(TIMER_KEY) || 'null');
     if (!s || s.key !== resultKey(RT.cur) || !Number.isFinite(s.ms) || s.ms < 0) return;
@@ -109,7 +117,7 @@ function setBusy(busy) {
           (!RT.cur || (+b.dataset.lock > 0 && !RT.cur.conds[+b.dataset.lock - 1])))),
   );
   const reroll = $('#reroll');
-  if (reroll) reroll.disabled = busy || !RT.cur || RT.rerolls <= 0;
+  if (reroll) reroll.disabled = busy || RT.finished || !RT.cur || RT.rerolls <= 0;
   $$('#done,#failb,#tgl').forEach((b) => (b.disabled = busy || RT.finished));
   const label = $('#spin-label');
   if (label) label.textContent = t(busy ? 'rolling' : 'spin');
@@ -304,7 +312,7 @@ function paintContract() {
     fav = S.favs.some((f) => resultKey(f) === resultKey(x));
   el.innerHTML = `<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${difficultyBadge(x)}</div>
   <div class="contract-hero">${dia(h)}<div><h2>${esc(h.name)}</h2><p>${modeName(x)} · ${t('diff.' + x.diff)} · ${x.conds.length} ${t('conditionsCount')}</p></div><button class="icon-button" id="fav" aria-label="${t('fav')}" title="${t('fav')}" aria-pressed="${fav}">${icon('star', 18)}</button></div>
-  <div class="contract-state">${icon(RT.finished ? 'check' : 'play', 12)}${t(RT.finished ? 'sessionClosed' : 'sessionActive')}</div><p class="contract-note">${t('contractHint')}</p>${desktop?.matchState ? `<div data-match-status>${matchStatus()}</div>` : ''}
+  <div class="contract-state">${icon(RT.finished ? 'check' : 'play', 12)}${t(RT.finished ? 'sessionClosed' : 'sessionActive')}</div><p class="contract-note">${RT.finished ? t('contractHint') : t('contractDeadline') + ' ' + esc(new Date(x.ts + CONTRACT_DAY).toLocaleString(S.lang, { dateStyle: 'short', timeStyle: 'short' }))}</p>${desktop?.matchState ? `<div data-match-status>${matchStatus()}</div>` : ''}
   ${RT.finished ? `<div class="completion-status ${x.outcome === 'fail' ? 'failed' : ''}">${icon(x.outcome === 'done' ? 'check' : 'close', 17)}${t(x.outcome === 'done' ? 'completedStatus' : 'failedStatus')}</div>` : ''}
   <div class="result-actions"><button class="pb" id="done" ${RT.finished ? 'disabled' : ''}>${icon('check', 16)}${t('done')}</button><button class="pb o" id="failb" ${RT.finished ? 'disabled' : ''}>${icon('close', 15)}${t('fail')}</button></div>
   <button class="pb friend-challenge" id="cf">${icon('shield', 15)}${t('challengeFriend')}</button>
@@ -326,7 +334,9 @@ function particles(col) {
   }
 }
 async function doRoll(reroll, opt = {}) {
+  checkDeadlines();
   if (RT.busy) return;
+  if (reroll && RT.finished) return;
   if (reroll && (!RT.cur || RT.rerolls <= 0)) return toast(t('noRerolls'));
   const seed = reroll ? RT.seed : opt.seed || newSeed(),
     r = reroll ? RT.r + 1 : opt.r || 0;
@@ -356,7 +366,8 @@ async function doRoll(reroll, opt = {}) {
   RT.r = r;
   RT.locks = locks;
   RT.rerolls = reroll ? RT.rerolls - 1 : Math.max(0, RT.maxRerolls - r);
-  const existing = S.history.find((x) => resultKey(x) === resultKey(res));
+  const existing = [...S.history, ...S.favs].find((x) => resultKey(x) === resultKey(res));
+  res.ts = existing?.ts ?? (reroll ? RT.cur.ts : Date.now());
   if (existing) res.outcome = existing.outcome;
   S.history = S.history.filter((x) => resultKey(x) !== resultKey(res));
   if (reroll && S.history[0]?.seed === res.seed && !S.history[0].outcome) S.history.shift();
@@ -413,10 +424,27 @@ async function doRoll(reroll, opt = {}) {
     fromHash(next);
   }
 }
+function checkDeadlines() {
+  const failed = expireContracts(S);
+  if (!failed.size) return;
+  persist();
+  if (RT.cur && failed.has(resultKey(RT.cur))) {
+    RT.cur.outcome = 'fail';
+    RT.finished = true;
+    setBusy(RT.busy);
+    RT.timer.run = false;
+    paintContract();
+    if (RT.tab === 'roulette') showCelebration(RT.cur, H(RT.cur.hero), RT.data.challenges);
+  }
+  paintHeader();
+  if (RT.tab === 'history') viewHistory();
+}
 function finish(o) {
+  checkDeadlines();
   const x = RT.cur;
   if (!x || RT.finished) return;
   RT.finished = true;
+  setBusy(RT.busy);
   RT.timer.run = false;
   x.outcome = o;
   for (const f of S.favs) if (resultKey(f) === resultKey(x)) f.outcome = o;
@@ -1131,6 +1159,11 @@ export async function boot() {
     if (new URLSearchParams(location.search).has('daily'))
       await doRoll(false, { seed: dailySeed() });
   }
+  checkDeadlines();
+  setInterval(checkDeadlines, 1000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) checkDeadlines();
+  });
   restoreTimer();
   const notice = document.createElement('p');
   notice.id = 'data-notice';

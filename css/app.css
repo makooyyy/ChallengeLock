@@ -6812,3 +6812,17 @@ body.desktop .pad::-webkit-scrollbar {
   color: var(--muted);
   line-height: 1.45;
 }
+
+.paper .result-actions,
+.paper .share-actions {
+  gap: 10px;
+}
+.paper .share-actions {
+  flex-wrap: wrap;
+}
+.lab-item-actions {
+  gap: 8px;
+}
+.paper .friend-challenge {
+  margin-block-start: 8px;
+}

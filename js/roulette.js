@@ -125,3 +125,18 @@ export function rollBan(seed, heroes, items, o, type) {
     ? { hero: hero.id, item: pick(r, items).id }
     : { hero: hero.id, slot: int(r, 1, hero.abilities) };
 }
+
+export const CONTRACT_DAY = 24 * 60 * 60 * 1000;
+
+export function expireContracts(state, now = Date.now()) {
+  const failed = new Set();
+  const records = [...state.history, ...state.favs];
+  for (const x of records) {
+    if (!x.outcome && now >= x.ts + CONTRACT_DAY) failed.add(resultKey(x));
+  }
+  for (const x of records) {
+    if (!x.outcome && failed.has(resultKey(x))) x.outcome = 'fail';
+  }
+  state.stats.fail += failed.size;
+  return failed;
+}
