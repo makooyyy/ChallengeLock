@@ -758,7 +758,42 @@ function publishLogHealth(logHealth) {
   }
 }
 
+let shopWindow = null;
+let shopDeadline = 0;
+function updateShopWindow(open) {
+  if (!open) {
+    shopDeadline = 0;
+    shopWindow?.hide();
+    return;
+  }
+  shopDeadline = Date.now() + 6500;
+  if (!shopWindow) {
+    const { x, y, width, height } = screen.getDisplayNearestPoint(
+      screen.getCursorScreenPoint(),
+    ).bounds;
+    shopWindow = new BrowserWindow({
+      x: x + Math.round(width * 0.0125),
+      y: y + Math.round(height * 0.14),
+      width: Math.min(330, Math.round(width * 0.2)),
+      height: Math.round(height * 0.64),
+      frame: false,
+      transparent: true,
+      focusable: false,
+      show: false,
+      skipTaskbar: true,
+      webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false },
+    });
+    shopWindow.setIgnoreMouseEvents(true);
+    shopWindow.setAlwaysOnTop(true, 'screen-saver');
+    shopWindow.on('closed', () => {
+      shopWindow = null;
+    });
+    shopWindow.loadURL(new URL('/mod/bridge', pageUrl()).href).catch((error) => log(error.message));
+  }
+  if (!shopWindow.isVisible()) shopWindow.showInactive();
+}
 function watchTick() {
+  if (shopDeadline && Date.now() >= shopDeadline) updateShopWindow(false);
   const now = Date.now();
   if (!logWatcher.file || !fs.existsSync(logWatcher.file)) {
     // Look the install up again at most every 30 seconds: the game may appear later.
@@ -801,6 +836,8 @@ function watchTick() {
   }
   if (batch.lines.length) publishLogHealth('receiving');
   for (const line of batch.lines) {
+    const shop = /\[PanoramaScript\] \[ChallengeLock\] companion=(open|closed)\s*$/.exec(line);
+    if (shop) updateShopWindow(shop[1] === 'open');
     const event = logWatch.trackLine(logWatcher.tracker, line);
     if (!event) continue;
     if (event.type === 'start') {
@@ -898,7 +935,7 @@ function checkGameProcess() {
 
 function startMatchWatch() {
   if (logWatcher.timer) return;
-  logWatcher.timer = setInterval(watchTick, 2000);
+  logWatcher.timer = setInterval(watchTick, 350);
   logWatcher.timer.unref?.();
   void refreshAccount();
   checkGameProcess();

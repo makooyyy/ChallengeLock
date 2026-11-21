@@ -1,6 +1,6 @@
-# ChallengeLock Shop Companion — prototype 0.1.1
+# ChallengeLock Shop Companion — prototype 0.1.2
 
-Native Panorama panel shown only when the game reports the shop is open (`gameplay_hud.gShopOpen`).
+A click-through desktop window follows shop events from the game log (`gameplay_hud.gShopOpen`).
 Displays the current challenge, next purchase and build list from the desktop app on `127.0.0.1:47821`.
 Purchases are marked in ChallengeLock; this prototype does not automatically detect bought items.
 No memory access, gameplay commands, chat messages or external services are used by the mod.
@@ -16,7 +16,7 @@ py mod/build.py --game "C:/Program Files (x86)/Steam/steamapps/common/Deadlock" 
 
 The build extracts the installed game's current damage-impact layout and adds one script include.
 It stops on unexpected layout structure, verifies compiled resources with Source2Viewer and writes
-`mod/dist/ChallengeLock-Shop-Mod-0.1.1.zip`. No game files are changed by the builder.
+`mod/dist/ChallengeLock-Shop-Mod-0.1.2.zip`. No game files are changed by the builder.
 
 ## Install / remove
 
@@ -26,8 +26,7 @@ Use one installation method only. Restart the game and keep ChallengeLock runnin
 Remove/disable this mod and restart to revert. Do not replace another mod's VPK.
 
 The only stock override is `panorama/layout/hud_damage_impact.vxml_c`; another mod overriding
-that file needs a merged build. Rebuild after game updates. The loopback port must be 47821;
-the app's fallback port is intentionally not scanned. A disconnected app shows an offline hint.
+that file needs a merged build. Rebuild after game updates. The desktop app must be running and reading console.log. Use borderless windowed mode.
 
 ## Sources and licenses
 

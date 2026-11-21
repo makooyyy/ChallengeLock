@@ -50,10 +50,10 @@ def main():
     dist.mkdir(exist_ok=True)
     archive = dist / 'pak99_challengelock_dir.vpk'
     vpk.new(str(stage)).save(str(archive))
-    manifest = {'version':'0.1.1', 'host':HOST, 'layoutSHA256':hashlib.sha256(original.read_bytes()).hexdigest(),
+    manifest = {'version':'0.1.2', 'host':HOST, 'layoutSHA256':hashlib.sha256(original.read_bytes()).hexdigest(),
                 'vpkSHA256':hashlib.sha256(archive.read_bytes()).hexdigest(), 'files':list(sources)}
     (dist / 'build-info.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
-    with zipfile.ZipFile(dist / 'ChallengeLock-Shop-Mod-0.1.1.zip','w',zipfile.ZIP_DEFLATED) as z:
+    with zipfile.ZipFile(dist / 'ChallengeLock-Shop-Mod-0.1.2.zip','w',zipfile.ZIP_DEFLATED) as z:
         z.write(archive,'pak01_dir.vpk')
         z.write(dist / 'build-info.json','build-info.json')
         z.write(ROOT / 'README.md','README.md')
