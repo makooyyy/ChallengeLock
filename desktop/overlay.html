@@ -25,7 +25,7 @@
         overflow: hidden;
         background: transparent;
         font-family: Inter, 'Segoe UI', system-ui, sans-serif;
-        color: #f2f5fb;
+        color: #faf7f3;
         user-select: none;
       }
       [hidden] {
@@ -60,8 +60,8 @@
         width: 100%;
         height: 100%;
         box-sizing: border-box;
-        background: linear-gradient(180deg, #101a30 0%, #0b1120 60%);
-        border: 1px solid #243252;
+        background: linear-gradient(180deg, #2e2112 0%, #1f160c 60%);
+        border: 1px solid #543d22;
         border-radius: 16px;
         padding: 12px;
         display: flex;
@@ -69,7 +69,7 @@
         gap: 10px;
         overflow: hidden;
         box-shadow:
-          0 0 0 1px #0b1120,
+          0 0 0 1px #1f160c,
           0 12px 32px rgba(0, 0, 0, 0.5);
       }
       .drag {
@@ -90,7 +90,7 @@
         width: 44px;
         height: 44px;
         border-radius: 12px;
-        background: linear-gradient(135deg, #2f6fed, #1c3f8f);
+        background: linear-gradient(135deg, #bf6a5d, #7a3b31);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -115,7 +115,7 @@
       }
       .hero-meta {
         font-size: 12px;
-        color: #8ea0c2;
+        color: #c7aa89;
       }
       .difficulty {
         color: #ff9f86;
@@ -126,15 +126,15 @@
         font-family: 'JetBrains Mono', monospace;
         font-size: 12px;
         font-weight: 600;
-        color: #9db8ee;
-        background: #16233f;
-        border: 1px solid #2a3a5e;
+        color: #dec7ad;
+        background: #3d2c18;
+        border: 1px solid #614627;
         border-radius: 8px;
         padding: 5px 9px;
       }
       .conditions {
-        background: #0f182b;
-        border: 1px solid #1d2943;
+        background: #291e11;
+        border: 1px solid #45311b;
         border-radius: 12px;
         overflow: hidden;
         display: flex;
@@ -145,7 +145,7 @@
         gap: 10px;
         align-items: flex-start;
         padding: 10px 12px;
-        border-bottom: 1px solid #1d2943;
+        border-bottom: 1px solid #45311b;
       }
       .condition:last-child {
         border-bottom: 0;
@@ -155,7 +155,7 @@
         width: 18px;
         height: 18px;
         box-sizing: border-box;
-        border: 2px solid #3a4c74;
+        border: 2px solid #795935;
         border-radius: 5px;
         margin-top: 1px;
       }
@@ -176,7 +176,7 @@
         font-size: 10px;
         font-weight: 600;
         letter-spacing: 0.1em;
-        color: #6f9bf5;
+        color: #d39a91;
       }
       .condition-name {
         font-size: 14px;
@@ -188,11 +188,11 @@
       .condition-desc {
         font-size: 12px;
         line-height: 1.35;
-        color: #a9b6d0;
+        color: #d4bea5;
       }
       .build {
-        background: linear-gradient(135deg, #16284d, #0f1b36);
-        border: 1px solid #2f4478;
+        background: linear-gradient(135deg, #47331c, #312314);
+        border: 1px solid #775630;
         border-radius: 12px;
         padding: 10px 12px;
         display: flex;
@@ -209,7 +209,7 @@
         width: 40px;
         height: 40px;
         border-radius: 10px;
-        background: #2f6fed;
+        background: #bf6a5d;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -229,7 +229,7 @@
         font-family: 'JetBrains Mono', monospace;
         font-size: 9px;
         letter-spacing: 0.14em;
-        color: #8ea0c2;
+        color: #c7aa89;
       }
       .build-name {
         font-size: 15px;
@@ -248,11 +248,11 @@
         font-family: 'JetBrains Mono', monospace;
         font-size: 14px;
         font-weight: 600;
-        color: #9db8ee;
+        color: #dec7ad;
       }
       .build-tier {
         font-size: 11px;
-        color: #8ea0c2;
+        color: #c7aa89;
       }
       .build-progress {
         display: flex;
@@ -263,10 +263,10 @@
         flex: 1 1 0%;
         height: 3px;
         border-radius: 2px;
-        background: #26365c;
+        background: #5d4325;
       }
       .build-bar.filled {
-        background: #2f6fed;
+        background: #bf6a5d;
       }
       .footer {
         display: flex;
@@ -274,20 +274,20 @@
         justify-content: space-between;
         gap: 8px;
         font-size: 11px;
-        color: #8ea0c2;
+        color: #c7aa89;
         margin-top: auto;
       }
       .timer {
         font-family: 'JetBrains Mono', monospace;
         font-variant-numeric: tabular-nums;
         font-weight: 600;
-        color: #f2f5fb;
+        color: #faf7f3;
       }
       .status {
         padding: 3px 8px;
         border-radius: 999px;
         background: rgba(91, 140, 255, 0.18);
-        color: #cfe0ff;
+        color: #f1e8dd;
         font-weight: 700;
       }
       .empty {
@@ -295,8 +295,47 @@
         place-items: center;
         height: 100%;
         text-align: center;
-        color: #8ea0c2;
+        color: #c7aa89;
         font-size: 12px;
+      }
+
+      .card,
+      main {
+        background: #282226;
+        border: 1px solid #a7845e;
+        border-radius: 5px;
+        color: #f2e4c9;
+        box-shadow:
+          inset 0 0 0 3px #282226,
+          inset 0 0 0 4px #725d48;
+      }
+      .hero-name,
+      #next {
+        font-family: Georgia, serif;
+        font-weight: 700;
+      }
+      #next {
+        font-size: 23px;
+        line-height: 1.15;
+        margin-block: 6px;
+      }
+      #price,
+      .counter {
+        color: #f0c483;
+      }
+      #ban {
+        margin-top: 12px;
+        padding-block: 7px;
+        border-block: 1px solid #75614e;
+      }
+      #hero {
+        font: italic bold 17px Georgia;
+        margin-top: 10px;
+      }
+      .hero-badge {
+        background: #783f37;
+        border: 1px solid #b89168;
+        border-radius: 3px;
       }
     </style>
   </head>

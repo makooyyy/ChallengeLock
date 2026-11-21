@@ -1,0 +1,630 @@
+/* Contract stationery and the dark frame shared by the game tools. */
+:root {
+  --bg: #e5d7bb;
+  --surface: #f1e5cd;
+  --ink: #302621;
+  --muted: #685849;
+  --line: #b9a487;
+  --accent: #853e37;
+  --green: #853e37;
+  --soft: #e8d6b6;
+  --soft-ink: #73352f;
+  --dark: #292025;
+  --radius: 5px;
+  --shadow: 0 7px 20px #21171b1a;
+  --stock: #e6d6b8;
+  --gold: #d6ad74;
+  --rule: 3px double var(--line);
+}
+:root[data-theme='dark'] {
+  --bg: #1c191c;
+  --surface: #30292a;
+  --ink: #f2e3c7;
+  --muted: #c4ad92;
+  --line: #66544a;
+  --accent: #d79881;
+  --green: #daa28d;
+  --soft: #453533;
+  --soft-ink: #f3c4ac;
+  --stock: #262224;
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+.pad {
+  background:
+    repeating-linear-gradient(2deg, transparent 0 4px, #a9885307 5px, transparent 6px), var(--stock);
+  background-size: 100% 9px;
+}
+.panel {
+  color: var(--ink);
+}
+.rail,
+[data-theme='dark'] .rail {
+  background: #211c20;
+  border-color: #78604e;
+  color: #eddab8;
+}
+.rail .logo {
+  background: none;
+  color: #dbb277;
+  box-shadow: none;
+  font: 36px Georgia;
+}
+.rail .nb {
+  color: #d4c1a9;
+  border-radius: 3px;
+}
+.rail .nb.on,
+.rail .nb.on:hover {
+  background: #743e38;
+  border-color: #95695b;
+  color: #fff2dc;
+  box-shadow: inset 3px 0 #e3bc82;
+}
+.rail .nb.on:before {
+  display: none;
+}
+.app-header {
+  border-bottom: var(--rule);
+  min-height: 55px;
+  margin-bottom: 20px;
+}
+.context-name b,
+.brand > span {
+  font-family: Georgia, serif;
+}
+h1,
+.studio-intro h1,
+.page-intro h1,
+.panel > .intro h1 {
+  font-family: Oswald, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+h2,
+.card h2,
+.paper h2,
+.lab-hero h2,
+.journal-record summary b,
+.release h2 {
+  font-family: Georgia, serif;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+#app
+  :is(
+    .card,
+    .paper,
+    .release,
+    .lab-section,
+    .lab-phase,
+    .lab-empty,
+    .mode-picker,
+    .board-options,
+    .theme-button,
+    .lang-button,
+    .seg,
+    .hc,
+    .lab-item,
+    .cat-choice,
+    .lab-stage,
+    .mode-option,
+    .ban-rule-card
+  ) {
+  border-radius: 4px;
+}
+#app :is(.card, .paper, .lab-empty, .release, .lab-phase) {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+#app .section-heading,
+.lab-section-title,
+.lab-result-header,
+.lab-phase-heading {
+  border-bottom: var(--rule);
+  padding-bottom: 10px;
+}
+#app :is(.spin, .pb:not(.o), .game-export-button),
+#app .nb.on {
+  background: #783c34;
+  color: #fff1d9;
+  border: 1px solid #935a48;
+  box-shadow:
+    inset 0 0 0 2px #783c34,
+    inset 0 0 0 3px #be9270;
+  border-radius: 4px;
+}
+#app :is(.spin, .pb:not(.o), .game-export-button):hover:not(:disabled) {
+  background: #623029;
+  color: #fff7e8;
+}
+#app
+  :is(
+    .mode-option.selected,
+    .lab-stages .on,
+    .ban-type-picker .on,
+    .lab-presets .on,
+    .seg .on,
+    .hc:has(input:checked),
+    .cat-choice:has(input:checked)
+  ) {
+  background: var(--soft);
+  border-color: var(--accent);
+  color: var(--soft-ink);
+}
+#app
+  :is(
+    .journal-tools input,
+    .lab-field select,
+    .search-input,
+    .lab-budget,
+    .lab-item,
+    .condition-number,
+    .overlay-pos,
+    .ban-slot-map > div
+  ) {
+  border-radius: 3px;
+}
+#app :is(.lab-item, .ban-slot-map > div, .lab-item-actions button, .journal-record) {
+  border-color: var(--line);
+}
+#app
+  :is(
+    .eyebrow,
+    .lab-section-title > span,
+    .lab-phase-heading > span,
+    .hero-count,
+    .release-version,
+    .journal-record summary strong
+  ) {
+  color: var(--soft-ink);
+}
+.page-intro,
+.studio-intro {
+  border-bottom: var(--rule);
+  padding-bottom: 18px;
+}
+.studio-intro {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(105deg, #302326, #5a3732);
+  border: 1px solid #82644e;
+  border-radius: 3px;
+  padding: 22px clamp(20px, 4vw, 55px);
+  min-height: 150px;
+}
+.studio-intro h1 {
+  color: #faecd1;
+}
+.studio-intro p {
+  color: #e4d3b9;
+  max-width: 65%;
+}
+.studio-art {
+  display: block;
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 32%;
+  height: 100%;
+  background: repeating-radial-gradient(
+    circle at 60% 55%,
+    transparent 0 24px,
+    #cda16e60 25px 26px,
+    transparent 27px 44px
+  );
+  z-index: -1;
+}
+.studio-art img:first-child {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  transform: none;
+  object-fit: cover;
+  object-position: 50% 30%;
+  mask-image: linear-gradient(90deg, transparent, #000 40%);
+}
+.mach {
+  background: #282125;
+  color: #eddec5;
+  border-color: #826c58;
+  border-radius: 4px;
+}
+.mach .board-toolbar,
+.mach .board-options {
+  border-color: #705c50;
+}
+.mach .hero-reel {
+  background: linear-gradient(148deg, #603f3d, #282027);
+  border-color: #8a715c;
+  border-radius: 3px;
+}
+.mach .conditions {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+}
+.mach .conditions .condition-reel + .condition-reel {
+  border-top: var(--rule);
+}
+.mach .condition-result h3 {
+  font:
+    bold 22px/1.2 Georgia,
+    serif;
+  color: var(--ink);
+}
+.mach .condition-result p,
+.mach .condition-empty,
+.mach .condition-top .reel-title,
+.mach .condition-top .lk {
+  color: var(--muted);
+}
+.mach .condition-number {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--soft-ink);
+  border-radius: 0;
+}
+.mach .hero-reel > .reel-title,
+.mach .hero-display p,
+.mach .hero-display .hero-context,
+.mach .filter-summary,
+.mach .filter-summary button {
+  color: #e0c6a3;
+}
+.mach .hero-display h3 {
+  font:
+    italic bold 42px/1.1 Georgia,
+    serif;
+  color: #ffedd0;
+}
+.mach .hero-context span,
+.mach .hero-reel > .lk {
+  background: #382b29;
+  color: #f1dcbf;
+  border-color: #856952;
+}
+.contract-portrait {
+  display: none;
+}
+#app .paper {
+  border-top: 4px double var(--line);
+}
+#app .contract-state {
+  background: var(--soft);
+  color: var(--soft-ink);
+}
+#app .lab-order-title h2,
+.journal-record summary b,
+.lab-item-name h3 {
+  font-family: Georgia, serif;
+}
+.build-shopping {
+  border-left: 5px solid var(--accent) !important;
+}
+.ban-rule-text {
+  border-block: var(--rule);
+  padding-block: 15px;
+}
+#overlay-example {
+  background: #292226;
+  color: #f4e5c7;
+  border-color: #9e7d59;
+}
+.completion-card,
+[data-theme='dark'] .completion-card {
+  background: #efe0be;
+  color: #362a24;
+  border: 5px double #9b765b;
+}
+.completion-card.failure,
+[data-theme='dark'] .completion-card.failure {
+  background: #e4cfb5;
+  color: #482e2a;
+}
+@media (min-width: 1000px) {
+  html:not(.desktop-compact) .d {
+    grid-template-columns: 164px minmax(0, 1fr);
+  }
+  html:not(.desktop-compact) .rail {
+    width: 164px;
+    padding-inline: 12px;
+  }
+  .rail .brand {
+    display: flex;
+    align-items: center;
+    padding: 0 0 18px;
+    gap: 4px;
+  }
+  .rail .brand > span {
+    display: block;
+    font-size: 16px;
+    color: #ecdaba;
+  }
+  .rail .nb {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    min-height: 46px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .pad {
+    padding-inline: clamp(24px, 3vw, 50px);
+  }
+  .roulette-layout {
+    grid-template-columns: minmax(0, 1.95fr) minmax(255px, 0.85fr);
+    gap: 16px;
+  }
+}
+@media (min-width: 720px) {
+  html:not(.desktop-compact) .mach .reel-stage:has(.hero-display) {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.3fr);
+    align-items: stretch;
+    padding: 15px;
+    gap: 0;
+  }
+  html:not(.desktop-compact) .hero-reel:has(.hero-display) {
+    display: block;
+    position: relative;
+    height: auto;
+    min-height: 315px;
+    align-self: stretch;
+    isolation: isolate;
+    border: 1px solid #9a7b5d;
+  }
+  html:not(.desktop-compact) .hero-reel:has(.hero-display) > .reel-title {
+    position: absolute;
+    top: 8px;
+    left: 3px;
+    z-index: 2;
+    text-shadow: 0 1px 4px #111;
+  }
+  html:not(.desktop-compact) .hero-reel:has(.hero-display) > .lk {
+    position: absolute;
+    top: 12px;
+    right: 10px;
+    margin: 0;
+    padding: 5px;
+    min-height: 28px;
+  }
+  html:not(.desktop-compact) .hero-reel:has(.hero-display) > .lk span {
+    display: none;
+  }
+  html:not(.desktop-compact) .hero-reel:has(.hero-display) .strip {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+  }
+  html:not(.desktop-compact) .mach .hero-display {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    align-items: flex-end;
+    min-height: 100%;
+    padding: 18px;
+  }
+  html:not(.desktop-compact) .mach .hero-display:after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(0deg, #171318f5, transparent 70%);
+  }
+  html:not(.desktop-compact) .mach .contract-portrait {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 30%;
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+  }
+  html:not(.desktop-compact) .mach .hero-display:not(.missing-portrait) .hero-avatar {
+    display: none;
+  }
+  html:not(.desktop-compact) .mach .hero-display h3 {
+    font-size: clamp(27px, 3vw, 42px);
+  }
+  .mach .hero-display .hero-context {
+    gap: 4px;
+  }
+  .mach .conditions {
+    padding: 0 14px;
+  }
+}
+@media (max-width: 719px) {
+  .studio-intro {
+    min-height: 108px;
+    padding: 15px;
+  }
+  .studio-intro p {
+    max-width: 70%;
+    font-size: 12px;
+  }
+  html:not(.desktop-compact) .mach .hero-display {
+    overflow: hidden;
+    position: relative;
+    min-height: 120px;
+    padding-inline-end: 40%;
+  }
+  html:not(.desktop-compact) .mach .contract-portrait {
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 45%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+    mask-image: linear-gradient(90deg, transparent, #000 28%);
+  }
+  html:not(.desktop-compact) .mach .hero-display:not(.missing-portrait) .hero-avatar {
+    display: none;
+  }
+  .mach .hero-display h3 {
+    font-size: 26px;
+  }
+}
+
+html:not(.desktop-compact) .playing-contract .studio-intro {
+  display: block;
+  min-height: 0;
+  padding: 0 0 14px;
+  margin: 0 0 18px;
+  background: none;
+  border: 0;
+  border-bottom: var(--rule);
+}
+.playing-contract .studio-art,
+.playing-contract .studio-intro p {
+  display: none;
+}
+.playing-contract .studio-intro h1 {
+  color: var(--ink);
+}
+html:not(.desktop-compact) .playing-contract .paper .contract-build,
+html:not(.desktop-compact) .playing-contract .paper [data-tab='ban'],
+html:not(.desktop-compact) .playing-contract .paper .friend-challenge {
+  display: flex;
+  width: 100%;
+  margin: 8px 0;
+  justify-content: center;
+}
+#app .playing-contract .paper [data-tab='ban'],
+#app .playing-contract .paper .friend-challenge {
+  background: transparent;
+  color: var(--soft-ink);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+html:not(.desktop-compact) .playing-contract .hero-display > div > p {
+  display: none;
+}
+html:not(.desktop-compact) .mach .hero-display.missing-portrait {
+  flex-wrap: wrap;
+}
+html:not(.desktop-compact) .playing-contract .mach {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+html:not(.desktop-compact) .playing-contract .mach .reel-stage {
+  padding: 0;
+}
+#app .build-shopping .pb {
+  min-height: 40px;
+}
+
+.folio-heading {
+  display: none;
+}
+@media (min-width: 720px) {
+  html:not(.desktop-compact) .mach .hero-reel:has(.hero-display)::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    inset: 12px;
+    border: 1px solid #ead8b49c;
+    pointer-events: none;
+  }
+  html:not(.desktop-compact) .mach .hero-reel:has(.hero-display) > .lk {
+    z-index: 3;
+  }
+  html:not(.desktop-compact) .mach .hero-display {
+    padding: 26px;
+  }
+  html:not(.desktop-compact) .mach .reel-stage:has(.hero-display) .conditions {
+    position: relative;
+    border-radius: 0 3px 3px 0;
+    border-left: 0;
+    padding-inline: clamp(18px, 2vw, 32px);
+    overflow: visible;
+    background: var(--surface);
+  }
+  html:not(.desktop-compact) .mach .reel-stage:has(.hero-display) .conditions::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 -7px;
+    width: 8px;
+    background: radial-gradient(circle at 0 6px, transparent 4.8px, var(--surface) 5.5px) 0 0/8px
+      12px;
+    pointer-events: none;
+  }
+  html:not(.desktop-compact) .mach .reel-stage:has(.hero-display) .folio-heading {
+    display: block;
+    margin-top: 18px;
+    padding-bottom: 10px;
+    border-bottom: var(--rule);
+    font:
+      600 12px Oswald,
+      sans-serif;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  html:not(.desktop-compact) .playing-contract .mach .hero-reel > .reel-title {
+    left: 14px;
+    top: 12px;
+  }
+}
+#app .paper .preview-actions ~ .share-actions {
+  margin-top: 14px;
+}
+#app .lab-settings #build-import {
+  display: flex;
+  margin-top: 12px;
+  justify-content: center;
+}
+#app .lab-settings #rb {
+  margin-top: 14px;
+}
+#app #p-history .card > :is(h2, h3, p, .journal-stats) + :is(h2, h3, p, .journal-stats) {
+  margin-block-start: 12px;
+}
+#app #journal-list {
+  margin-block-start: 16px;
+}
+#app #journal-list > h3 {
+  margin: 18px 0 12px;
+}
+#app #p-history .card > h2 {
+  line-height: 1.25;
+}
+#app .journal-actions,
+#app .backup-actions,
+#app .ban-result-footer {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#app .section-heading + :is(.overlay-controls, .hero-tools, .cat-grid),
+#app .lab-result-header + .lab-totals {
+  margin-top: 14px;
+}
+#app #p-custom details > summary {
+  padding: 10px 0;
+}
+
+#app .mode-picker {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+#app .mode-options {
+  gap: clamp(10px, 1.5vw, 22px);
+}
+#app .mode-option {
+  border-radius: 6px;
+}

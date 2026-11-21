@@ -1,6 +1,26 @@
 {
-  "installerVersion": "1.30.0",
+  "installerVersion": "1.31.0",
   "releases": [
+    {
+      "version": "1.28.0",
+      "date": "2026-11-21",
+      "title": {
+        "ru": "Бумажные контракты",
+        "en": "Paper contracts"
+      },
+      "items": {
+        "ru": [
+          "Новое оформление приложения и оверлеев. Портрет героя в рамке занимает всю высоту условий контракта.",
+          "Уличная стычка, обычный и рейтинговый режимы выбираются тремя отдельными кнопками.",
+          "Увеличены отступы в истории и конструкторе билдов. В браузерных настройках доступен образец оверлея."
+        ],
+        "en": [
+          "Updated app and overlays. Framed hero portraits span the full height of contract conditions.",
+          "Street Brawl, Normal and Ranked each have a separate button.",
+          "Improved spacing in history and builds, with an overlay sample in web settings."
+        ]
+      }
+    },
     {
       "version": "1.27.0",
       "date": "2026-11-21",

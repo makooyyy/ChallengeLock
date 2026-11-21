@@ -221,6 +221,11 @@ function paintCatalog() {
 }
 function show(tab) {
   RT.tab = tab;
+  const context = document.querySelector('.context-name [data-i18n]');
+  if (context) {
+    context.dataset.i18n = 'tab.' + tab;
+    context.textContent = t('tab.' + tab);
+  }
   $$('.nb').forEach((b) => {
     const on = b.dataset.tab === tab;
     b.classList.toggle('on', on);
@@ -243,17 +248,7 @@ function show(tab) {
 function viewRoulette() {
   const p = $('#p-roulette');
   p.innerHTML =
-    `<div class="studio-intro"><div><div class="eyebrow"><span class="live-indicator"></span>DEADLOCK / CHALLENGE GENERATOR</div><h1>${t('studioTitle')} <span>${t('studioTitleAccent')}</span></h1><p>${t('rouletteIntro')}</p></div><div class="studio-art" aria-hidden="true"><span class="art-orbit"></span>${[
-      'haze',
-      'abrams',
-      'ivy',
-    ]
-      .map((id) => H(id))
-      .filter(Boolean)
-      .map((h) => `<img src="${esc(h.icon)}" alt="">`)
-      .join(
-        '',
-      )}<span class="art-caption">PICK. PLAY. REPEAT.</span></div></div><div class="session-toolbar"><span class="session-title">${icon('settings', 16)}${t('sessionSetup')}</span><button id="daily" class="daily-button">${icon('calendar', 16)}${t('daily')}</button></div>` +
+    `<div class="studio-intro"><div><h1>${t('studioTitle')}</h1><p>${t('rouletteIntro')}</p></div><div class="studio-art" aria-hidden="true"><img src="assets/portraits/abrams.webp" alt=""></div></div><div class="session-toolbar"><span class="session-title">${icon('settings', 16)}${t('sessionSetup')}</span><button id="daily" class="daily-button">${icon('calendar', 16)}${t('daily')}</button></div>` +
     `
   <section class="mode-picker" aria-label="${t('gameModeTitle')}"><div class="mode-picker-heading"><span class="eyebrow">${t('gameModeTitle')}</span><span>${t('gameModeHint')}</span></div><div class="mode-options">${GAME_MODES.map((m, i) => `<button data-game-mode="${m}" aria-pressed="${S.gameMode === m}" class="mode-option ${S.gameMode === m ? 'selected' : ''}"><span class="mode-index">0${i + 1}</span><span class="mode-glyph">${icon(['spark', 'dice', 'trophy'][i], 21)}</span><span><b>${t('gameMode.' + m)}</b><small>${t('gameModeDesc.' + m)}</small></span><span class="mode-check">${icon('check', 15)}</span></button>`).join('')}</div></section>
   <div class="roulette-layout"><section class="mach" aria-label="${t('tab.roulette')}" aria-busy="false">
@@ -264,7 +259,7 @@ function viewRoulette() {
       'diff',
     )}</div>
     <div class="reel-stage"><div class="reel hero-reel" data-i="0"><div class="reel-title"><span>${t('yourHero')}</span>${icon('shield', 13)}</div><div class="strip"></div><button class="lk" data-lock="0" aria-label="${t('lock')} — ${t('hero')}"></button></div>
-    <div class="conditions">${[1, 2, 3].map((i) => `<div class="reel condition-reel" data-i="${i}"><div class="condition-top"><div class="reel-title"><span class="condition-number">0${i}</span><span>${t('cond')} ${ROMAN[i - 1]}</span></div><button class="lk" data-lock="${i}" aria-label="${t('lock')} — ${t('cond')} ${ROMAN[i - 1]}"></button></div><div class="strip"></div></div>`).join('')}</div></div>
+    <div class="conditions"><div class="folio-heading">${t('challengeRules')}</div>${[1, 2, 3].map((i) => `<div class="reel condition-reel" data-i="${i}"><div class="condition-top"><div class="reel-title"><span class="condition-number">0${i}</span><span>${t('cond')} ${ROMAN[i - 1]}</span></div><button class="lk" data-lock="${i}" aria-label="${t('lock')} — ${t('cond')} ${ROMAN[i - 1]}"></button></div><div class="strip"></div></div>`).join('')}</div></div>
     <div class="filter-summary"><span>${icon('shield', 12)}${heroPool(RT.data.heroes, S).length} ${t('heroesCount')}</span><span class="sep">/</span><span>${S.cats.length} ${t('categoriesCount')}</span><button id="configure-pool" data-tab="custom">${t('configure')}${icon('arrow', 12)}</button></div>
     <div class="board-actions"><button class="spin" id="spin">${icon('shuffle')}<span id="spin-label">${t('spin')}</span><kbd>SPACE</kbd></button></div>
     <details class="board-options"><summary><span>${icon('settings', 14)}${t('extraSettings')}</span>${icon('chevron', 14)}</summary><div class="options-content"><label class="chk"><input type="checkbox" id="snd" ${S.sound ? 'checked' : ''}>${t('soundOn')}</label><label class="chk"><input type="checkbox" id="fsame" ${S.friend.same ? 'checked' : ''}>${t('sameHero')}</label><label class="chk">${t('player')}<input type="number" id="fpl" min="1" max="9" value="${S.friend.player}" class="num" ${S.friend.same ? 'disabled' : ''}></label><p class="keyboard-hint">${t('keys')}</p></div></details>
@@ -283,7 +278,7 @@ function paintReels(res, animate) {
     el.closest('.reel').hidden = i > 0 && (res ? !entry : i > 1);
     if (i === 0) {
       el.innerHTML = entry
-        ? `<div class="hero-display" style="--hero-color:${entry.color}"><div class="hero-avatar"><span>${esc(entry.name[0])}</span><img class="pic" src="${esc(entry.icon)}" alt=""></div><div><p>DEADLOCK / CHALLENGE</p><h3>${esc(entry.name)}</h3><div class="hero-context"><span>${modeName(res)}</span><span>${t('diff.' + res.diff)}</span></div></div></div>`
+        ? `<div class="hero-display" data-portrait="${esc(entry.id)}" style="--hero-color:${entry.color}"><img class="contract-portrait" aria-hidden="true" alt="" src="assets/portraits/${esc(entry.id)}.webp"><div class="hero-avatar"><span>${esc(entry.name[0])}</span><img class="pic" src="${esc(entry.icon)}" alt=""></div><div><p>${t('yourHero')}</p><h3>${esc(entry.name)}</h3><div class="hero-context"><span>${modeName(res)}</span><span>${t('diff.' + res.diff)}</span></div></div></div>`
         : `<div class="hero-empty"><div class="portrait-stack">${['abrams', 'ivy', 'haze']
             .map((id) => H(id))
             .filter(Boolean)
@@ -661,7 +656,7 @@ function updatePreview() {
   const el = $('#overlay-example');
   if (!el) return;
   const s = RT.overlay,
-    shop = s.mode === 'shop',
+    shop = (s.mode || 'shop') === 'shop',
     x = RT.cur && !RT.preview ? RT.cur : null;
   const rows = x
     ? x.conds
@@ -697,12 +692,11 @@ function updatePreview() {
     .join('');
 }
 function overlayCard() {
-  if (!desktop?.overlayState) return '';
-  const s = RT.overlay || {};
+  const s = { mode: 'shop', ...RT.overlay };
   const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'];
   return `<div class="card"><div class="section-heading"><div><h2>${t('overlayTitle')}</h2><p>${t('overlayHint')}</p></div>${icon('layers', 20)}</div>
-    <div class="overlay-controls"><div class="overlay-modes">${['shop', 'match', 'manual'].map((m) => `<button data-overlay-mode="${m}" aria-pressed="${(s.mode || 'shop') === m}">${t('overlayMode.' + m)}</button>`).join('')}</div><p>${t(s.mode === 'shop' || !s.mode ? 'shopModeHint' : 'normalModeHint')}</p><div id="overlay-example" aria-label="${t('previewTitle')}"></div>
-      <button ${s.mode === 'shop' ? 'hidden' : ''} id="overlay-toggle" class="pb">${icon('play', 16)}${t('overlayToggle')}</button>
+    <div class="overlay-controls">${desktop?.overlayState ? '' : `<p class="lab-help">${t('browserOverlayHint')}</p>`}<div class="overlay-modes">${['shop', 'match', 'manual'].map((m) => `<button data-overlay-mode="${m}" aria-pressed="${(s.mode || 'shop') === m}">${t('overlayMode.' + m)}</button>`).join('')}</div><p>${t(s.mode === 'shop' || !s.mode ? 'shopModeHint' : 'normalModeHint')}</p><div id="overlay-example" aria-label="${t('previewTitle')}"></div>
+      <button ${s.mode === 'shop' ? 'hidden' : ''} id="overlay-toggle" ${desktop?.toggleOverlay ? '' : 'disabled'} class="pb">${icon('play', 16)}${t('overlayToggle')}</button>
       <label class="lab-field">${t('overlayOpacity')}<input type="range" id="overlay-opacity" min="0.35" max="1" step="0.01" value="${s.opacity ?? 0.92}"></label>
       <div class="overlay-position-grid">
         ${positions.map((p) => `<button type="button" class="overlay-pos ${p === s.position ? 'on' : ''}" data-overlay-pos="${p}" aria-pressed="${p === s.position}">${t('pos.' + p)}</button>`).join('')}
@@ -839,9 +833,8 @@ function connectionSummary() {
   return `<p>${t('matchDetection')} · ${t(log[m.logHealth] || 'statusUnknown')}</p><p>${t('matchHistory')} · ${t(api[m.api] || 'statusUnknown')}</p>`;
 }
 function gameCard() {
-  if (!desktop?.game) return '';
   const en = S.lang === 'en';
-  return `<div class="card"><div class="section-heading"><div><h2>${t('gameTitle')}</h2><p>${t('gameHint')}</p></div>${icon('search', 20)}</div><div id="connection-summary">${connectionSummary()}</div><label class="chk"><input type="checkbox" id="match-api-enabled" ${RT.match?.enabled ? 'checked' : ''}>${en ? 'Check my matches using Deadlock API' : 'Проверять мои матчи через Deadlock API'}</label><p class="lab-help">${en ? 'Sends the active Steam Account ID to api.deadlock-api.com. No API key required. Unsupported conditions stay manual; history may arrive late.' : 'Передаёт ID активного Steam-аккаунта на api.deadlock-api.com. Ключ не нужен. Недоступные в статистике условия проверяются вручную; данные могут задерживаться.'}</p><button id="match-refresh">${en ? 'Check match data' : 'Проверить данные матча'}</button><details><summary>${t('diagnostics')}</summary><div data-match-status>${matchStatus()}</div><button id="game-probe">${icon('search', 14)}${t('gameFind')}</button><div id="game-result" class="game-result" aria-live="polite"></div></details></div>`;
+  return `<div class="card"><div class="section-heading"><div><h2>${t('gameTitle')}</h2><p>${t('gameHint')}</p></div>${icon('search', 20)}</div><div id="connection-summary">${desktop?.game ? connectionSummary() : esc(t('desktopGameHint'))}</div><label class="chk"><input type="checkbox" id="match-api-enabled" ${desktop?.setMatchEnabled ? '' : 'disabled'} ${RT.match?.enabled ? 'checked' : ''}>${en ? 'Check my matches using Deadlock API' : 'Проверять мои матчи через Deadlock API'}</label><p class="lab-help">${en ? 'Sends the active Steam Account ID to api.deadlock-api.com. No API key required. Unsupported conditions stay manual; history may arrive late.' : 'Передаёт ID активного Steam-аккаунта на api.deadlock-api.com. Ключ не нужен. Недоступные в статистике условия проверяются вручную; данные могут задерживаться.'}</p><button id="match-refresh" ${desktop?.refreshMatch ? '' : 'disabled'}>${en ? 'Check match data' : 'Проверить данные матча'}</button><details><summary>${t('diagnostics')}</summary><div data-match-status>${matchStatus()}</div><button id="game-probe" ${desktop?.game ? '' : 'disabled'}>${icon('search', 14)}${t('gameFind')}</button><div id="game-result" class="game-result" aria-live="polite"></div></details></div>`;
 }
 
 async function probeGameDesktop() {
@@ -1389,6 +1382,11 @@ function bind() {
   document.addEventListener(
     'error',
     (e) => {
+      if (e.target.matches?.('img.contract-portrait')) {
+        e.target.parentElement.classList.add('missing-portrait');
+        e.target.remove();
+        return;
+      }
       if (e.target.matches?.('img.pic,img.asset-img')) {
         console.warn('image failed:', e.target.currentSrc || e.target.src);
         e.target.remove();
