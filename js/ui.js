@@ -1,4 +1,10 @@
-import { renderBuilder, builderClick, builderChange, hydrateBuilder } from './builder-ui.js';
+import {
+  renderBuilder,
+  builderClick,
+  builderChange,
+  useContractHero,
+  hydrateBuilder,
+} from './builder-ui.js';
 import { renderBan, banClick, banChange, hydrateBan } from './ban-ui.js';
 // UI: tabs, reels animation, contract, timer, builds, bans, filters, history.
 import { icon } from './icons.js';
@@ -408,6 +414,10 @@ async function doRoll(reroll, opt = {}) {
   const existing = [...S.history, ...S.favs].find((x) => resultKey(x) === resultKey(res));
   RT.cur = existing || res;
   RT.preview = !existing;
+  if (existing && !existing.outcome) {
+    useContractHero(existing);
+    persist();
+  }
   RT.finished = !!RT.cur.outcome;
   RT.timer = { ms: 0, run: false, t0: 0 };
   setHash(RT.cur);
@@ -910,6 +920,7 @@ function bind() {
     if (b.id === 'accept-contract' && RT.cur && RT.preview) {
       RT.cur.ts = Date.now();
       RT.preview = false;
+      useContractHero(RT.cur);
       S.history = [RT.cur, ...S.history.filter((x) => resultKey(x) !== resultKey(RT.cur))].slice(
         0,
         50,

@@ -6856,3 +6856,49 @@ body.desktop .pad::-webkit-scrollbar {
 #reroll-hint:empty {
   display: none;
 }
+
+.build-shopping,
+.build-comparison,
+.replacement-menu,
+#build-advanced[open] {
+  display: grid;
+  gap: 12px;
+}
+.build-shopping,
+.build-comparison,
+.replacement-menu {
+  padding: 16px;
+  margin-block: 12px;
+}
+.build-shopping {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+.build-shopping #undo-buy {
+  grid-column: 1/-1;
+}
+.build-shopping h3 {
+  margin: 4px 0;
+}
+.variant-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.variant-pair ol {
+  padding-inline-start: 1.4em;
+}
+.replacement-menu button {
+  text-align: start;
+  white-space: normal;
+}
+#build-advanced summary {
+  cursor: pointer;
+  padding-block: 10px;
+}
+@media (max-width: 480px) {
+  .variant-pair,
+  .build-shopping {
+    grid-template-columns: 1fr;
+  }
+}

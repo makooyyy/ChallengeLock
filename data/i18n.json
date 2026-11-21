@@ -195,7 +195,7 @@
     "settingsPending": "Настройки изменены. Нажми «Пересобрать билд», чтобы применить их. Ниже пока предыдущий вариант.",
     "buildCost": "Стоимость билда",
     "budgetReserve": "не потрачено",
-    "budgetCapHint": "Остаток не помещается в лимит этапа: до {slots} предметов не выше T{tier}.",
+    "budgetCapHint": "Свободный бюджет указан выше. Ограничения этой сборки: {slots} слотов, предметы до T{tier}.",
     "purchased": "Куплено",
     "toBuy": "душ до полной сборки",
     "branchMix": "Состав по веткам",
@@ -327,7 +327,19 @@
     "acceptContract": "Принять на 24 часа",
     "noAlternative": "Другого варианта нет. Сними закрепление или расширь фильтры.",
     "markCondition": "Отметить условие",
-    "markedCondition": "Условие отмечено"
+    "markedCondition": "Условие отмечено",
+    "nextPurchase": "Следующая покупка",
+    "shoppingDone": "Все предметы куплены",
+    "undoBuy": "Отменить покупку",
+    "savedVariant": "Сохранённый",
+    "currentVariant": "Текущий",
+    "switchVariant": "Вернуться к сохранённому",
+    "compareBuild": "Сохранить вариант и собрать другой",
+    "sameVariant": "Получился тот же билд. Попробуй ещё раз или измени настройки.",
+    "cancelChoice": "Отмена",
+    "experimentalBuild": "Экспериментальный билд",
+    "slotsFilled": "Заняты все слоты ({slots}). Чтобы потратить остаток, замени предмет более дорогим или увеличь лимит слотов.",
+    "belowPrice": "Остаток меньше минимальной цены оставшихся предметов этого этапа ({cost} душ)."
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -525,7 +537,7 @@
     "settingsPending": "Settings changed. Rebuild to apply them. The previous build is still shown below.",
     "buildCost": "Build cost",
     "budgetReserve": "unspent",
-    "budgetCapHint": "The rest does not fit the stage limit: up to {slots} items, tier T{tier} or lower.",
+    "budgetCapHint": "Unspent souls are shown above. This build allows {slots} slots and items up to T{tier}.",
     "purchased": "Purchased",
     "toBuy": "souls left to complete",
     "branchMix": "Branch distribution",
@@ -657,6 +669,18 @@
     "acceptContract": "Accept for 24 hours",
     "noAlternative": "No alternative. Unpin a slot or broaden your filters.",
     "markCondition": "Mark condition",
-    "markedCondition": "Condition checked"
+    "markedCondition": "Condition checked",
+    "nextPurchase": "Next purchase",
+    "shoppingDone": "Shopping complete",
+    "undoBuy": "Undo purchase",
+    "savedVariant": "Saved",
+    "currentVariant": "Current",
+    "switchVariant": "Switch to saved build",
+    "compareBuild": "Save and generate another",
+    "sameVariant": "Same build. Try again or change your settings.",
+    "cancelChoice": "Cancel",
+    "experimentalBuild": "Experimental build",
+    "slotsFilled": "All {slots} slots are occupied. Spending more requires a pricier replacement or a higher slot limit.",
+    "belowPrice": "Unspent souls are below the lowest price of the remaining items for this stage ({cost} souls)."
   }
 }

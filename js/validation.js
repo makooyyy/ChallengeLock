@@ -65,6 +65,8 @@ export function normalizeState(x, def) {
   out.savedBan = savedBan(x.savedBan);
   out.buildSettings = buildSettings(x.buildSettings);
   out.savedBuild = savedBuild(x.savedBuild);
+  out.comparisonBuild = savedBuild(x.comparisonBuild);
+  out.buildContractKey = typeof x.buildContractKey === 'string' ? x.buildContractKey : '';
   out.heroMode = x.heroMode === 'only' ? 'only' : 'exclude';
   out.sel = strings(x.sel ?? (out.heroMode === 'only' ? out.only : out.excluded));
   return out;

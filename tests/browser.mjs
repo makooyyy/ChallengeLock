@@ -315,6 +315,7 @@ try {
   await page.click('[data-build-stage="full"]');
   await page.fill('#bud', '32000');
   await page.selectOption('#build-hero', 'abrams');
+  await page.click('#build-advanced summary');
   await page.selectOption('#build-focus', 'spirit');
   await page.selectOption('#build-active', '0');
   await page.click('#rb');
@@ -332,6 +333,7 @@ try {
     (id) => !regenerated.locked.includes(id) && !regenerated.purchased.includes(id),
   );
   await page.click('[data-build-replace="' + replace + '"]');
+  await page.locator('[data-choose-item]').first().click();
   let replaced = await page.evaluate(async () => (await import('/js/state.js')).RT.build);
   assert(!replaced.items.includes(replace));
   assert(
@@ -343,6 +345,15 @@ try {
   let saved = await page.evaluate(async () => (await import('/js/state.js')).RT.build);
   assert.deepEqual(saved.items, replaced.items);
   assert(saved.purchased.includes(lab.items[1]));
+  await page.locator('[data-buy-next]').click();
+  await page.click('#undo-buy');
+  await page.click('#compare-build');
+  await page.waitForSelector('#swap-build');
+  await page.click('#swap-build');
+  assert.deepEqual(
+    await page.evaluate(async () => (await import('/js/state.js')).RT.build.items),
+    saved.items,
+  );
   await page.fill('#bud', '10');
   await page.click('#rb');
   assert.deepEqual(

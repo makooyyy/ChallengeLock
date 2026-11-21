@@ -195,3 +195,34 @@ export function replaceBuildItem(seed, b, id, heroes, items, o) {
     ? { ...next, settings: b.settings, locked: [...b.locked], purchased: [...b.purchased] }
     : null;
 }
+
+// Prefer an alternative at a similar price, then a cheaper option and a different activation type.
+export function replacementOptions(b, id, heroes, items) {
+  if (!b.items.includes(id) || b.locked.includes(id) || b.purchased.includes(id)) return [];
+  const original = items.find((i) => i.id === id);
+  const options = items
+    .filter((i) => i.active !== false && !b.items.includes(i.id))
+    .sort((a, c) => Math.abs(a.cost - original.cost) - Math.abs(c.cost - original.cost))
+    .map((i) => ({
+      i,
+      build: restoreBuild(
+        { ...b, items: b.items.map((key) => (key === id ? i.id : key)) },
+        heroes,
+        items,
+      ),
+    }))
+    .filter((x) => x.build);
+  const selected = [];
+  for (const test of [
+    () => true,
+    (x) => x.i.cost < original.cost,
+    (x) => x.i.isActive !== original.isActive,
+    () => true,
+    () => true,
+  ]) {
+    const x = options.find((x) => !selected.includes(x) && test(x));
+    if (x) selected.push(x);
+    if (selected.length === 3) break;
+  }
+  return selected.map((x) => x.build);
+}

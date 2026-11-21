@@ -1,6 +1,24 @@
 {
   "releases": [
     {
+      "version": "1.28.0",
+      "date": "2026-11-21",
+      "title": {
+        "ru": "Билд и план покупок",
+        "en": "Builds and shopping"
+      },
+      "items": {
+        "ru": [
+          "Герой принятого челленджа подставляется в настройки. Следующую покупку можно отметить или отменить.",
+          "Выбирай замену предмета и сравнивай два сохранённых варианта."
+        ],
+        "en": [
+          "Start with the accepted hero, track the next purchase and undo it.",
+          "Choose an item replacement and compare two builds."
+        ]
+      }
+    },
+    {
       "version": "1.27.0",
       "date": "2026-11-21",
       "title": {
