@@ -954,3 +954,19 @@ body.desktop .titlebar {
 .panel :is(button, label) {
   overflow-wrap: anywhere;
 }
+
+.shop-test {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin-block: 12px;
+}
+.match-recap {
+  padding-block: 16px;
+  border-top: 1px solid var(--paper-line);
+  color: var(--paper-ink);
+}
+.match-recap ul {
+  padding-inline-start: 20px;
+  margin-block: 10px;
+}

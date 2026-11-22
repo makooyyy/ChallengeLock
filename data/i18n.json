@@ -404,7 +404,15 @@
     "banConflict": "В билде есть активный запрет",
     "skillsDone": "Прокачка завершена",
     "skillDone": "Шаг выполнен",
-    "undoSkill": "На шаг назад"
+    "undoSkill": "На шаг назад",
+    "shopTest": "Проверить оверлей",
+    "modSignal": "Последний сигнал мода",
+    "noSignal": "Пока не получен",
+    "matchRecap": "Разбор матча",
+    "recap.pass": "Подтверждено статистикой",
+    "recap.fail": "Не выполнено по статистике",
+    "recap.marked": "Отмечено вручную",
+    "recap.unknown": "Без подтверждения"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -811,6 +819,14 @@
     "banConflict": "Build conflicts with the active ban",
     "skillsDone": "Ability plan complete",
     "skillDone": "Mark step complete",
-    "undoSkill": "Previous step"
+    "undoSkill": "Previous step",
+    "shopTest": "Test overlay",
+    "modSignal": "Last mod signal",
+    "noSignal": "None received yet",
+    "matchRecap": "Match recap",
+    "recap.pass": "Verified by stats",
+    "recap.fail": "Failed according to stats",
+    "recap.marked": "Marked manually",
+    "recap.unknown": "Unconfirmed"
   }
 }

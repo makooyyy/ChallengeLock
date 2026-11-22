@@ -55,6 +55,8 @@ contextBridge.exposeInMainWorld('challengeLockDesktop', {
     if (typeof callback === 'function')
       ipcRenderer.on('desktop:overlay-timer', (_event, value) => callback(value));
   },
+  shopTraining: (lang) => ipcRenderer.invoke('desktop:shop-training', lang),
+  shopSignal: () => ipcRenderer.invoke('desktop:shop-signal'),
   overlayState: () => ipcRenderer.invoke('desktop:overlay-state'),
   toggleOverlay: () => ipcRenderer.send('desktop:overlay-toggle'),
   setOverlaySettings: (settings) => ipcRenderer.invoke('desktop:overlay-settings', settings),

@@ -1,6 +1,24 @@
 {
-  "installerVersion": "1.38.0",
+  "installerVersion": "1.39.0",
   "releases": [
+    {
+      "version": "1.36.0",
+      "date": "2026-11-22",
+      "title": {
+        "ru": "Репетиция магазина и разбор матча",
+        "en": "Shop practice and match recap"
+      },
+      "items": {
+        "ru": [
+          "В настройках можно открыть учебную карточку и увидеть время сигнала мода.",
+          "Покупку в магазине можно отложить и вернуть. Под печатью результата сохраняется разбор условий и прогресс билда."
+        ],
+        "en": [
+          "Try shop controls from Settings and check the latest mod signal.",
+          "Defer and restore a purchase. Review condition evidence and build progress after a match."
+        ]
+      }
+    },
     {
       "version": "1.35.0",
       "date": "2026-11-22",

@@ -5,6 +5,8 @@ function snapshot(contract, build) {
   const state = {
     version: 1,
     shopToken: text(build?.shopToken, 64),
+    canDefer: build?.canDefer === true,
+    deferred: text(build?.deferred, 80),
     canUndo: build?.canUndo === true,
     lang: build?.lang || contract?.lang || 'ru',
     hero: text(contract?.hero, 60),

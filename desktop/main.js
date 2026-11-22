@@ -784,6 +784,31 @@ function publishLogHealth(logHealth) {
 }
 
 let shopWindow = null;
+let lastModSignal = 0;
+let trainingWindow = null;
+ipcMain.handle('desktop:shop-training', (event, lang) => {
+  if (event.sender !== mainWindow?.webContents) return;
+  if (trainingWindow) {
+    trainingWindow.show();
+    return;
+  }
+  trainingWindow = new BrowserWindow({
+    ...overlayBounds(),
+    alwaysOnTop: true,
+    frame: false,
+    transparent: true,
+    webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false },
+  });
+  trainingWindow.on('closed', () => {
+    trainingWindow = null;
+  });
+  trainingWindow
+    .loadURL(
+      new URL('/mod/bridge?training=1&lang=' + (lang === 'en' ? 'en' : 'ru'), pageUrl()).href,
+    )
+    .catch((error) => log(error.message));
+});
+ipcMain.handle('desktop:shop-signal', () => lastModSignal);
 let shopDeadline = 0;
 const shopSender = (event) =>
   shopWindow &&
@@ -793,7 +818,7 @@ const shopSender = (event) =>
 ipcMain.on('shop:act', (event, action, token) => {
   if (
     shopSender(event) &&
-    ['buy', 'skill', 'undo'].includes(action) &&
+    ['buy', 'skill', 'undo', 'defer', 'resume'].includes(action) &&
     token &&
     token === overlayBuild?.shopToken &&
     mainWindow &&
@@ -888,7 +913,10 @@ function watchTick() {
   if (batch.lines.length) publishLogHealth('receiving');
   for (const line of batch.lines) {
     const shop = /\[PanoramaScript\] \[ChallengeLock\] companion=(open|closed)\s*$/.exec(line);
-    if (shop) updateShopWindow(shop[1] === 'open');
+    if (shop) {
+      lastModSignal = Date.now();
+      updateShopWindow(shop[1] === 'open');
+    }
     const event = logWatch.trackLine(logWatcher.tracker, line);
     if (!event) continue;
     if (event.type === 'start') {

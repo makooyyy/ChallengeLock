@@ -484,12 +484,40 @@ async function doRoll(reroll, opt = {}) {
     fromHash(next);
   }
 }
+setInterval(async () => {
+  const el = document.getElementById('shop-signal');
+  if (!el?.getClientRects().length || !desktop?.shopSignal) return;
+  const time = await desktop.shopSignal();
+  el.textContent =
+    t('modSignal') + ' · ' + (time ? new Date(time).toLocaleTimeString(S.lang) : t('noSignal'));
+}, 1500);
+function makeRecap(x) {
+  const checks = RT.match?.key === resultKey(x) ? RT.match.checks || [] : [];
+  const b = RT.build?.hero === x.hero ? RT.build : null;
+  return {
+    rules: x.conds.map((id) => {
+      const status = checks.find((c) => c.id === id)?.status;
+      return ['pass', 'fail'].includes(status)
+        ? status
+        : x.checked?.includes(id)
+          ? 'marked'
+          : 'unknown';
+    }),
+    build: b
+      ? { bought: b.purchased.length, total: b.items.length, skill: b.skillIndex || 0 }
+      : null,
+  };
+}
 function checkDeadlines() {
   const failed = expireContracts(S);
   if (!failed.size) return;
   persist();
   if (RT.cur && failed.has(resultKey(RT.cur))) {
     $('#p-roulette')?.classList.remove('playing-contract');
+    RT.cur.recap = makeRecap(RT.cur);
+    for (const entry of [...S.history, ...S.favs])
+      if (resultKey(entry) === resultKey(RT.cur)) entry.recap = RT.cur.recap;
+    persist();
     RT.cur.outcome = 'fail';
     RT.finished = true;
     setBusy(RT.busy);
@@ -507,7 +535,7 @@ function finish(o, reason = 'manual') {
   RT.finished = true;
   setBusy(RT.busy);
   RT.timer.run = false;
-  const completion = { outcome: o, reason, endedAt: Date.now() };
+  const completion = { recap: makeRecap(x), outcome: o, reason, endedAt: Date.now() };
   if (RT.match?.key === resultKey(x) && RT.match.matchId && RT.match.matchTime) {
     completion.matchId = RT.match.matchId;
     completion.matchTime = RT.match.matchTime;
@@ -726,6 +754,7 @@ function overlayCard() {
       </div>
       <label class="lab-field">${t('overlaySize')}<input type="range" id="overlay-size" min="70" max="160" step="1" value="${Math.round(((s.width || 360) / 360) * 100)}"></label>
       <div class="overlay-size-readout">${s.width || 360} × ${s.height || 440}</div>
+      ${desktop?.shopTraining ? `<div class="shop-test"><button id="shop-training">${t('shopTest')}</button><small id="shop-signal"></small></div>` : ''}
       <button id="overlay-reset" class="ghost">${t('overlayReset')}</button>
       <label class="chk" ${s.mode === 'shop' ? 'hidden' : ''}><input type="checkbox" id="overlay-clickthrough" ${s.clickThrough ? 'checked' : ''}>${t('overlayClickThrough')}</label>
       <label class="chk"><input type="checkbox" id="overlay-show-hero" ${s.showHero !== false ? 'checked' : ''}>${t('overlayShowHero')}</label>
@@ -1156,6 +1185,7 @@ function bind() {
       viewCustom();
       return;
     }
+    if (b.id === 'shop-training') return desktop?.shopTraining?.(S.lang);
     if (b.id === 'overlay-reset') {
       RT.overlay = {
         ...RT.overlay,
@@ -1516,6 +1546,7 @@ export async function boot() {
               ...restoreResult(x, h.heroes, c.challenges),
               outcome: x.outcome,
               reason: x.reason,
+              recap: x.recap,
               matchId: x.matchId,
               matchTime: x.matchTime,
               endedAt: x.endedAt,

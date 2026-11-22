@@ -17,6 +17,24 @@ export function options(x = {}) {
     only: strings(x.only),
   };
 }
+function normalizedRecap(r) {
+  const v = r.recap;
+  if (!Array.isArray(v?.rules) || v.rules.length !== r.conds.length) return null;
+  const b = v.build;
+  return {
+    rules: v.rules.map((s) => (['pass', 'fail', 'marked'].includes(s) ? s : 'unknown')),
+    build:
+      b &&
+      [b.bought, b.total, b.skill].every(Number.isSafeInteger) &&
+      b.bought >= 0 &&
+      b.bought <= b.total &&
+      b.total <= 12 &&
+      b.skill >= 0 &&
+      b.skill <= 16
+        ? { bought: b.bought, total: b.total, skill: b.skill }
+        : null,
+  };
+}
 export function validRecord(x) {
   return (
     object(x) &&
@@ -59,6 +77,7 @@ export function normalizeState(x, def) {
         opts: options(r.opts),
         ts: r.ts,
         reason: ['manual', 'match', 'deadline'].includes(r.reason) ? r.reason : null,
+        recap: normalizedRecap(r),
         matchId: Number.isSafeInteger(r.matchId) ? r.matchId : null,
         matchTime: Number.isSafeInteger(r.matchTime) ? r.matchTime : null,
         endedAt: Number.isFinite(r.endedAt) && r.endedAt > 0 ? r.endedAt : null,

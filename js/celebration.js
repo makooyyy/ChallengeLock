@@ -12,6 +12,42 @@ export function closeCelebration() {
 export function celebrationOpen() {
   return !!dialog?.open;
 }
+function renderRecap(result, challenges) {
+  if (!result.recap) return '';
+  const { rules, build } = result.recap;
+  const rows = result.conds
+    .map(
+      (id, i) =>
+        '<li>' +
+        esc(loc(challenges.find((c) => c.id === id).name)) +
+        ' · ' +
+        t('recap.' + rules[i]) +
+        '</li>',
+    )
+    .join('');
+  const progress = build
+    ? '<p>' +
+      t('purchased') +
+      ' · ' +
+      build.bought +
+      ' / ' +
+      build.total +
+      ' · ' +
+      t('abilityPlan') +
+      ' · ' +
+      build.skill +
+      ' / 16</p>'
+    : '';
+  return (
+    '<section class="match-recap"><h3>' +
+    t('matchRecap') +
+    '</h3><ul>' +
+    rows +
+    '</ul>' +
+    progress +
+    '</section>'
+  );
+}
 export function showCelebration(result, hero, challenges) {
   if (!dialog) {
     dialog = document.createElement('dialog');
@@ -59,6 +95,7 @@ export function showCelebration(result, hero, challenges) {
     <div class="seal-space"><div class="ink-burst" aria-hidden="true"></div><div class="result-seal" role="img" aria-label="${t(success ? 'stampDone' : 'stampFailed')}">
       <svg viewBox="0 0 220 180" aria-hidden="true"><defs><path id="seal-upper-arc" d="M 39 87 A 71 71 0 0 1 181 87"/><path id="seal-lower-arc" d="M 44 106 A 70 70 0 0 0 176 106"/></defs><circle cx="110" cy="90" r="83"/><circle cx="110" cy="90" r="77" class="seal-inner"/><circle cx="110" cy="90" r="63" class="seal-inner"/><text class="seal-arc"><textPath href="#seal-upper-arc" startOffset="50%" text-anchor="middle">CHALLENGELOCK</textPath></text><text class="seal-arc"><textPath href="#seal-lower-arc" startOffset="50%" text-anchor="middle">${t('stampArchive')}</textPath></text><path d="${success ? 'm94 58 10 10 20-24' : 'm99 47 22 22m0-22-22 22'}" class="seal-symbol"/><rect x="8" y="78" width="204" height="37" rx="2" class="seal-band"/><text x="110" y="103" text-anchor="middle" class="seal-word">${t(success ? 'stampDone' : 'stampFailed')}</text><path d="m50 122 2 4 4 1-3 3 1 5-4-3-4 3 1-5-3-3 4-1Zm120 0 2 4 4 1-3 3 1 5-4-3-4 3 1-5-3-3 4-1Z" class="seal-star"/></svg>
     </div></div></div>
+    ${renderRecap(result, challenges)}
     <div class="completion-bottom"><span>${icon('history', 16)}${t('resultRecorded')}</span><button class="completion-continue" data-close-completion>${t('continuePlaying')}${icon('arrow', 16)}</button></div>
   </article>`;
   document.body.classList.add('completion-open');

@@ -123,6 +123,7 @@
     }
   </style>
   <main hidden>
+    <header id="training" hidden><strong></strong> <button id="exit-training">×</button></header>
     <section id="build" hidden>
       <h2 id="purchase-title">Следующая покупка</h2>
       <div class="purchase-line">
@@ -131,7 +132,8 @@
       </div>
       <p id="next-skill"></p>
       <div class="shop-actions">
-        <button id="buy">Куплено</button><button id="skill">Прокачано</button
+        <button id="defer">Отложить</button><button id="resume">Вернуть</button
+        ><button id="buy">Куплено</button><button id="skill">Прокачано</button
         ><button id="undo">Отменить</button>
       </div>
     </section>
@@ -143,6 +145,43 @@
   </main>
   <script>
     const el = (id) => document.getElementById(id);
+    const params = new URLSearchParams(location.search);
+    const training = params.get('training') === '1';
+    let demo = { items: ['Headshot Booster', 'Extra Spirit'], skill: 0 },
+      demoUndo = null;
+    function practice(action) {
+      if (action === 'undo' && demoUndo) {
+        demo = demoUndo;
+        demoUndo = null;
+      } else if (action) {
+        demoUndo = structuredClone(demo);
+        if (action === 'buy') demo.items.shift();
+        if (action === 'skill') demo.skill++;
+        if (action === 'defer' || action === 'resume') {
+          demo.items.reverse();
+          demo.deferred = action === 'defer' ? demo.items.at(-1) : null;
+        }
+        if (!demo.items.includes(demo.deferred)) demo.deferred = null;
+      }
+      const en = params.get('lang') === 'en';
+      el('training').hidden = false;
+      el('training').querySelector('strong').textContent = en ? 'Practice build' : 'Учебный билд';
+      el('exit-training').ariaLabel = en ? 'Close' : 'Закрыть';
+      el('exit-training').onclick = () => window.close();
+      render({
+        shopToken: 'training',
+        hero: 'Abrams',
+        conditions: [],
+        lang: en ? 'en' : 'ru',
+        next: demo.items[0],
+        complete: !demo.items.length,
+        cost: 800,
+        nextSkill: ['[2] Shoulder Charge', '[1] Siphon Life'][demo.skill],
+        canUndo: !!demoUndo,
+        canDefer: demo.items.length > 1 && !demo.deferred,
+        deferred: demo.deferred,
+      });
+    }
     let previous,
       token,
       pointerActive = false,
@@ -155,9 +194,13 @@
     }
     document.addEventListener('mousemove', (e) => hover(!!e.target.closest('button,summary')));
     document.addEventListener('mouseleave', () => hover(false));
-    for (const action of ['buy', 'skill', 'undo'])
+    for (const action of ['buy', 'skill', 'undo', 'defer', 'resume'])
       el(action).onclick = () => {
         if (!pending && token) {
+          if (training) {
+            practice(action);
+            return;
+          }
           pending = true;
           window.shopControls?.act(action, token);
           setTimeout(() => (pending = false), 1600);
@@ -177,11 +220,13 @@
         (s.display?.build !== false && (s.next || s.nextSkill || s.complete))
       );
       for (const [id, show, label] of [
+        ['defer', s.canDefer, en ? 'Defer' : 'Отложить'],
+        ['resume', s.deferred, (en ? 'Restore · ' : 'Вернуть · ') + (s.deferred || '')],
         ['buy', s.next, en ? 'Bought' : 'Куплено'],
         ['skill', s.nextSkill, en ? 'Leveled' : 'Прокачано'],
         ['undo', s.canUndo, en ? 'Undo' : 'Отменить'],
       ]) {
-        el(id).hidden = !show || !window.shopControls || !token;
+        el(id).hidden = !show || (!training && !window.shopControls) || !token;
         el(id).textContent = label;
       }
       el('ban').textContent = s.ban || '';
@@ -248,6 +293,7 @@
       }
       setTimeout(tick, 1500);
     }
-    tick();
+    if (training) practice();
+    else tick();
   </script>
 </html>

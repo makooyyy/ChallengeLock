@@ -117,6 +117,7 @@ try {
   assert.equal(await page.locator('#build-hero').inputValue(), (await state()).cur.hero);
   await page.click('[data-tab="roulette"]');
   await page.click('#done');
+  assert.equal(await page.locator('.match-recap li').count(), rerolled.cur.conds.length);
   async function checkResultContrast() {
     const minimum = await page.locator('.completion-card').evaluate((card) => {
       const root = document.documentElement;
@@ -701,6 +702,14 @@ try {
           document.querySelector('#ban').getBoundingClientRect().top,
       ),
   );
+  await shopPage.goto(origin + '/desktop/mod-shop.html?training=1');
+  await shopPage.click('#defer');
+  assert.equal(await shopPage.locator('#next').textContent(), 'Extra Spirit');
+  await shopPage.click('#resume');
+  await shopPage.click('#buy');
+  await shopPage.click('#skill');
+  await shopPage.click('#undo');
+  assert.match(await shopPage.locator('#next-skill').textContent(), /Shoulder Charge/);
   await shopPage.close();
   // Exercise the actual overlay document, including CSS hidden/overflow behavior.
   const overlayPage = await desk.newPage();
@@ -802,6 +811,12 @@ try {
     if (RT.build.skillIndex !== 1) throw Error('Advance skill');
     shopAction('undo', window.__reportedBuild.shopToken, save);
     if (RT.build.skillIndex !== 0) throw Error('Undo skill');
+    const original = window.__reportedBuild.nextItem;
+    shopAction('defer', window.__reportedBuild.shopToken, save);
+    if (window.__reportedBuild.nextItem === original || RT.build.purchased.length)
+      throw Error('Defer without buying');
+    shopAction('resume', window.__reportedBuild.shopToken, save);
+    if (window.__reportedBuild.nextItem !== original) throw Error('Restore deferred purchase');
     RT.build.purchased = [...RT.build.items];
     renderBuilder();
   });

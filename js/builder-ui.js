@@ -24,8 +24,12 @@ let choices = [];
 let undo = null;
 let undoTimer;
 const bannedItem = (b) => (RT.ban?.hero === b.hero ? RT.ban.item : null);
-const nextPurchase = (b) =>
-  item(b.items.find((id) => !b.purchased.includes(id) && id !== bannedItem(b)));
+const pendingItems = (b) =>
+  b.items.filter((id) => !b.purchased.includes(id) && id !== bannedItem(b));
+const nextPurchase = (b) => {
+  const ids = pendingItems(b);
+  return item(ids.find((id) => id !== b.deferred) || ids[0]);
+};
 function clearTransient() {
   clearTimeout(undoTimer);
   undo = null;
@@ -90,14 +94,34 @@ let shopUndo = null;
 let lastShopState = '';
 let shopToken = '';
 function shopState(b) {
-  return JSON.stringify([b.seed, b.hero, b.items, b.purchased, b.skillIndex || 0, bannedItem(b)]);
+  return JSON.stringify([
+    b.seed,
+    b.hero,
+    b.items,
+    b.purchased,
+    b.deferred,
+    b.skillIndex || 0,
+    bannedItem(b),
+  ]);
 }
 export function shopAction(action, token, save) {
   const b = RT.build;
   if (!b || token !== shopToken || shopState(b) !== lastShopState) return;
   const next = nextPurchase(b);
-  const before = { purchased: [...b.purchased], skillIndex: b.skillIndex || 0 };
+  const before = {
+    deferred: b.deferred || null,
+    purchased: [...b.purchased],
+    skillIndex: b.skillIndex || 0,
+  };
   if (action === 'buy' && next) b.purchased.push(next.id);
+  else if (
+    action === 'defer' &&
+    next &&
+    pendingItems(b).length > 1 &&
+    !pendingItems(b).includes(b.deferred)
+  )
+    b.deferred = next.id;
+  else if (action === 'resume' && pendingItems(b).includes(b.deferred)) b.deferred = null;
   else if (action === 'skill' && skillInfo(b)) b.skillIndex = (b.skillIndex || 0) + 1;
   else if (action === 'undo' && shopUndo?.state === lastShopState) {
     Object.assign(b, shopUndo.before);
@@ -125,6 +149,11 @@ function reportBuild() {
       desktopApi.reportBuild({
         shopToken,
         canUndo: !!shopUndo,
+        canDefer:
+          pendingItems(RT.build).length > 1 && !pendingItems(RT.build).includes(RT.build.deferred),
+        deferred: pendingItems(RT.build).includes(RT.build.deferred)
+          ? item(RT.build.deferred)?.name
+          : null,
         hero: hero(RT.build.hero)?.name || RT.build.hero,
         nextItem: next?.name || null,
         complete: RT.build.items.length > 0 && !next,
