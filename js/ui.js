@@ -387,19 +387,15 @@ function paintContract() {
     el.innerHTML = `<div class="contract-top"><h2>${t('previewTitle')}</h2></div><p class="contract-note">${t('previewNote')}</p><div class="result-actions preview-actions"><button class="pb" id="accept-contract">${t('acceptContract')}</button><button class="reroll-button" id="reroll">${icon('refresh', 17)}${t('reroll')}<small id="rr">${RT.rerolls}</small></button></div><small id="reroll-hint" role="status"></small><div class="share-actions"><button id="cl">${t('copyLink')}</button></div>`;
     return;
   }
-  const h = H(x.hero),
-    fav = S.favs.some((f) => resultKey(f) === resultKey(x));
-  el.innerHTML = `<div class="contract-top"><span class="eyebrow">${t('yourContract')}</span>${difficultyBadge(x)}</div>
-  <div class="contract-hero">${dia(h)}<div><h2>${esc(h.name)}</h2><p>${modeName(x)} · ${t('diff.' + x.diff)} · ${x.conds.length} ${t('conditionsCount')}</p></div><button class="icon-button" id="fav" aria-label="${t('fav')}" title="${t('fav')}" aria-pressed="${fav}">${icon('star', 18)}</button></div>
-  <div class="contract-state">${icon(RT.finished ? 'check' : 'play', 12)}${t(RT.finished ? 'sessionClosed' : 'sessionActive')}</div><p class="contract-note">${RT.finished ? t('contractHint') : t('contractDeadline') + ' ' + esc(new Date(x.ts + CONTRACT_DAY).toLocaleString(S.lang, { dateStyle: 'short', timeStyle: 'short' }))}</p>${desktop?.matchState ? `<div data-match-status>${matchStatus()}</div>` : ''}
+  el.innerHTML = `<div class="contract-top"><h2 class="eyebrow">${t('yourContract')}</h2>${difficultyBadge(x)}</div>
   ${RT.finished ? `<div class="completion-status ${x.outcome === 'fail' ? 'failed' : ''}">${icon(x.outcome === 'done' ? 'check' : 'close', 17)}${t(x.outcome === 'done' ? 'completedStatus' : 'failedStatus')}</div>` : ''}
   <div class="result-actions"><button class="pb" id="done" ${RT.finished ? 'disabled' : ''}>${icon('check', 16)}${t('done')}</button><button class="pb o" id="failb" ${RT.finished ? 'disabled' : ''}>${icon('close', 15)}${t('fail')}</button></div>
   ${!RT.finished ? `<button class="pb contract-build" id="contract-build">${icon('layers', 16)}${t('buildThisHero')}</button><p>${RT.ban?.hero === x.hero ? esc(banRule(RT.ban)) : ''}</p><button class="pb" data-tab="ban">${t('addBan')}</button>` : ''}
   <button class="pb friend-challenge" id="cf">${icon('shield', 15)}${t('challengeFriend')}</button>
   ${RT.finished ? `<button class="review-stamp" id="review-stamp">${icon('shield', 17)}${t('reviewStamp')}${icon('arrow', 15)}</button>` : ''}
-  <div class="timer-row"><div class="timer-readout">${icon('clock', 17)}<b id="tm" class="mono-t">${mmss(RT.timer.ms)}</b></div><button class="timer-toggle" id="tgl" ${RT.finished ? 'disabled' : ''}>${icon(RT.timer.run ? 'clock' : 'play', 12)}${RT.timer.run ? t('pause') : t('start')}</button></div>
   <div class="share-actions"><button id="cl">${icon('link', 14)}${t('copyLink')}</button><button id="ct">${icon('copy', 14)}${t('copyText')}</button><button id="cp">${icon('download', 14)}${t('png')}</button></div>
-  <div class="contract-seed">SEED / ${esc(x.seed)} · R${x.r}</div>`;
+  <div class="contract-seed">SEED / ${esc(x.seed)} · R${x.r}</div>
+  ${!RT.finished ? `<footer class="contract-followup">${desktop?.matchState ? `<div data-match-status>${matchStatus()}</div>` : ''}<p class="contract-note">${t('contractDeadline')} ${esc(new Date(x.ts + CONTRACT_DAY).toLocaleString(S.lang, { dateStyle: 'short', timeStyle: 'short' }))}</p></footer>` : ''}`;
 }
 
 function particles(col) {
@@ -1234,21 +1230,6 @@ function bind() {
     }
     if (b.id === 'done') return finish('done');
     if (b.id === 'failb') return finish('fail');
-    if (b.id === 'tgl') {
-      if (RT.finished) return;
-      const T = RT.timer;
-      T.run = !T.run;
-      if (T.run) T.t0 = Date.now() - T.ms;
-      saveTimer();
-      return paintContract();
-    }
-    if (b.id === 'fav') {
-      const x = RT.cur,
-        k = (f) => resultKey(f) === resultKey(x);
-      S.favs = S.favs.some(k) ? S.favs.filter((f) => !k(f)) : [{ ...x }, ...S.favs].slice(0, 50);
-      persist();
-      return paintContract();
-    }
     if (b.id === 'cl') return toast((await copy(linkFor(RT.cur))) ? t('copied') : t('error'));
     if (b.id === 'ct') return toast((await copy(resText(RT.cur))) ? t('copied') : t('error'));
     if (b.id === 'cp') return png();
@@ -1453,8 +1434,8 @@ export async function boot() {
   if (desktop) {
     document.body.classList.add('desktop');
     desktop.appVersion?.().then((version) => {
-      const brand = document.querySelector('.titlebar-brand');
-      if (brand && version) brand.textContent = 'ChallengeLock ' + version;
+      const label = document.querySelector('.titlebar-version');
+      if (label && version) label.textContent = version;
     });
   }
   applyTheme();
@@ -1610,7 +1591,7 @@ export async function boot() {
     exit.className = 'compact-exit';
     exit.textContent = S.lang === 'ru' ? 'Развернуть' : 'Expand';
     exit.onclick = () => desktop.toggleCompact?.();
-    document.body.append(exit);
+    document.querySelector('.titlebar-controls').prepend(exit);
   }
   checkForUpdates(RT.data.changelog.installerVersion || siteVersion());
 }

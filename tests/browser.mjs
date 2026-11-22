@@ -474,6 +474,10 @@ try {
   await desk.addInitScript(() => {
     window.challengeLockDesktop = {
       isDesktop: true,
+      appVersion: async () => '1.33.0',
+      minimizeWindow: () => (window.__windowAction = 'minimize'),
+      maximizeWindow: () => (window.__windowAction = 'maximize'),
+      closeWindow: () => (window.__windowAction = 'close'),
       reportContract: (c) => (window.__contract = c),
       onSpin: (f) => (window.__spin = f),
       onOutcome: (f) => (window.__outcome = f),
@@ -488,6 +492,21 @@ try {
   compactPage.on('pageerror', (e) => errors.push(e.message));
   await compactPage.goto(origin + '/#seed=compact&d=insane&r=0');
   await compactPage.waitForSelector('html.desktop-compact');
+  assert.equal(await compactPage.locator('.titlebar-version').textContent(), '1.33.0');
+  assert.equal(
+    await compactPage.locator('.titlebar').evaluate((el) => getComputedStyle(el).webkitAppRegion),
+    'drag',
+  );
+  assert.equal(
+    await compactPage
+      .locator('.titlebar-controls')
+      .evaluate((el) => getComputedStyle(el).webkitAppRegion),
+    'no-drag',
+  );
+  for (const action of ['minimize', 'maximize', 'close']) {
+    await compactPage.locator('[data-window-action="' + action + '"]').click();
+    assert.equal(await compactPage.evaluate(() => window.__windowAction), action);
+  }
   assert(await compactPage.locator('.hero-display').isVisible());
   assert(await compactPage.locator('.studio-intro').isHidden());
   assert((await compactPage.locator('.hero-display').boundingBox()).y < 180);
@@ -518,7 +537,11 @@ try {
     await compactPage.evaluate(async () => (await import('/js/state.js')).RT.timer.run),
     false,
   );
-  assert.equal(await compactPage.locator('#tm').textContent(), '01:30');
+  assert.equal(await compactPage.locator('#tm, #tgl, .contract-hero').count(), 0);
+  assert.equal(
+    await compactPage.evaluate(async () => (await import('/js/state.js')).RT.timer.ms),
+    90000,
+  );
   await compactPage.evaluate(() =>
     window.__match({
       key: window.__contract.key,

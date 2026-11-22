@@ -1,6 +1,24 @@
 {
-  "installerVersion": "1.32.0",
+  "installerVersion": "1.33.0",
   "releases": [
+    {
+      "version": "1.30.0",
+      "date": "2026-11-22",
+      "title": {
+        "ru": "Компактная карточка челленджа",
+        "en": "Compact challenge card"
+      },
+      "items": {
+        "ru": [
+          "Убраны повтор героя и ручной секундомер. Статус матча и срок выполнения находятся под действиями.",
+          "Верхняя панель окна оформлена в стиле контракта."
+        ],
+        "en": [
+          "Removed the duplicate hero summary and manual stopwatch. Match status and deadline sit below the actions.",
+          "The desktop title bar now matches the contract design."
+        ]
+      }
+    },
     {
       "version": "1.29.0",
       "date": "2026-11-21",

@@ -216,7 +216,7 @@ function createWindow() {
     minHeight: 320,
     title: 'ChallengeLock',
     frame: false,
-    backgroundColor: '#101217',
+    backgroundColor: '#292025',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

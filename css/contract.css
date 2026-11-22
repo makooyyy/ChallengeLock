@@ -723,3 +723,77 @@ html:not(.desktop-compact) .playing-contract .mach .reel-stage {
 .skill-plan li small {
   display: block;
 }
+
+.contract-followup {
+  margin-block-start: 16px;
+  display: grid;
+  gap: 8px;
+}
+.contract-followup .contract-note {
+  margin: 0;
+}
+
+body.desktop .titlebar {
+  padding-inline: 18px 6px;
+  background: linear-gradient(105deg, #492c30, #2b2226 48%, #241e21);
+  color: #f2e3c7;
+  border-bottom: 3px double #937453;
+}
+.titlebar-drag {
+  flex: 1;
+  gap: 12px;
+}
+.titlebar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font:
+    bold 19px Georgia,
+    serif;
+  letter-spacing: 0.015em;
+  text-transform: none;
+  color: inherit;
+}
+.titlebar-brand::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  background: #a35a4d;
+  border: 3px double #e6c38d;
+}
+.titlebar-version {
+  padding-inline-start: 12px;
+  border-inline-start: 1px solid #95785c;
+  color: #dec49d;
+  font: 11px monospace;
+  letter-spacing: 0.05em;
+}
+.titlebar-version:empty {
+  display: none;
+}
+.titlebar-controls {
+  border-inline-start: 1px solid #715c51;
+  padding-inline-start: 6px;
+}
+.titlebar-button {
+  width: 38px;
+  border-radius: 3px;
+  color: #f2e3c7;
+  font: 16px system-ui;
+}
+.titlebar-button:hover {
+  background: #59463e;
+}
+.titlebar-button.close:hover {
+  background: #873f38;
+  color: white;
+}
+.titlebar-button:focus-visible {
+  outline: 2px solid #dfba83;
+  outline-offset: -3px;
+}
+.desktop-compact .titlebar-controls .compact-exit {
+  position: static;
+}
