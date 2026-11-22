@@ -108,12 +108,22 @@ class MatchMonitor {
       this.session.contract = contract;
       return;
     }
-    this.session = { contract, selectedAt: this.now(), startedAt: null, endedAt: null };
+    this.session = {
+      contract,
+      selectedAt: Number.isFinite(contract.selectedAt)
+        ? Math.max(this.now() - 86400000, Math.min(contract.selectedAt, this.now()))
+        : this.now(),
+      startedAt: null,
+      endedAt: null,
+    };
     this.publish({
       key: this.state.phase === 'playing' ? null : contract.key,
       phase: this.state.phase === 'playing' ? 'playing' : 'waiting',
       checks: [],
       matchId: null,
+      candidates: [],
+      matchTime: null,
+      matchHero: null,
       durationMs: null,
       outcome: null,
       stats: null,
@@ -149,13 +159,37 @@ class MatchMonitor {
       });
     }
   }
-  async poll() {
+  choose(key, id) {
+    const session = this.session;
+    const match = session?.matches?.find((m) => m.match_id === id);
+    if (!this.enabled || !match || key !== session.contract.key) return false;
+    const result = evaluate(session.contract, match);
+    session.checked = true;
+    this.publish({
+      api: 'verified',
+      phase: 'ended',
+      key,
+      matchId: id,
+      matchTime: match.start_time * 1000,
+      matchHero: match.hero_id,
+      checks: result.checks,
+      outcome: result.outcome,
+      durationMs: match.match_duration_s * 1000,
+      stats: {
+        kills: match.player_kills,
+        deaths: match.player_deaths,
+        assists: match.player_assists,
+      },
+    });
+    return true;
+  }
+  async poll(refresh = false) {
     const session = this.session;
     if (
       !this.enabled ||
       !this.accountId ||
       !session ||
-      session.checked ||
+      (session.checked && !refresh) ||
       this.busy ||
       this.now() < this.nextRequestAt
     )
@@ -169,28 +203,30 @@ class MatchMonitor {
       if (!Array.isArray(history)) throw new Error('Invalid match history');
       if (this.session !== session || !this.enabled || accountId !== this.accountId) return;
       const match = selectMatch(history, session, this.accountId, this.now());
-      if (!match) {
-        this.publish({ api: 'waiting' });
-        return;
-      }
-      session.checked = true;
-      const result = evaluate(session.contract, match);
-      const outcome = result.outcome;
+      const window = { ...session, startedAt: null, endedAt: null };
+      session.matches = history
+        .filter((m) => selectMatch([m], window, accountId, this.now()))
+        .slice(0, 50);
       this.publish({
-        api: 'verified',
-        phase: 'ended',
-        key: session.contract.key,
-        matchId: match.match_id,
-        checks: result.checks,
-        outcome,
-
-        durationMs: match.match_duration_s * 1000,
-        stats: {
-          kills: match.player_kills,
-          deaths: match.player_deaths,
-          assists: match.player_assists,
-        },
+        candidates: session.matches.map((m) => ({
+          id: m.match_id,
+          time: m.start_time * 1000,
+          hero: m.hero_id,
+        })),
       });
+      const selected = session.matches.find((m) => m.match_id === this.state.matchId) || match;
+      if (selected) this.choose(session.contract.key, selected.match_id);
+      else {
+        session.checked = false;
+        this.publish({
+          api: 'waiting',
+          checks: [],
+          matchId: null,
+          matchTime: null,
+          outcome: null,
+          stats: null,
+        });
+      }
     } catch {
       if (this.session === session) this.publish({ api: 'unavailable' });
     } finally {

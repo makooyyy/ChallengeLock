@@ -98,6 +98,7 @@ function reportBuild() {
         nextItem: next?.name || null,
         complete: RT.build.items.length > 0 && !next,
         lang: S.lang,
+        nextSkill: skillInfo(RT.build),
         nextCost: next?.cost || 0,
         nextTier: next ? (S.lang === 'en' ? 'Tier ' : 'Тир ') + next.tier : null,
         budget: RT.build.budget,
@@ -161,6 +162,28 @@ function budgetReason(b) {
 function skillLabel(step) {
   return step.tier ? 'T' + step.tier : t('abilityUnlock');
 }
+function skillInfo(b) {
+  const step = abilityPlan(b, hero(b.hero))[b.skillIndex || 0];
+  return step
+    ? step.name +
+        ' · ' +
+        skillLabel(step) +
+        (step.tier ? ' · ' + [0, 1, 2, 5][step.tier] + ' ' + t('skillPoints') : '')
+    : '';
+}
+function buildWarning(b) {
+  const ban = RT.ban;
+  if (ban?.hero !== b.hero) return '';
+  const conflict =
+    ban.item && b.items.includes(ban.item)
+      ? item(ban.item)?.name
+      : ban.slot
+        ? hero(b.hero)?.abilityDetails?.[ban.slot - 1]?.name
+        : '';
+  return conflict
+    ? '<p class="lab-notice" role="status">' + t('banConflict') + ' · ' + esc(conflict) + '</p>'
+    : '';
+}
 function skillCard(build, hero) {
   const steps = abilityPlan(build, hero);
   if (!steps.length) return '';
@@ -176,10 +199,10 @@ function skillCard(build, hero) {
           return `<td><span class="skill-mark ${cost ? '' : 'skill-open'}" title="${esc(label)}" aria-label="${esc(label)}">${cost || '◆'}</span></td>`;
         })
         .join('');
-      return `<tr><th scope="row"><div>${ability.icon ? `<img src="${esc(ability.icon)}" alt="" loading="lazy">` : ''}<span>${esc(ability.name)}</span></div></th>${cells}</tr>`;
+      return `<tr><th scope="row" tabindex="0" data-skill-name="${esc(ability.name)}" title="${esc(ability.name)}"><div>${ability.icon ? `<img src="${esc(ability.icon)}" alt="" loading="lazy">` : ''}<span>${esc(ability.name)}</span></div></th>${cells}</tr>`;
     })
     .join('');
-  return `<section class="card skill-plan"><h2 id="skill-heading">${t('abilityPlan')}</h2><p class="skill-legend"><b>◆</b> ${t('abilityUnlock')} <span>1 / 2 / 5</span> ${t('skillPoints')}</p><div class="skill-scroll" tabindex="0" role="region" aria-labelledby="skill-heading"><table aria-labelledby="skill-heading"><thead><tr><th scope="col">${t('skillAbility')}</th>${steps.map((_, i) => `<th scope="col">${i + 1}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></section>`;
+  return `<section class="card skill-plan"><h2 id="skill-heading">${t('abilityPlan')}</h2><p class="skill-legend"><b>◆</b> ${t('abilityUnlock')} <span>1 / 2 / 5</span> ${t('skillPoints')}</p><div class="skill-scroll" tabindex="0" role="region" aria-labelledby="skill-heading"><table aria-labelledby="skill-heading"><thead><tr><th scope="col">${t('skillAbility')}</th>${steps.map((_, i) => `<th scope="col">${i + 1}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div><div class="skill-actions"><strong>${esc(skillInfo(build)) || t('skillsDone')}</strong>${(build.skillIndex || 0) < 16 ? `<button data-skill-move="1">${t('skillDone')}</button>` : ''}${build.skillIndex ? `<button data-skill-move="-1">${t('undoSkill')}</button>` : ''}</div></section>`;
 }
 function result(b, stale) {
   const h = hero(b.hero),
@@ -191,7 +214,7 @@ function result(b, stale) {
     cumulative += i.cost;
     return { i, index, cumulative };
   });
-  return `${purchaseCard(b)}${stale ? `<div class="lab-notice">${icon('settings', 16)}${t('settingsPending')}</div>` : ''}<div class="lab-overview card"><div class="lab-result-header"><div class="lab-hero"><img class="pic" src="${esc(h.icon)}" alt=""><div><span class="eyebrow">${t('experimentalBuild')} · ${t('phase.' + b.settings.stage)} · ${t('focus.' + b.settings.focus)}</span><h2>${esc(h.name)}</h2></div></div><div class="lab-result-tools"><button id="build-edit">${icon('settings', 15)}${t('configure')}</button><button id="copy-game-build" class="game-export-button">${icon('download', 15)}${t('exportGame')}</button><button id="cb">${icon('copy', 15)}${t('copyText')}</button></div></div><div class="lab-totals"><div><small>${t('buildCost')}</small><b>${money(b.spent)}</b><span>/ ${money(b.budget)} ${t('soulsLabel')}</span></div><div><small>${t('remaining')}</small><b>${money(b.budget - b.spent)}</b><span>${t('budgetReserve')}</span></div><div><small>${t('purchased')}</small><b>${purchased.length}<em> / ${b.items.length}</em></b><span>${money(b.spent - paid)} ${t('toBuy')}</span></div></div><div class="lab-branch-bar" aria-label="${t('branchMix')}">${BRANCHES.map(
+  return `${buildWarning(b)}${purchaseCard(b)}${stale ? `<div class="lab-notice">${icon('settings', 16)}${t('settingsPending')}</div>` : ''}<div class="lab-overview card"><div class="lab-result-header"><div class="lab-hero"><img class="pic" src="${esc(h.icon)}" alt=""><div><span class="eyebrow">${t('experimentalBuild')} · ${t('phase.' + b.settings.stage)} · ${t('focus.' + b.settings.focus)}</span><h2>${esc(h.name)}</h2></div></div><div class="lab-result-tools"><button id="build-edit">${icon('settings', 15)}${t('configure')}</button><button id="copy-game-build" class="game-export-button">${icon('download', 15)}${t('exportGame')}</button><button id="cb">${icon('copy', 15)}${t('copyText')}</button></div></div><div class="lab-totals"><div><small>${t('buildCost')}</small><b>${money(b.spent)}</b><span>/ ${money(b.budget)} ${t('soulsLabel')}</span></div><div><small>${t('remaining')}</small><b>${money(b.budget - b.spent)}</b><span>${t('budgetReserve')}</span></div><div><small>${t('purchased')}</small><b>${purchased.length}<em> / ${b.items.length}</em></b><span>${money(b.spent - paid)} ${t('toBuy')}</span></div></div><div class="lab-branch-bar" aria-label="${t('branchMix')}">${BRANCHES.map(
     (branch) => {
       const cost = b.items
         .filter((id) => item(id).branch === branch)
@@ -218,6 +241,15 @@ function result(b, stale) {
 export async function builderClick(button, notify, save) {
   const d = button.dataset,
     s = S.buildSettings;
+  if (d.skillMove && RT.build) {
+    RT.build.skillIndex = Math.max(
+      0,
+      Math.min(16, (RT.build.skillIndex || 0) + Number(d.skillMove)),
+    );
+    store(save);
+    renderBuilder();
+    return true;
+  }
   if (d.buildStage) {
     S.buildSettings = buildSettings({
       ...s,

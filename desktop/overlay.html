@@ -385,6 +385,7 @@
                 <div class="build-tier" id="build-tier">Тир I</div>
               </div>
             </div>
+            <div id="next-skill"></div>
             <div class="build-progress" id="build-progress" aria-hidden="true"></div>
           </div>
         </div>
@@ -483,6 +484,9 @@
           buildEl.hidden = false;
           buildName.textContent = build.complete ? labels.built : build.nextItem;
           buildCost.textContent = build.complete ? '' : build.nextCost || 0;
+          document.getElementById('next-skill').textContent = build.nextSkill
+            ? (build.lang === 'en' ? 'Next ability: ' : 'Прокачка: ') + build.nextSkill
+            : '';
           buildTier.textContent = build.complete ? '' : build.nextTier || '';
           const total = Math.max(1, (build.items && build.items.length) || 1);
           const filled = Math.min(total, (build.purchased && build.purchased.length) || 0);

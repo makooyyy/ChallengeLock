@@ -356,6 +356,7 @@ function paintContract() {
           label: `${H(RT.cur.hero).name} · ${t('diff.' + RT.cur.diff)}`,
           hero: H(RT.cur.hero)?.name || RT.cur.hero,
           heroId: H(RT.cur.hero)?.apiId,
+          selectedAt: RT.cur.ts,
           gameMode: options(RT.cur.opts).gameMode,
           difficulty: t('diff.' + RT.cur.diff),
           conditions: RT.cur.conds.map((id) => {
@@ -506,6 +507,10 @@ function finish(o, reason = 'manual') {
   setBusy(RT.busy);
   RT.timer.run = false;
   const completion = { outcome: o, reason, endedAt: Date.now() };
+  if (RT.match?.key === resultKey(x) && RT.match.matchId && RT.match.matchTime) {
+    completion.matchId = RT.match.matchId;
+    completion.matchTime = RT.match.matchTime;
+  }
   Object.assign(x, completion);
   for (const entry of [...S.favs, ...S.history])
     if (resultKey(entry) === resultKey(x)) Object.assign(entry, completion);
@@ -759,6 +764,30 @@ function matchStatus() {
   };
   const current = RT.cur && m.key === resultKey(RT.cur);
   const checks = current ? m.checks || [] : [];
+  let review = '';
+  if (current && !RT.finished && m.candidates?.length) {
+    const label = (c) =>
+      (RT.data.heroes.find((h) => h.apiId === c.hero)?.name || '—') +
+      ' · ' +
+      new Date(c.time).toLocaleString(S.lang) +
+      ' · #' +
+      c.id;
+    const selected = m.candidates.find((c) => c.id === m.matchId);
+    review =
+      '<div class="match-review">' +
+      (selected ? '<strong>' + esc(label(selected)) + '</strong>' : '') +
+      m.candidates
+        .filter((c) => c.id !== m.matchId)
+        .map(
+          (c) =>
+            `<button data-match-pick="${Number(c.id)}">${en ? 'Select match' : 'Выбрать матч'} · ${esc(label(c))}</button>`,
+        )
+        .join('') +
+      (selected && m.outcome
+        ? `<button class="pb" data-match-accept>${en ? 'Confirm result' : 'Подтвердить результат'}</button>`
+        : '') +
+      '</div>';
+  }
   if (checks.length) {
     const groups = [
       ['checkPassed', checks.filter((c) => c.status === 'pass')],
@@ -774,6 +803,7 @@ function matchStatus() {
     ];
     return (
       '<div class="match-status">' +
+      review +
       groups
         .filter(([, cs]) => cs.length)
         .map(
@@ -785,7 +815,7 @@ function matchStatus() {
     );
   }
   const late = m.phase === 'playing' && !current;
-  return `<div class="match-status"><strong>${esc(phase[m.phase] || phase.idle)}</strong><small>${esc(api[m.api] || '')}</small>${late ? `<small>${en ? 'Joined an ongoing match. Automatic completion is available from the next match.' : 'Подключились к уже начатому матчу. Автозачёт доступен со следующего матча.'}</small>` : ''}${['stale', 'missing'].includes(m.logHealth) ? `<small>${en ? 'No fresh log. Add -condebug in Steam launch options and restart Deadlock.' : 'Нет свежего журнала. Нужен -condebug в параметрах Steam и перезапуск Deadlock.'}</small>` : ''}${current && m.matchId ? `<small>${en ? 'Match' : 'Матч'} #${m.matchId} · ${m.stats?.kills ?? '—'}/${m.stats?.deaths ?? '—'}/${m.stats?.assists ?? '—'}</small>` : ''}</div>`;
+  return `<div class="match-status">${review}<strong>${esc(phase[m.phase] || phase.idle)}</strong><small>${esc(api[m.api] || '')}</small>${late ? `<small>${en ? 'Joined an ongoing match. Automatic completion is available from the next match.' : 'Подключились к уже начатому матчу. Автозачёт доступен со следующего матча.'}</small>` : ''}${['stale', 'missing'].includes(m.logHealth) ? `<small>${en ? 'No fresh log. Add -condebug in Steam launch options and restart Deadlock.' : 'Нет свежего журнала. Нужен -condebug в параметрах Steam и перезапуск Deadlock.'}</small>` : ''}${current && m.matchId ? `<small>${en ? 'Match' : 'Матч'} #${m.matchId} · ${m.stats?.kills ?? '—'}/${m.stats?.deaths ?? '—'}/${m.stats?.assists ?? '—'}</small>` : ''}</div>`;
 }
 function updateMatch(state) {
   if (!state) return;
@@ -813,7 +843,8 @@ function updateMatch(state) {
     const timer = $('#tm');
     if (timer) timer.textContent = mmss(RT.timer.ms);
     desktop?.reportTimer?.(mmss(RT.timer.ms));
-    if (['done', 'fail'].includes(state.outcome)) finish(state.outcome, 'match');
+    if (!state.candidates?.length && ['done', 'fail'].includes(state.outcome))
+      finish(state.outcome, 'match');
     else if (
       previous?.phase !== state.phase ||
       JSON.stringify(previous?.checks) !== JSON.stringify(state.checks)
@@ -935,6 +966,7 @@ function renderJournalRows() {
           heading +
           `<details class="journal-record" data-key="${esc(key)}" ${open.has(key) ? 'open' : ''}><summary>${hero ? dia(hero) : ''}<span><b>${esc(hero?.name || x.hero)}</b> ${favorites.has(key) ? icon('star', 14) : ''}<small>${modeName(x)} · ${t('diff.' + x.diff)}</small></span><strong ${!x.outcome ? `data-countdown="${Number(x.ts)}"` : ''}>${esc(journalStatus(x))}</strong></summary>
       <p>${t('journalStarted')} · ${esc(new Date(x.ts).toLocaleString(S.lang))}</p>
+      ${x.matchId && x.matchTime ? `<p>${esc(hero?.name || x.hero)} · #${Number(x.matchId)} · ${esc(new Date(x.matchTime).toLocaleString(S.lang))}</p>` : ''}
       <ol>${x.conds
         .map((id) => {
           const c = C(id);
@@ -1228,6 +1260,15 @@ function bind() {
       document.querySelector('[data-progress="' + CSS.escape(id) + '"]')?.focus();
       return;
     }
+    if (b.dataset.matchPick && RT.cur && !RT.finished)
+      return desktop?.chooseMatch?.(resultKey(RT.cur), Number(b.dataset.matchPick));
+    if (
+      b.hasAttribute('data-match-accept') &&
+      RT.cur &&
+      RT.match?.key === resultKey(RT.cur) &&
+      ['done', 'fail'].includes(RT.match.outcome)
+    )
+      return finish(RT.match.outcome, 'match');
     if (b.id === 'done') return finish('done');
     if (b.id === 'failb') return finish('fail');
     if (b.id === 'cl') return toast((await copy(linkFor(RT.cur))) ? t('copied') : t('error'));
@@ -1474,6 +1515,8 @@ export async function boot() {
               ...restoreResult(x, h.heroes, c.challenges),
               outcome: x.outcome,
               reason: x.reason,
+              matchId: x.matchId,
+              matchTime: x.matchTime,
               endedAt: x.endedAt,
               checked: x.checked || [],
             },

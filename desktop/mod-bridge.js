@@ -13,6 +13,7 @@ function snapshot(contract, build) {
       checked: c.checked === true,
     })),
     buildHero: text(build?.hero, 60),
+    ...(build?.nextSkill ? { nextSkill: text(build.nextSkill, 160) } : {}),
     next: text(build?.nextItem, 80),
     cost: Number.isFinite(build?.nextCost) ? build.nextCost : 0,
     complete: build?.complete === true,

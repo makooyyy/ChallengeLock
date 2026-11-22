@@ -400,7 +400,11 @@
     "abilityPlan": "Порядок прокачки",
     "abilityUnlock": "Открыть",
     "skillAbility": "Способность",
-    "skillPoints": "очк. прокачки"
+    "skillPoints": "очк. прокачки",
+    "banConflict": "В билде есть активный запрет",
+    "skillsDone": "Прокачка завершена",
+    "skillDone": "Шаг выполнен",
+    "undoSkill": "На шаг назад"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -803,6 +807,10 @@
     "abilityPlan": "Ability leveling order",
     "abilityUnlock": "Unlock",
     "skillAbility": "Ability",
-    "skillPoints": "ability points"
+    "skillPoints": "ability points",
+    "banConflict": "Build conflicts with the active ban",
+    "skillsDone": "Ability plan complete",
+    "skillDone": "Mark step complete",
+    "undoSkill": "Previous step"
   }
 }

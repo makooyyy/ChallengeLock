@@ -295,9 +295,31 @@ try {
     if ((await page.locator('html').getAttribute('lang')) !== language) await page.click('#lang');
     for (const width of [320, 390, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });
-      for (const tab of ['roulette', 'build', 'ban', 'custom', 'history']) {
+      for (const tab of ['roulette', 'build', 'ban', 'custom', 'history', 'updates']) {
         await page.click('[data-tab="' + tab + '"]');
         assert(await page.locator('#p-' + tab + ' h1').isVisible());
+        const collisions = await page.locator('#p-' + tab).evaluate((panel) => {
+          const rects = [...panel.querySelectorAll('button, h1,h2,h3,p')]
+            .filter((el) => el.checkVisibility() && !el.closest('details:not([open])'))
+            .map((el) => [el, el.getBoundingClientRect()]);
+          const issues = [];
+          for (const [i, [a, r]] of rects.entries())
+            for (const [b, q] of rects.slice(i + 1)) {
+              if (a.contains(b) || b.contains(a) || (!a.matches('button') && !b.matches('button')))
+                continue;
+              if (
+                Math.min(r.right, q.right) - Math.max(r.left, q.left) > 2 &&
+                Math.min(r.bottom, q.bottom) - Math.max(r.top, q.top) > 2
+              )
+                issues.push([a.id || a.className, b.id || b.className]);
+            }
+          return issues;
+        });
+        assert.deepEqual(
+          collisions,
+          [],
+          language + ' ' + tab + ' ' + width + ' ' + JSON.stringify(collisions),
+        );
         assert(
           await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
           'Overflow: ' + language + ' ' + tab + ' at ' + width,
@@ -437,6 +459,13 @@ try {
           await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
           'Lab overflow ' + tab + ' ' + language + ' ' + width,
         );
+        if (tab === 'build') {
+          assert.equal((await page.locator('.skill-scroll table').boundingBox()).width, 790);
+          const heights = await page
+            .locator('.skill-scroll tbody tr')
+            .evaluateAll((rows) => rows.map((r) => r.getBoundingClientRect().height));
+          assert.equal(new Set(heights).size, 1);
+        }
       }
     }
   }

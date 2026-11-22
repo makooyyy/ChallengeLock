@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('challengeLockDesktop', {
   platform: process.platform,
   isDesktop: true,
+  chooseMatch: (key, id) => ipcRenderer.invoke('desktop:choose-match', key, id),
   matchState: () => ipcRenderer.invoke('desktop:match-state'),
   setMatchEnabled: (enabled) => ipcRenderer.invoke('desktop:match-settings', enabled),
   refreshMatch: () => ipcRenderer.invoke('desktop:match-refresh'),

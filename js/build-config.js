@@ -49,6 +49,7 @@ export function savedBuild(x) {
     settings,
     locked: subset(x.locked),
     purchased: subset(x.purchased),
+    skillIndex: Number.isInteger(x.skillIndex) ? Math.max(0, Math.min(16, x.skillIndex)) : 0,
   };
 }
 export function banSettings(x = {}) {

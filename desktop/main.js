@@ -695,6 +695,7 @@ ipcMain.on('desktop:contract', (_event, text) => {
           hero: text.hero,
           difficulty: text.difficulty,
           heroId: text.heroId,
+          selectedAt: text.selectedAt,
           gameMode: text.gameMode,
           conditions: Array.isArray(text.conditions) ? text.conditions : [],
           mode: text.mode,
@@ -761,6 +762,7 @@ async function refreshAccount() {
   });
   monitor.configure(matchSettings.enabled, accountId);
 }
+ipcMain.handle('desktop:choose-match', (_event, key, id) => monitor.choose(key, id));
 ipcMain.handle('desktop:match-state', () => matchSnapshot);
 ipcMain.handle('desktop:match-settings', async (_event, enabled) => {
   matchSettings = { enabled: enabled === true };
@@ -771,7 +773,7 @@ ipcMain.handle('desktop:match-settings', async (_event, enabled) => {
   return matchSnapshot;
 });
 ipcMain.handle('desktop:match-refresh', async () => {
-  await monitor.poll();
+  await monitor.poll(true);
   return matchSnapshot;
 });
 function publishLogHealth(logHealth) {

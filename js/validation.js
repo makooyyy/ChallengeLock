@@ -59,6 +59,8 @@ export function normalizeState(x, def) {
         opts: options(r.opts),
         ts: r.ts,
         reason: ['manual', 'match', 'deadline'].includes(r.reason) ? r.reason : null,
+        matchId: Number.isSafeInteger(r.matchId) ? r.matchId : null,
+        matchTime: Number.isSafeInteger(r.matchTime) ? r.matchTime : null,
         endedAt: Number.isFinite(r.endedAt) && r.endedAt > 0 ? r.endedAt : null,
         checked: strings(r.checked).filter((id) => r.conds.includes(id)),
         outcome: ['done', 'fail'].includes(r.outcome) ? r.outcome : null,

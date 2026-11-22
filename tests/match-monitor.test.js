@@ -177,3 +177,24 @@ test('disconnect and shutdown stop a match without declaring a defeat', () => {
     assert.equal(trackLine(tracker, 'ChangeGameState: PostGame (8)', 300), null);
   }
 });
+
+test('reviewing a different eligible game replaces all checks and rejects unrelated games', async () => {
+  const later = { ...match, match_id: 456, start_time: 2000, player_assists: 0 };
+  const monitor = new MatchMonitor({
+    now: () => 3000000,
+    notify: () => {},
+    fetchHistory: async () => [match, later, { ...later, match_id: 999, hero_id: 2 }],
+  });
+  monitor.configure(true, 10);
+  monitor.contract({ ...contract, selectedAt: 900000 });
+  await monitor.poll();
+  assert.deepEqual(
+    monitor.state.candidates.map((m) => m.id),
+    [123, 456],
+  );
+  assert.equal(monitor.choose('other', 456), false);
+  assert.equal(monitor.choose('A', 999), false);
+  assert.equal(monitor.choose('A', 456), true);
+  assert.equal(monitor.state.matchTime, 2000000);
+  assert.equal(monitor.state.outcome, 'fail');
+});

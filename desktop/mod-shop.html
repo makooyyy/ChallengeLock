@@ -96,6 +96,7 @@
     <section id="build" hidden>
       <h2>Следующая покупка</h2>
       <p id="next"></p>
+      <p id="next-skill"></p>
       <strong id="price"></strong>
     </section>
     <p id="ban" hidden></p>
@@ -130,6 +131,7 @@
       );
       el('build').hidden = s.display?.build === false || !(s.next || s.complete);
       el('next').textContent = s.complete ? 'Билд собран' : s.next;
+      el('next-skill').textContent = s.nextSkill ? 'Прокачка: ' + s.nextSkill : '';
       el('price').textContent = [s.next ? s.cost + ' душ' : '', s.buildHero]
         .filter(Boolean)
         .join(' · ');

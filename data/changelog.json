@@ -1,6 +1,26 @@
 {
-  "installerVersion": "1.36.0",
+  "installerVersion": "1.37.0",
   "releases": [
+    {
+      "version": "1.34.0",
+      "date": "2026-11-22",
+      "title": {
+        "ru": "Матч и план прокачки",
+        "en": "Match review and ability progress"
+      },
+      "items": {
+        "ru": [
+          "Проверка матча показывает героя, время и ID. Доступные матчи можно выбрать перед подтверждением.",
+          "Следующий шаг прокачки отображается в магазине, а конфликты с запретом — в билде.",
+          "Таблица прокачки получила фиксированные размеры. Обновлены отступы у действий контракта."
+        ],
+        "en": [
+          "Review eligible matches before confirming the result.",
+          "Shop overlays show the next ability step. Builds flag active bans.",
+          "Fixed-size ability chart and improved contract action spacing."
+        ]
+      }
+    },
     {
       "version": "1.33.0",
       "date": "2026-11-22",
