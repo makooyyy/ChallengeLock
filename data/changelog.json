@@ -1,6 +1,22 @@
 {
-  "installerVersion": "1.34.0",
+  "installerVersion": "1.35.0",
   "releases": [
+    {
+      "version": "1.32.0",
+      "date": "2026-11-22",
+      "title": {
+        "ru": "Кнопки окна",
+        "en": "Window controls"
+      },
+      "items": {
+        "ru": [
+          "Три кнопки управления окном получили одинаковый размер и выровненные значки. В боковой панели появился знак с замком на одной линии с названием."
+        ],
+        "en": [
+          "Window controls now have uniform dimensions and centered icons. The sidebar wordmark has an aligned lock emblem."
+        ]
+      }
+    },
     {
       "version": "1.31.0",
       "date": "2026-11-22",

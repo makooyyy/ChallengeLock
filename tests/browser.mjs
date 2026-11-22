@@ -509,6 +509,25 @@ try {
       .evaluate((el) => getComputedStyle(el).webkitAppRegion),
     'no-drag',
   );
+  const controls = compactPage.locator('.titlebar-button');
+  const bounds = await controls.evaluateAll((buttons) =>
+    buttons.map((button) => {
+      const box = button.getBoundingClientRect();
+      const glyph = button.querySelector('svg').getBoundingClientRect();
+      return [
+        box.width,
+        box.height,
+        box.y,
+        glyph.width,
+        glyph.height,
+        glyph.x - box.x,
+        glyph.y - box.y,
+      ];
+    }),
+  );
+  assert.equal(bounds.length, 3);
+  assert.deepEqual(bounds[0], bounds[1]);
+  assert.deepEqual(bounds[1], bounds[2]);
   for (const action of ['minimize', 'maximize', 'close']) {
     await compactPage.locator('[data-window-action="' + action + '"]').click();
     assert.equal(await compactPage.evaluate(() => window.__windowAction), action);
