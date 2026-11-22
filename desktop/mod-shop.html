@@ -73,6 +73,9 @@
       line-height: 1.15;
       margin-block: 6px;
     }
+    #price {
+      white-space: nowrap;
+    }
     #price,
     .counter {
       color: #f0c483;
@@ -91,13 +94,46 @@
       border: 1px solid #b89168;
       border-radius: 3px;
     }
+    .purchase-line,
+    .shop-actions {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    #price {
+      white-space: nowrap;
+    }
+    .shop-actions {
+      margin-block: 8px;
+    }
+    button {
+      padding: 5px 9px;
+      background: #563832;
+      color: #fff1d5;
+      border: 1px solid #a7845e;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    summary {
+      cursor: pointer;
+    }
+    [hidden] {
+      display: none !important;
+    }
   </style>
-  <main>
+  <main hidden>
     <section id="build" hidden>
-      <h2>Следующая покупка</h2>
-      <p id="next"></p>
+      <h2 id="purchase-title">Следующая покупка</h2>
+      <div class="purchase-line">
+        <p id="next"></p>
+        <strong id="price"></strong>
+      </div>
       <p id="next-skill"></p>
-      <strong id="price"></strong>
+      <div class="shop-actions">
+        <button id="buy">Куплено</button><button id="skill">Прокачано</button
+        ><button id="undo">Отменить</button>
+      </div>
     </section>
     <p id="ban" hidden></p>
     <ol id="conditions"></ol>
@@ -107,37 +143,84 @@
   </main>
   <script>
     const el = (id) => document.getElementById(id);
-    let previous;
+    let previous,
+      token,
+      pointerActive = false,
+      pending = false;
+    function hover(active) {
+      if (active !== pointerActive) {
+        pointerActive = active;
+        window.shopControls?.hover(active);
+      }
+    }
+    document.addEventListener('mousemove', (e) => hover(!!e.target.closest('button,summary')));
+    document.addEventListener('mouseleave', () => hover(false));
+    for (const action of ['buy', 'skill', 'undo'])
+      el(action).onclick = () => {
+        if (!pending && token) {
+          pending = true;
+          window.shopControls?.act(action, token);
+          setTimeout(() => (pending = false), 1600);
+        }
+      };
     function render(s) {
+      const opened = new Set(
+        [...el('conditions').querySelectorAll('details[open] summary')].map((s) => s.textContent),
+      );
+      token = s.shopToken;
+      pending = false;
+      const en = s.lang === 'en';
+      el('purchase-title').textContent = en ? 'Next purchase' : 'Следующая покупка';
+      document.querySelector('main').hidden = !(
+        s.hero ||
+        s.ban ||
+        (s.display?.build !== false && (s.next || s.nextSkill || s.complete))
+      );
+      for (const [id, show, label] of [
+        ['buy', s.next, en ? 'Bought' : 'Куплено'],
+        ['skill', s.nextSkill, en ? 'Leveled' : 'Прокачано'],
+        ['undo', s.canUndo, en ? 'Undo' : 'Отменить'],
+      ]) {
+        el(id).hidden = !show || !window.shopControls || !token;
+        el(id).textContent = label;
+      }
       el('ban').textContent = s.ban || '';
       el('ban').hidden = !s.ban;
       for (const id of ['hero', 'status', 'conditions']) el(id).hidden = s.display?.[id] === false;
-      el('hero').textContent = s.hero || 'ChallengeLock';
+      el('hero').hidden ||= !s.hero;
+      el('status').hidden ||= !s.hero;
+      el('hero').textContent = s.hero || '';
       el('status').textContent =
-        { done: 'Выполнено', fail: 'Провалено' }[s.outcome] ||
-        s.mode ||
-        'Выбери челлендж в приложении';
+        { done: 'Выполнено', fail: 'Провалено' }[s.outcome] || s.mode || '';
       el('conditions').replaceChildren(
         ...s.conditions
           .filter((c) => !c.checked)
           .map((c) => {
             const li = document.createElement('li'),
               desc = document.createElement('small');
-            li.textContent = c.name;
-            desc.textContent = c.desc;
-            li.append(desc);
+            if (!c.desc || c.desc.length <= 95) li.textContent = c.desc || c.name;
+            else {
+              const details = document.createElement('details'),
+                summary = document.createElement('summary');
+              details.open = opened.has(c.name);
+              summary.textContent = c.name;
+              desc.textContent = c.desc;
+              details.append(summary, desc);
+              li.append(details);
+            }
             return li;
           }),
       );
-      el('build').hidden = s.display?.build === false || !(s.next || s.complete);
-      el('next').textContent = s.complete ? 'Билд собран' : s.next;
-      el('next-skill').textContent = s.nextSkill ? 'Прокачка: ' + s.nextSkill : '';
-      el('price').textContent = [s.next ? s.cost + ' душ' : '', s.buildHero]
-        .filter(Boolean)
-        .join(' · ');
+      el('build').hidden = s.display?.build === false || !(s.next || s.complete || s.nextSkill);
+      el('next').textContent = s.complete ? (en ? 'Build complete' : 'Билд собран') : s.next;
+      el('next-skill').textContent = s.nextSkill
+        ? (en ? 'Ability: ' : 'Прокачка: ') + s.nextSkill
+        : '';
+      el('price').textContent = s.next ? '· ' + s.cost + (en ? ' souls' : ' душ') : '';
       const done = s.conditions.filter((c) => c.checked).length;
       el('checked').hidden = !done || s.display?.conditions === false;
-      el('checked').textContent = 'Выполнено условий: ' + done + ' / ' + s.conditions.length;
+      el('checked').textContent =
+        (en ? 'Conditions complete: ' : 'Выполнено условий: ') + done + ' / ' + s.conditions.length;
     }
     async function tick() {
       try {
@@ -150,6 +233,9 @@
         }
         document.title = 'CL-ready-' + Date.now();
       } catch {
+        document.querySelector('main').hidden = true;
+        hover(false);
+        token = null;
         el('ban').hidden = true;
         el('checked').hidden = true;
         el('hero').hidden = false;

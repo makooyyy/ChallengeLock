@@ -1,6 +1,24 @@
 {
-  "installerVersion": "1.37.0",
+  "installerVersion": "1.38.0",
   "releases": [
+    {
+      "version": "1.35.0",
+      "date": "2026-11-22",
+      "title": {
+        "ru": "Действия в магазине",
+        "en": "Shop controls"
+      },
+      "items": {
+        "ru": [
+          "В магазине можно отдельно отметить покупку и прокачку или отменить последний шаг.",
+          "Цена показана рядом с предметом, у способности указан слот. Условия компактны, а пустая панель скрыта."
+        ],
+        "en": [
+          "Mark purchases and ability upgrades separately in the shop, or undo the last step.",
+          "See item prices and ability slots at a glance. Expand longer rules. Empty panels stay hidden."
+        ]
+      }
+    },
     {
       "version": "1.34.0",
       "date": "2026-11-22",

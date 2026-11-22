@@ -1,8 +1,8 @@
 # ChallengeLock Shop Companion — prototype 0.1.2
 
-A click-through desktop window follows shop events from the game log (`gameplay_hud.gShopOpen`).
+A desktop window with click-through outside its controls follows shop events from the game log (`gameplay_hud.gShopOpen`).
 Displays the current challenge, next purchase and build list from the desktop app on `127.0.0.1:47821`.
-Purchases are marked in ChallengeLock; this prototype does not automatically detect bought items.
+Mark purchases and ability steps separately in the shop card. Undo reverses its last action. With no active challenge, build or ban, the panel stays hidden.
 No memory access, gameplay commands, chat messages or external services are used by the mod.
 
 ## Build

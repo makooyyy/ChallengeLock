@@ -789,6 +789,19 @@ try {
       buildSettings(),
     );
     window.challengeLockDesktop.reportBuild = (build) => (window.__reportedBuild = build);
+    renderBuilder();
+    const { shopAction } = await import('/js/builder-ui.js');
+    const token = window.__reportedBuild.shopToken;
+    const save = () => {};
+    shopAction('buy', token, save);
+    shopAction('buy', token, save);
+    if (RT.build.purchased.length !== 1) throw Error('Duplicate shop purchase');
+    shopAction('undo', window.__reportedBuild.shopToken, save);
+    if (RT.build.purchased.length) throw Error('Undo purchase');
+    shopAction('skill', window.__reportedBuild.shopToken, save);
+    if (RT.build.skillIndex !== 1) throw Error('Advance skill');
+    shopAction('undo', window.__reportedBuild.shopToken, save);
+    if (RT.build.skillIndex !== 0) throw Error('Undo skill');
     RT.build.purchased = [...RT.build.items];
     renderBuilder();
   });

@@ -141,7 +141,7 @@ const server = http.createServer((req, res) => {
     const body =
       urlPath === '/mod/state'
         ? JSON.stringify({
-            ...modBridge.snapshot(overlayContract, overlayBuild),
+            ...modBridge.snapshot(activeContract, overlayBuild),
             ban: shopBan,
             display: {
               hero: overlaySettings.showHero,
@@ -785,8 +785,31 @@ function publishLogHealth(logHealth) {
 
 let shopWindow = null;
 let shopDeadline = 0;
+const shopSender = (event) =>
+  shopWindow &&
+  event.sender === shopWindow.webContents &&
+  shopWindow.isVisible() &&
+  shopDeadline > Date.now();
+ipcMain.on('shop:act', (event, action, token) => {
+  if (
+    shopSender(event) &&
+    ['buy', 'skill', 'undo'].includes(action) &&
+    token &&
+    token === overlayBuild?.shopToken &&
+    mainWindow &&
+    !mainWindow.isDestroyed()
+  )
+    mainWindow.webContents.send('desktop:shop-action', action, token);
+});
+ipcMain.on('shop:hover', (event, active) => {
+  if (shopSender(event)) shopWindow.setIgnoreMouseEvents(active !== true, { forward: true });
+});
 function updateShopWindow(open) {
-  if (!open || overlaySettings.mode !== 'shop') {
+  if (
+    !open ||
+    overlaySettings.mode !== 'shop' ||
+    !(activeContract || (overlaySettings.showBuild !== false && overlayBuild) || shopBan)
+  ) {
     shopDeadline = 0;
     shopWindow?.hide();
     return;
@@ -800,17 +823,25 @@ function updateShopWindow(open) {
       focusable: false,
       show: false,
       skipTaskbar: true,
-      webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false },
+      webPreferences: {
+        preload: path.join(__dirname, 'shop-preload.js'),
+        sandbox: true,
+        contextIsolation: true,
+        nodeIntegration: false,
+      },
     });
     shopWindow.setOpacity(overlaySettings.opacity);
-    shopWindow.setIgnoreMouseEvents(true);
+    shopWindow.setIgnoreMouseEvents(true, { forward: true });
     shopWindow.setAlwaysOnTop(true, 'screen-saver');
     shopWindow.on('closed', () => {
       shopWindow = null;
     });
     shopWindow.loadURL(new URL('/mod/bridge', pageUrl()).href).catch((error) => log(error.message));
   }
-  if (!shopWindow.isVisible()) shopWindow.showInactive();
+  if (!shopWindow.isVisible()) {
+    shopWindow.setIgnoreMouseEvents(true, { forward: true });
+    shopWindow.showInactive();
+  }
 }
 function watchTick() {
   if (shopDeadline && Date.now() >= shopDeadline) updateShopWindow(false);

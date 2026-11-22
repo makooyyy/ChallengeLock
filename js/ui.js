@@ -1,5 +1,6 @@
 import {
   renderBuilder,
+  shopAction,
   builderClick,
   builderChange,
   useContractHero,
@@ -1603,6 +1604,7 @@ export async function boot() {
     if (!RT.busy) doRoll(false);
   });
   // The shell detected a finished match and the player picked the outcome.
+  desktop?.onShopAction?.((action, token) => shopAction(action, token, persist));
   desktop?.onMatch?.(updateMatch);
   desktop?.matchState?.().then(updateMatch);
   desktop?.onOutcome?.((event) => {

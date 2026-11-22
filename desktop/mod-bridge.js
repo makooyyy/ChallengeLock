@@ -4,6 +4,9 @@ const text = (value, limit) => String(value || '').slice(0, limit);
 function snapshot(contract, build) {
   const state = {
     version: 1,
+    shopToken: text(build?.shopToken, 64),
+    canUndo: build?.canUndo === true,
+    lang: build?.lang || contract?.lang || 'ru',
     hero: text(contract?.hero, 60),
     mode: text(contract?.mode, 60),
     outcome: ['done', 'fail'].includes(contract?.outcome) ? contract.outcome : '',

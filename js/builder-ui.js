@@ -86,14 +86,45 @@ export function renderBuilder() {
   };
   reportBuild();
 }
+let shopUndo = null;
+let lastShopState = '';
+let shopToken = '';
+function shopState(b) {
+  return JSON.stringify([b.seed, b.hero, b.items, b.purchased, b.skillIndex || 0, bannedItem(b)]);
+}
+export function shopAction(action, token, save) {
+  const b = RT.build;
+  if (!b || token !== shopToken || shopState(b) !== lastShopState) return;
+  const next = nextPurchase(b);
+  const before = { purchased: [...b.purchased], skillIndex: b.skillIndex || 0 };
+  if (action === 'buy' && next) b.purchased.push(next.id);
+  else if (action === 'skill' && skillInfo(b)) b.skillIndex = (b.skillIndex || 0) + 1;
+  else if (action === 'undo' && shopUndo?.state === lastShopState) {
+    Object.assign(b, shopUndo.before);
+  } else return;
+  shopUndo = action === 'undo' ? null : { before, state: shopState(b) };
+  store(save);
+  renderBuilder();
+}
 function reportBuild() {
   const desktopApi = window.challengeLockDesktop;
   if (desktopApi?.reportBuild) {
     if (!RT.build) {
+      lastShopState = '';
+      shopUndo = null;
+      shopToken = '';
       desktopApi.reportBuild(null);
     } else {
       const next = nextPurchase(RT.build);
+      const state = shopState(RT.build);
+      if (state !== lastShopState) {
+        lastShopState = state;
+        shopToken = crypto.randomUUID();
+        if (shopUndo?.state !== state) shopUndo = null;
+      }
       desktopApi.reportBuild({
+        shopToken,
+        canUndo: !!shopUndo,
         hero: hero(RT.build.hero)?.name || RT.build.hero,
         nextItem: next?.name || null,
         complete: RT.build.items.length > 0 && !next,
@@ -165,7 +196,10 @@ function skillLabel(step) {
 function skillInfo(b) {
   const step = abilityPlan(b, hero(b.hero))[b.skillIndex || 0];
   return step
-    ? step.name +
+    ? '[' +
+        step.slot +
+        '] ' +
+        step.name +
         ' · ' +
         skillLabel(step) +
         (step.tier ? ' · ' + [0, 1, 2, 5][step.tier] + ' ' + t('skillPoints') : '')
