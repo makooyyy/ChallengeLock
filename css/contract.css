@@ -326,14 +326,21 @@ h2,
 }
 .completion-card,
 [data-theme='dark'] .completion-card {
-  background: #efe0be;
-  color: #362a24;
+  --paper: #efe0be;
+  --paper-ink: #30241f;
+  --paper-muted: #584537;
+  --paper-line: #a18a70;
+  --stamp: #59412c;
+  --ink: var(--paper-ink);
+  --muted: var(--paper-muted);
+  background: var(--paper);
+  color: var(--paper-ink);
   border: 5px double #9b765b;
 }
 .completion-card.failure,
 [data-theme='dark'] .completion-card.failure {
-  background: #e4cfb5;
-  color: #482e2a;
+  --paper: #e4cfb5;
+  --stamp: #812f2d;
 }
 @media (min-width: 1000px) {
   html:not(.desktop-compact) .d {

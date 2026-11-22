@@ -117,6 +117,36 @@ try {
   assert.equal(await page.locator('#build-hero').inputValue(), (await state()).cur.hero);
   await page.click('[data-tab="roulette"]');
   await page.click('#done');
+  async function checkResultContrast() {
+    const minimum = await page.locator('.completion-card').evaluate((card) => {
+      const root = document.documentElement;
+      const previous = root.getAttribute('data-theme');
+      const luminance = (color) => {
+        const rgb = color
+          .match(/\d+/g)
+          .slice(0, 3)
+          .map((n) => Number(n) / 255)
+          .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+        return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+      };
+      let min = Infinity;
+      for (const theme of ['light', 'dark']) {
+        root.setAttribute('data-theme', theme);
+        const bg = luminance(getComputedStyle(card).backgroundColor);
+        for (const el of card.querySelectorAll(
+          'h2,h3,p,small,.eyebrow,.completion-seed,.completion-paper-head span,.completion-rules b,.completion-bottom > span',
+        )) {
+          const fg = luminance(getComputedStyle(el).color);
+          min = Math.min(min, (Math.max(bg, fg) + 0.05) / (Math.min(bg, fg) + 0.05));
+        }
+      }
+      if (previous === null) root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme', previous);
+      return min;
+    });
+    assert(minimum >= 4.5, 'Result text contrast: ' + minimum);
+  }
+  await checkResultContrast();
   const completed = (await state()).stats.done;
   assert(await page.locator('#completion-dialog').isVisible());
   assert(await page.locator('.result-seal').isVisible());
@@ -159,6 +189,7 @@ try {
   await page.click('#accept-contract');
   await page.click('#failb');
   assert.equal(await page.locator('#completion-dialog').getAttribute('data-outcome'), 'fail');
+  await checkResultContrast();
   assert(await page.locator('.result-seal').isVisible());
   assert.equal((await state()).stats.done, beforeFailure.done);
   assert.equal((await state()).stats.fail, beforeFailure.fail + 1);

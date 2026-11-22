@@ -1,6 +1,22 @@
 {
-  "installerVersion": "1.35.0",
+  "installerVersion": "1.36.0",
   "releases": [
+    {
+      "version": "1.33.0",
+      "date": "2026-11-22",
+      "title": {
+        "ru": "Читаемые карточки результата",
+        "en": "Readable result cards"
+      },
+      "items": {
+        "ru": [
+          "Заголовок, условия, подписи и печать на карточках успеха и провала контрастны в обеих темах."
+        ],
+        "en": [
+          "Success and failure cards use dark ink on paper in both themes."
+        ]
+      }
+    },
     {
       "version": "1.32.0",
       "date": "2026-11-22",
