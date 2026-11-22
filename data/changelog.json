@@ -1,6 +1,22 @@
 {
-  "installerVersion": "1.33.0",
+  "installerVersion": "1.34.0",
   "releases": [
+    {
+      "version": "1.31.0",
+      "date": "2026-11-22",
+      "title": {
+        "ru": "Карта прокачки",
+        "en": "Ability progression chart"
+      },
+      "items": {
+        "ru": [
+          "Во вкладке «Билд» порядок прокачки показан таблицей с иконками, шагами открытия и стоимостью улучшений."
+        ],
+        "en": [
+          "Builds now show a 16-step ability chart with icons, unlocks and upgrade costs."
+        ]
+      }
+    },
     {
       "version": "1.30.0",
       "date": "2026-11-22",

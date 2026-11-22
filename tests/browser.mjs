@@ -338,6 +338,12 @@ try {
   assert.equal(lab.hero, 'abrams');
   assert(lab.spent <= 32000);
   assert.equal(lab.settings.focus, 'spirit');
+  const chart = page.locator('.skill-scroll');
+  assert.equal(await chart.locator('thead th').count(), 17);
+  assert.equal(await chart.locator('tbody tr').count(), 4);
+  for (const row of await chart.locator('tbody tr').all()) {
+    assert.deepEqual(await row.locator('.skill-mark').allTextContents(), ['◆', '1', '2', '5']);
+  }
   await page.click('[data-build-lock="' + lab.items[0] + '"]');
   await page.check('[data-build-buy="' + lab.items[1] + '"]');
   await page.click('#rb');

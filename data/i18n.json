@@ -398,7 +398,9 @@
     "desktopGameHint": "Подключение к игре и проверка журнала доступны в приложении для ПК.",
     "acceptedSeal": "Принято",
     "abilityPlan": "Порядок прокачки",
-    "abilityUnlock": "Открыть"
+    "abilityUnlock": "Открыть",
+    "skillAbility": "Способность",
+    "skillPoints": "очк. прокачки"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -799,6 +801,8 @@
     "desktopGameHint": "Game connection and log diagnostics are available in the desktop app.",
     "acceptedSeal": "Accepted",
     "abilityPlan": "Ability leveling order",
-    "abilityUnlock": "Unlock"
+    "abilityUnlock": "Unlock",
+    "skillAbility": "Ability",
+    "skillPoints": "ability points"
   }
 }

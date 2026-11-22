@@ -164,7 +164,22 @@ function skillLabel(step) {
 function skillCard(build, hero) {
   const steps = abilityPlan(build, hero);
   if (!steps.length) return '';
-  return `<section class="card skill-plan"><h2>${t('abilityPlan')}</h2><ol>${steps.map((s) => `<li><b>${s.slot} · ${esc(s.name)}</b><small>${skillLabel(s)}</small></li>`).join('')}</ol></section>`;
+  const rows = hero.abilityDetails
+    .map((ability, index) => {
+      const cells = steps
+        .map((step) => {
+          if (step.slot !== index + 1) return '<td></td>';
+          const cost = [0, 1, 2, 5][step.tier];
+          const label = cost
+            ? skillLabel(step) + ' · ' + cost + ' ' + t('skillPoints')
+            : t('abilityUnlock');
+          return `<td><span class="skill-mark ${cost ? '' : 'skill-open'}" title="${esc(label)}" aria-label="${esc(label)}">${cost || '◆'}</span></td>`;
+        })
+        .join('');
+      return `<tr><th scope="row"><div>${ability.icon ? `<img src="${esc(ability.icon)}" alt="" loading="lazy">` : ''}<span>${esc(ability.name)}</span></div></th>${cells}</tr>`;
+    })
+    .join('');
+  return `<section class="card skill-plan"><h2 id="skill-heading">${t('abilityPlan')}</h2><p class="skill-legend"><b>◆</b> ${t('abilityUnlock')} <span>1 / 2 / 5</span> ${t('skillPoints')}</p><div class="skill-scroll" tabindex="0" role="region" aria-labelledby="skill-heading"><table aria-labelledby="skill-heading"><thead><tr><th scope="col">${t('skillAbility')}</th>${steps.map((_, i) => `<th scope="col">${i + 1}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></section>`;
 }
 function result(b, stale) {
   const h = hero(b.hero),
