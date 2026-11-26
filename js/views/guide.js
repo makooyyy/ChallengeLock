@@ -1,7 +1,10 @@
 import { renderLibrary, loadGuideData } from './guide-library.js';
 import { objects } from './map-events.js';
 import { renderTimeline } from './timeline.js';
+import { renderBeginner } from './beginner-fieldbook.js';
 const sections = [
+  ['beginner', 'Для новичков', 'Getting started'],
+  ['heroes', 'Герои', 'Heroes'],
   ['counters', 'Контрпредметы', 'Hero counters'],
   ['timeline', 'Таймлайн матча', 'Match timeline'],
   ['timings', 'Тайминги карты', 'Map timings'],
@@ -27,6 +30,10 @@ export async function renderGuide(panel, items, lang, heroes, getBuild) {
       panel.querySelector('[aria-pressed=true]').focus();
     }
   };
+  if (section === 'beginner') {
+    renderBeginner(root, lang);
+    return;
+  }
   if (section === 'timeline') {
     renderTimeline(root, lang);
     return;

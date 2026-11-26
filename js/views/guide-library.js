@@ -1,4 +1,5 @@
 import { setupComparison } from './item-comparison.js';
+import { renderHeroes } from './hero-fieldbook.js';
 const profiles = {
   bullets: ['bullet-resilience', 'metal-skin', 'disarming-hex'],
   spirit: ['spirit-resilience', 'spirit-shielding', 'warp-stone'],
@@ -243,7 +244,9 @@ export function renderLibrary(panel, section, heroes, items, lang, getBuild) {
   const tile = (x, note = '') =>
     `<button type="button" class="field-item ${x.branch}" data-tip="${esc(x.id)}" aria-haspopup="dialog"><img src="${pic(x.id)}" alt="" loading="lazy"><span><b>${esc(x.name)}</b><small>${x.cost.toLocaleString(lang)} ${l('душ', 'souls')}</small></span></button>${note ? `<p>${esc(note)}</p>` : ''}`;
   let compare;
-  if (section === 'counters') {
+  if (section === 'heroes') {
+    renderHeroes(root, heroes, byId, lang, esc, tile);
+  } else if (section === 'counters') {
     const h = heroes.find((x) => x.id === heroId) || heroes[0],
       [base, slot] = matchups[h.id] || ['spirit', 0],
       key = threat || base;

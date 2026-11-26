@@ -1599,3 +1599,34 @@ body.desktop .titlebar {
   color: #fff3df;
   background: #34292b;
 }
+
+.hero-dossier > * + *,
+.guide-content > .hero-dossier {
+  margin-block-start: 1rem;
+}
+.hero-dossier ol {
+  padding-inline-start: 1.5rem;
+}
+.hero-dossier .guide-portrait {
+  min-height: 10rem;
+}
+.guide-sheet .rookie-step {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  margin-block: 0.65rem;
+  line-height: 1.45;
+}
+.guide-sheet .rookie-step input {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+.guide-sheet [data-quiz] {
+  display: grid;
+  gap: 0.9rem;
+}
+.guide-sheet [data-quiz] fieldset {
+  min-width: 0;
+  padding: 0.6rem 0.9rem;
+}

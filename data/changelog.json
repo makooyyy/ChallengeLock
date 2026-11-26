@@ -1,6 +1,24 @@
 {
-  "installerVersion": "1.41.0",
+  "installerVersion": "1.42.0",
   "releases": [
+    {
+      "version": "1.39.0",
+      "date": "2026-11-26",
+      "title": {
+        "ru": "Досье героев и школа новичка",
+        "en": "Hero dossiers and beginner training"
+      },
+      "items": {
+        "ru": [
+          "Досье 42 героев с фильтрами, тренировками, примером матчапа и покупками по этапам игры.",
+          "Первые десять минут, словарь, движение, чтение интерфейса и мини-викторина с памятным знаком."
+        ],
+        "en": [
+          "Explore 42 hero dossiers with filters, drills, a matchup and purchases by phase.",
+          "Practice your first ten minutes, movement and HUD reading, learn terms and earn a quiz badge."
+        ]
+      }
+    },
     {
       "version": "1.38.0",
       "date": "2026-11-26",

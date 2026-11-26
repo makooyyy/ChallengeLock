@@ -833,6 +833,32 @@ try {
   const timelinePage = await browser.newPage();
   await timelinePage.clock.install();
   await timelinePage.goto(origin + '/?tab=guide');
+  await timelinePage.locator('[data-section="heroes"]').click();
+  const dossier = timelinePage.locator('[data-dossier]');
+  assert.equal(await dossier.locator('option').count(), 42);
+  await dossier.selectOption('bebop');
+  assert.match(await timelinePage.locator('.hero-dossier').innerText(), /Sticky Bomb/);
+  await timelinePage.locator('.hero-dossier [data-tip]').first().click();
+  assert(await timelinePage.locator('.field-tooltip').isVisible());
+  await timelinePage.keyboard.press('Escape');
+  await timelinePage.selectOption('[data-filter-hero="role"]', 'gun');
+  assert.equal(await dossier.locator('option[value="bebop"]').count(), 0);
+  await timelinePage.click('[data-section="beginner"]');
+  await timelinePage.check('[data-step="0"]');
+  for (const [n, answer] of [0, 1, 0].entries())
+    await timelinePage.check('[name="q' + n + '"][value="' + answer + '"]');
+  await timelinePage.click('[data-quiz] button');
+  assert.match(
+    await timelinePage.locator('.guide-content [role="status"]').innerText(),
+    /Первый выход|First Deployment/,
+  );
+  await timelinePage.reload();
+  await timelinePage.click('[data-section="beginner"]');
+  assert(await timelinePage.locator('[data-step="0"]').isChecked());
+  assert.match(
+    await timelinePage.locator('.guide-content [role="status"]').innerText(),
+    /Первый выход|First Deployment/,
+  );
   await timelinePage.evaluate(async () => {
     const { RT } = await import('/js/state.js');
     RT.build = { purchased: ['compress-cooldown'] };

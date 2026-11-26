@@ -2,7 +2,7 @@
 // CATALOG_VERSION is rewritten automatically by scripts/sync-catalog.mjs.
 const CATALOG_VERSION = '6c5d33f1af6788bd';
 const PREFIX = 'challengelock:' + self.registration.scope + ':';
-const VERSION = PREFIX + 'v78:' + CATALOG_VERSION;
+const VERSION = PREFIX + 'v79:' + CATALOG_VERSION;
 const FILES = [
   './',
   'index.html',
@@ -18,6 +18,8 @@ const FILES = [
   'js/ui-kit.js',
   'js/views/updates.js',
   'js/views/guide.js',
+  'js/views/hero-fieldbook.js',
+  'js/views/beginner-fieldbook.js',
   'js/views/timeline.js',
   'js/views/map-events.js',
   'js/views/challenge-tips.js',
