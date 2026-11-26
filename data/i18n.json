@@ -412,7 +412,8 @@
     "recap.pass": "Подтверждено статистикой",
     "recap.fail": "Не выполнено по статистике",
     "recap.marked": "Отмечено вручную",
-    "recap.unknown": "Без подтверждения"
+    "recap.unknown": "Без подтверждения",
+    "tab.guide": "Справочник"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -827,6 +828,7 @@
     "recap.pass": "Verified by stats",
     "recap.fail": "Failed according to stats",
     "recap.marked": "Marked manually",
-    "recap.unknown": "Unconfirmed"
+    "recap.unknown": "Unconfirmed",
+    "tab.guide": "Field guide"
   }
 }

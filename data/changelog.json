@@ -1,6 +1,26 @@
 {
-  "installerVersion": "1.39.0",
+  "installerVersion": "1.40.0",
   "releases": [
+    {
+      "version": "1.37.0",
+      "date": "2026-11-22",
+      "title": {
+        "ru": "Полевой справочник",
+        "en": "Field guide"
+      },
+      "items": {
+        "ru": [
+          "Подбор контрпредметов для 42 героев и советы по игровым ситуациям.",
+          "Каталог из 156 предметов в стиле магазина Deadlock с поиском, фильтрами и карточками характеристик.",
+          "Тайминги карты показывают первое появление и считают следующее от момента зачистки."
+        ],
+        "en": [
+          "Matchup purchases for 42 heroes and advice for common situations.",
+          "Browse 156 items in a shop-style catalog with filters, search and detailed tooltips.",
+          "See first spawns and calculate respawns from the time of a clear."
+        ]
+      }
+    },
     {
       "version": "1.36.0",
       "date": "2026-11-22",

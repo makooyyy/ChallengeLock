@@ -34,6 +34,7 @@ import { newSeed, dailySeed } from './rng.js';
 import { validateData, normalizeState, options, GAME_MODES } from './validation.js';
 import { parseHash, linkFor, setHash, copy, drawCard } from './share.js';
 import { checkForUpdates } from './update-check.js';
+import { renderGuide } from './views/guide.js';
 import { releasesOf, siteVersionOf, renderUpdates } from './views/updates.js';
 import {
   $,
@@ -53,7 +54,7 @@ import {
 const H = (id) => RT.data.heroes.find((h) => h.id === id),
   C = (id) => RT.data.challenges.find((c) => c.id === id);
 const DIFFS = Object.keys(DIFF);
-const TABS = ['roulette', 'build', 'ban', 'custom', 'history', 'updates'];
+const TABS = ['roulette', 'build', 'ban', 'custom', 'history', 'guide', 'updates'];
 // Present only inside the Electron shell; undefined in a normal browser tab.
 const desktop = globalThis.challengeLockDesktop;
 // Why a roll produced nothing, phrased as an i18n key the player can act on.
@@ -241,6 +242,7 @@ function show(tab) {
     ban: viewBan,
     custom: viewCustom,
     history: viewHistory,
+    guide: () => renderGuide($('#p-guide'), RT.data.items, S.lang, RT.data.heroes),
     updates: viewUpdates,
   };
   const view = views[tab];
