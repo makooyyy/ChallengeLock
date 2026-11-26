@@ -413,7 +413,11 @@
     "recap.fail": "Не выполнено по статистике",
     "recap.marked": "Отмечено вручную",
     "recap.unknown": "Без подтверждения",
-    "tab.guide": "Справочник"
+    "tab.guide": "Справочник",
+    "tipHow": "Как выполнить",
+    "tipReturn": "Вернуться к контракту",
+    "tipBrowse": "Весь справочник",
+    "tipRelated": "По твоему контракту"
   },
   "en": {
     "tab.roulette": "Roulette",
@@ -829,6 +833,10 @@
     "recap.fail": "Failed according to stats",
     "recap.marked": "Marked manually",
     "recap.unknown": "Unconfirmed",
-    "tab.guide": "Field guide"
+    "tab.guide": "Field guide",
+    "tipHow": "How to complete",
+    "tipReturn": "Back to contract",
+    "tipBrowse": "Browse field guide",
+    "tipRelated": "For your contract"
   }
 }

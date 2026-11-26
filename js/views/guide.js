@@ -1,72 +1,9 @@
 import { renderLibrary, loadGuideData } from './guide-library.js';
-const objects = [
-  {
-    name: ['Коробки', 'Crates'],
-    first: 180,
-    delay: [180],
-    url: 'Crate',
-    hint: [
-      'Обычные точки на карте. Выбери отдельную зону для исключений.',
-      'Standard map locations. Select a special area for exceptions.',
-    ],
-  },
-  {
-    name: ['Мид-босс', 'Mid Boss'],
-    first: 0,
-    delay: [420, 360, 300],
-    url: 'Midboss',
-    hint: [
-      'На карте с начала матча. Повторный отсчёт начинается после убийства.',
-      'Present from match start. The next timer starts on the kill.',
-    ],
-  },
-  {
-    name: ['Средний лагерь', 'Medium camp'],
-    first: 300,
-    delay: [290],
-    url: 'Haunt',
-    hint: ['Считай от полной зачистки лагеря.', 'Count from clearing the entire camp.'],
-  },
-  {
-    name: ['Sinner’s Sacrifice', 'Sinner’s Sacrifice'],
-    first: 480,
-    delay: [300],
-    url: 'Sinner%27s_Sacrifice',
-    hint: [
-      'Для одиночного автомата считай от разрушения; для смешанного лагеря — от полной зачистки.',
-      'Count from machine destruction at a solo site, or the full clear at a hybrid camp.',
-    ],
-  },
-  {
-    name: ['Коробки над боссом', 'Crates above Mid Boss'],
-    first: 600,
-    delay: [180],
-    url: 'Crate',
-    hint: [
-      'Комната под Times Squares над ямой босса.',
-      'The room below Times Squares above the pit.',
-    ],
-  },
-  {
-    name: ['Башня и площадь', 'Tower and plaza'],
-    first: 300,
-    delay: [180],
-    url: 'Crate',
-    hint: ['Верх колокольни и Sunken Plaza.', 'Top of the Bell Tower and Sunken Plaza.'],
-  },
-  {
-    name: ['Коробки в тоннелях', 'Tunnel crates'],
-    first: 300,
-    delay: [300],
-    url: 'Crate',
-    hint: [
-      'В тоннелях интервал дольше, чем у обычных коробок.',
-      'Tunnel crates take longer than regular crates.',
-    ],
-  },
-];
+import { objects } from './map-events.js';
+import { renderTimeline } from './timeline.js';
 const sections = [
   ['counters', 'Контрпредметы', 'Hero counters'],
+  ['timeline', 'Таймлайн матча', 'Match timeline'],
   ['timings', 'Тайминги карты', 'Map timings'],
   ['items', 'Каталог предметов', 'Item catalog'],
   ['situations', 'Игровые ситуации', 'Playbook'],
@@ -76,7 +13,7 @@ let section = 'counters',
   kill = 0,
   minutes = 12,
   seconds = 0;
-export async function renderGuide(panel, items, lang, heroes) {
+export async function renderGuide(panel, items, lang, heroes, getBuild) {
   const idx = lang === 'en' ? 1 : 0,
     l = (a, b) => (idx ? b : a);
   panel.innerHTML = `<div class="guide-head"><h1>${l('Полевой справочник', 'Field guide')}</h1><p>${l('Покупки под угрозу, цели на карте и решения по ходу матча.', 'Matchup purchases, map objectives and decisions during a match.')}</p></div>
@@ -86,14 +23,18 @@ export async function renderGuide(panel, items, lang, heroes) {
     const b = e.target.closest('button');
     if (b) {
       section = b.dataset.section;
-      renderGuide(panel, items, lang, heroes);
+      renderGuide(panel, items, lang, heroes, getBuild);
       panel.querySelector('[aria-pressed=true]').focus();
     }
   };
+  if (section === 'timeline') {
+    renderTimeline(root, lang);
+    return;
+  }
   if (section !== 'timings') {
     try {
       await loadGuideData();
-      if (panel.contains(root)) renderLibrary(panel, section, heroes, items, lang);
+      if (panel.contains(root)) renderLibrary(panel, section, heroes, items, lang, getBuild);
     } catch {
       if (panel.contains(root))
         root.textContent = l(
@@ -129,14 +70,14 @@ export async function renderGuide(panel, items, lang, heroes) {
     if (b) {
       object = Number(b.dataset.object);
       kill = 0;
-      renderGuide(panel, items, lang, heroes);
+      renderGuide(panel, items, lang, heroes, getBuild);
       panel.querySelector('[data-object][aria-pressed=true]').focus();
     }
   };
   root.onchange = (e) => {
     if (e.target.matches('select')) {
       kill = Number(e.target.value);
-      renderGuide(panel, items, lang, heroes);
+      renderGuide(panel, items, lang, heroes, getBuild);
       panel.querySelector('.guide-content select').focus();
     }
   };

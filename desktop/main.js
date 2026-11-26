@@ -8,6 +8,7 @@ const {
   screen,
   ipcMain,
   nativeImage,
+  Notification,
   dialog,
 } = require('electron');
 let autoUpdater = null;
@@ -219,6 +220,7 @@ function createWindow() {
     backgroundColor: '#292025',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      backgroundThrottling: false,
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -763,6 +765,15 @@ async function refreshAccount() {
   monitor.configure(matchSettings.enabled, accountId);
 }
 ipcMain.handle('desktop:choose-match', (_event, key, id) => monitor.choose(key, id));
+ipcMain.on('desktop:timeline-alert', (event, message) => {
+  if (
+    event.sender !== mainWindow?.webContents ||
+    typeof message !== 'string' ||
+    !Notification?.isSupported()
+  )
+    return;
+  new Notification({ title: 'ChallengeLock', body: message.slice(0, 400), silent: true }).show();
+});
 ipcMain.handle('desktop:match-state', () => matchSnapshot);
 ipcMain.handle('desktop:match-settings', async (_event, enabled) => {
   matchSettings = { enabled: enabled === true };

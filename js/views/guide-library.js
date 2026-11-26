@@ -1,3 +1,4 @@
+import { setupComparison } from './item-comparison.js';
 const profiles = {
   bullets: ['bullet-resilience', 'metal-skin', 'disarming-hex'],
   spirit: ['spirit-resilience', 'spirit-shielding', 'warp-stone'],
@@ -232,15 +233,16 @@ let heroId = 'haze',
   query = '',
   branch = 'all',
   dictionary;
-export function renderLibrary(panel, section, heroes, items, lang) {
+export function renderLibrary(panel, section, heroes, items, lang, getBuild) {
   const i = lang === 'en' ? 1 : 0,
     l = (a, b) => (i ? b : a),
     byId = new Map(items.map((x) => [x.id, x]));
   const root = panel.querySelector('.guide-content'),
-    rerender = () => renderLibrary(panel, section, heroes, items, lang);
+    rerender = () => renderLibrary(panel, section, heroes, items, lang, getBuild);
   const pic = (id) => 'assets/guide-items/' + id + '.webp';
   const tile = (x, note = '') =>
     `<button type="button" class="field-item ${x.branch}" data-tip="${esc(x.id)}" aria-haspopup="dialog"><img src="${pic(x.id)}" alt="" loading="lazy"><span><b>${esc(x.name)}</b><small>${x.cost.toLocaleString(lang)} ${l('душ', 'souls')}</small></span></button>${note ? `<p>${esc(note)}</p>` : ''}`;
+  let compare;
   if (section === 'counters') {
     const h = heroes.find((x) => x.id === heroId) || heroes[0],
       [base, slot] = matchups[h.id] || ['spirit', 0],
@@ -307,6 +309,7 @@ export function renderLibrary(panel, section, heroes, items, lang) {
       ['misc', l('Разное', 'Miscellaneous'), ['regen', 'out_of_combat_regen', 'healing']],
     ];
     root.innerHTML = `<section class="shop-index"><div class="shop-tools"><div>${categories.map(([k, name]) => `<button data-filter="${k}" aria-pressed="${branch === k}">${name}</button>`).join('')}</div><input type="search" aria-label="${l('Поиск предмета', 'Find an item')}" placeholder="${l('Поиск предмета', 'Find an item')}" value="${esc(query)}"></div><div class="market-wrap"><div class="market-grid"></div></div></section>`;
+    compare = setupComparison(root, items, dictionary, lang, getBuild, esc);
     const groups = ['weapon', 'spirit', 'vitality'];
     const draw = () => {
       const q = query.trim().toLowerCase(),
@@ -395,6 +398,17 @@ export function renderLibrary(panel, section, heroes, items, lang) {
     tip.setAttribute('aria-label', x.name);
     tip.innerHTML = `<header><img src="${pic(x.id)}" alt=""><div><h3>${esc(x.name)}</h3><b>◈ ${x.cost.toLocaleString(lang)}</b></div><button aria-label="${l('Закрыть', 'Close')}">×</button></header><div class="field-tip-body">${data.sections.map((s) => `<section><h4>${{ innate: l('Характеристики', 'Attributes'), passive: l('Пассивное', 'Passive'), active: l('Активное', 'Active') }[s.kind] || esc(s.kind)}</h4>${s.blocks.map((b) => `${b.desc ? `<p>${esc(b.desc)}</p>` : ''}${b.stats.map(([k, v]) => `<div class="field-stat"><b>${esc(v)}</b> ${esc(k)}</div>`).join('')}`).join('')}</section>`).join('')}${x.components.length ? `<section><h4>${l('Компоненты', 'Components')}</h4>${x.components.map((id) => (byId.get(id) ? `<span class="field-component"><img src="${pic(id)}" alt="">${esc(byId.get(id).name)}</span>` : '')).join('')}</section>` : ''}</div>`;
     tip.style.maxHeight = '';
+    if (compare) {
+      const pick = document.createElement('button');
+      pick.className = 'compare-pick';
+      pick.textContent = l('Добавить к сравнению', 'Add to comparison');
+      pick.onclick = (e) => {
+        e.stopPropagation();
+        hide();
+        compare(x.id);
+      };
+      tip.querySelector('header').after(pick);
+    }
     const r = button.getBoundingClientRect(),
       w = tip.offsetWidth,
       h = tip.offsetHeight;

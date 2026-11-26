@@ -1461,3 +1461,141 @@ body.desktop .titlebar {
   outline: 2px solid var(--tone);
   outline-offset: -2px;
 }
+
+.condition-result .condition-tip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 4px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+  background: var(--surface);
+  font-size: 12px;
+}
+.contract-advice {
+  max-width: 760px;
+}
+.contract-advice h2 {
+  margin-block: 10px;
+}
+.contract-advice .advice-rule {
+  padding-block: 12px;
+  border-block: var(--rule);
+}
+.tip-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block-start: 18px;
+}
+.contract-recommendations {
+  margin-bottom: 16px;
+}
+
+.match-timeline {
+  max-width: 900px;
+}
+.timeline-clock,
+.timeline-form,
+.match-timeline fieldset {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.timeline-clock {
+  padding: 16px;
+  background: #362629;
+  color: #f4e2c8;
+  border: 3px double #93785d;
+  justify-content: space-between;
+}
+.timeline-clock strong {
+  font:
+    bold 38px Georgia,
+    serif;
+  font-variant-numeric: tabular-nums;
+}
+.timeline-form input {
+  width: 7em;
+}
+.match-timeline fieldset {
+  margin-block: 16px;
+  padding: 10px;
+  border: 1px solid var(--line);
+}
+.match-timeline label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.match-timeline input[type='checkbox'] {
+  min-height: 0;
+  accent-color: var(--accent);
+}
+.match-timeline ol {
+  padding: 0;
+  margin: 0;
+}
+.match-timeline li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.match-timeline li time {
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  min-width: 4em;
+  color: var(--accent);
+}
+.match-timeline li button {
+  margin-inline-start: auto;
+}
+
+.purchase-comparison {
+  margin-bottom: 14px;
+}
+.purchase-comparison summary {
+  cursor: pointer;
+  font:
+    bold 22px Georgia,
+    serif;
+}
+.compare-selects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.purchase-comparison table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  overflow-wrap: anywhere;
+}
+.purchase-comparison th,
+.purchase-comparison td {
+  text-align: left;
+  vertical-align: top;
+  padding: 9px 6px;
+  border-bottom: 1px solid var(--line);
+}
+.purchase-comparison th img {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+.purchase-comparison .compare-section {
+  background: var(--soft);
+}
+.compare-pick {
+  margin: 8px 14px;
+  padding: 6px 10px;
+  border: 1px solid #c4a68b;
+  color: #fff3df;
+  background: #34292b;
+}

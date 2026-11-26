@@ -79,6 +79,14 @@ try {
       };
     });
   const initial = (await state()).cur;
+  for (const condition of initial.conds) {
+    const link = page.locator('#p-roulette [data-condition-tip="' + condition + '"]');
+    await link.click();
+    assert(await page.locator('#tip-title').isVisible());
+    await page.click('[data-tip-return]');
+    assert(await link.evaluate((el) => document.activeElement === el));
+    assert.deepEqual((await state()).cur, initial);
+  }
   await page.click('[data-tab="history"]');
   assert.equal(await page.locator('.journal-record').count(), 0);
   await page.click('[data-tab="roulette"]');
@@ -822,6 +830,54 @@ try {
   });
   assert.equal(await compactPage.evaluate(() => window.__reportedBuild.complete), true);
   assert.equal(await compactPage.evaluate(() => window.__reportedBuild.nextItem), null);
+  const timelinePage = await browser.newPage();
+  await timelinePage.clock.install();
+  await timelinePage.goto(origin + '/?tab=guide');
+  await timelinePage.evaluate(async () => {
+    const { RT } = await import('/js/state.js');
+    RT.build = { purchased: ['compress-cooldown'] };
+  });
+  await timelinePage.click('[data-section="items"]');
+  await timelinePage.locator('[data-tip="superior-cooldown"]').click();
+  await timelinePage.locator('.compare-pick').click();
+  await timelinePage.selectOption('[data-side="1"]', 'transcendent-cooldown');
+  const prices = timelinePage
+    .locator('.purchase-comparison tr')
+    .filter({ hasText: /Осталось заплатить|Still to pay/ });
+  assert.match(await prices.locator('td').first().textContent(), /1\D?600/);
+  assert.match(await prices.locator('td').last().textContent(), /4\D?800/);
+  assert((await timelinePage.locator('.purchase-comparison .compare-section').count()) > 0);
+  await timelinePage.evaluate(async () => {
+    (await import('/js/state.js')).RT.build = null;
+  });
+  await timelinePage.click('[data-section="timeline"]');
+  await timelinePage.click('[data-run]');
+  await timelinePage.check('[data-track="sinner"]');
+  await timelinePage.fill('.timeline-form input', '07:29');
+  await timelinePage.click('.timeline-form button');
+  await timelinePage.clock.runFor(1700);
+  assert.match(await timelinePage.locator('#toast').textContent(), /Sinner.*30/);
+  await timelinePage.clock.runFor(20000);
+  assert.match(await timelinePage.locator('#toast').textContent(), /Sinner.*10/);
+  await timelinePage.clock.runFor(10000);
+  await timelinePage.click('[data-clear="sinner"]');
+  assert.match(await timelinePage.locator('[data-event="sinner"] time').textContent(), /^13:0/);
+  await timelinePage.reload();
+  await timelinePage.click('[data-section="timeline"]');
+  assert(await timelinePage.locator('[data-track="sinner"]').isChecked());
+  assert(await timelinePage.locator('[data-clear="sinner"]').isDisabled());
+  await timelinePage.evaluate(async () => {
+    const { syncTimeline } = await import('/js/views/timeline.js');
+    const startedAt = Date.now() - 60000;
+    syncTimeline({ phase: 'playing', startedAt });
+    syncTimeline({ phase: 'playing', startedAt });
+  });
+  assert.match(await timelinePage.locator('[data-game-clock]').innerText(), /^1:0/);
+  await timelinePage.evaluate(async () =>
+    (await import('/js/views/timeline.js')).syncTimeline({ phase: 'ended' }),
+  );
+  assert.equal(await timelinePage.locator('[data-game-clock]').innerText(), '0:00');
+  await timelinePage.close();
   await desk.close();
   assert.deepEqual(errors, []);
   console.log(

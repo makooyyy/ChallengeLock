@@ -1,6 +1,26 @@
 {
-  "installerVersion": "1.40.0",
+  "installerVersion": "1.41.0",
   "releases": [
+    {
+      "version": "1.38.0",
+      "date": "2026-11-26",
+      "title": {
+        "ru": "Справочник в матче",
+        "en": "In-match field guide"
+      },
+      "items": {
+        "ru": [
+          "Советы для всех 124 условий открываются прямо из контракта.",
+          "Таймлайн напоминает о выбранных целях за 30 и 10 секунд; возрождение можно отсчитывать от зачистки.",
+          "В каталоге можно сравнить два предмета по эффектам, характеристикам и доплате с учётом купленных компонентов."
+        ],
+        "en": [
+          "Open practical tips for all 124 conditions from your contract.",
+          "Track selected map objectives with 30- and 10-second reminders and clear-based respawns.",
+          "Compare item effects, stats, recipes and remaining prices after purchased components."
+        ]
+      }
+    },
     {
       "version": "1.37.0",
       "date": "2026-11-22",

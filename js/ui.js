@@ -34,6 +34,8 @@ import { newSeed, dailySeed } from './rng.js';
 import { validateData, normalizeState, options, GAME_MODES } from './validation.js';
 import { parseHash, linkFor, setHash, copy, drawCard } from './share.js';
 import { checkForUpdates } from './update-check.js';
+import { challengeTips } from './views/challenge-tips.js';
+import { syncTimeline, watchTimeline } from './views/timeline.js';
 import { renderGuide } from './views/guide.js';
 import { releasesOf, siteVersionOf, renderUpdates } from './views/updates.js';
 import {
@@ -223,6 +225,27 @@ function paintCatalog() {
     el.append(a);
   }
 }
+let tipId = null;
+function viewFieldGuide() {
+  const panel = $('#p-guide');
+  const current = RT.cur;
+  const ids = (current?.conds || []).filter((id) => challengeTips.has(id));
+  const active = ids.includes(tipId) ? C(tipId) : null;
+  if (active) {
+    const hero = H(current.hero);
+    panel.innerHTML = `<div class="guide-head"><h1>${t('tab.guide')}</h1></div><article class="guide-sheet contract-advice"><small class="eyebrow">${esc(hero.name)} · ${esc(modeName(current))}</small><h2 tabindex="-1" id="tip-title">${esc(loc(active.name))}</h2><p class="advice-rule">${esc(loc(active.desc))}</p><h3>${t('tipHow')}</h3><p>${esc(loc(challengeTips.get(active.id)))}</p><div class="tip-actions"><button class="pb" data-tip-return="${esc(active.id)}">${t('tipReturn')}</button><button data-tab="guide">${t('tipBrowse')}</button></div></article>`;
+    return;
+  }
+  panel.innerHTML = '<div class="guide-standard"></div>';
+  const guide = panel.firstElementChild;
+  renderGuide(guide, RT.data.items, S.lang, RT.data.heroes, () => RT.build);
+  if (ids.length) {
+    const box = document.createElement('section');
+    box.className = 'guide-sheet contract-recommendations';
+    box.innerHTML = `<h2>${t('tipRelated')}</h2><div class="tip-actions">${ids.map((id) => `<button data-condition-tip="${esc(id)}">${esc(loc(C(id).name))}</button>`).join('')}</div>`;
+    panel.prepend(box);
+  }
+}
 function show(tab) {
   RT.tab = tab;
   const context = document.querySelector('.context-name [data-i18n]');
@@ -242,7 +265,7 @@ function show(tab) {
     ban: viewBan,
     custom: viewCustom,
     history: viewHistory,
-    guide: () => renderGuide($('#p-guide'), RT.data.items, S.lang, RT.data.heroes),
+    guide: viewFieldGuide,
     updates: viewUpdates,
   };
   const view = views[tab];
@@ -312,7 +335,7 @@ function paintReels(res, animate) {
             )}</div><div><b>${t('whoNext')}</b><small>${activeHeroes().length} ${t('heroesReady')}</small></div></div>`;
     } else
       el.innerHTML = entry
-        ? `<div class="condition-result"><h3>${esc(loc(entry.name))}</h3><p>${esc(loc(entry.desc))}</p></div>`
+        ? `<div class="condition-result"><h3>${esc(loc(entry.name))}</h3><p>${esc(loc(entry.desc))}</p>${challengeTips.has(entry.id) ? `<button data-condition-tip="${esc(entry.id)}" class="condition-tip">${t('tipHow')}${icon('arrow', 14)}</button>` : ''}</div>`
         : `<div class="condition-empty">${res ? t('unusedCondition') : t('conditionPlaceholder')}</div>`;
     const lock = $(`.reel[data-i="${i}"] .lk`);
     lock.innerHTML =
@@ -851,6 +874,7 @@ function matchStatus() {
 }
 function updateMatch(state) {
   if (!state) return;
+  syncTimeline(state);
   const previous = RT.match;
   RT.match = state;
   if (RT.ban && previous?.phase === 'playing' && ['ended', 'interrupted'].includes(state.phase)) {
@@ -1139,7 +1163,20 @@ function bind() {
       const next = d.journalRepeat !== undefined ? { ...x, seed: crypto.randomUUID(), r: 0 } : x;
       return fromHash(parseHash(new URL(linkFor(next)).hash));
     }
+    if (d.conditionTip && RT.cur?.conds.includes(d.conditionTip)) {
+      tipId = d.conditionTip;
+      show('guide');
+      $('#tip-title')?.focus();
+      return;
+    }
+    if (d.tipReturn) {
+      tipId = null;
+      show('roulette');
+      document.querySelector('[data-condition-tip="' + CSS.escape(d.tipReturn) + '"]')?.focus();
+      return;
+    }
     if (d.tab) {
+      tipId = null;
       show(d.tab);
       if (b.id === 'configure-pool') $('#hero-search')?.focus();
 
@@ -1638,6 +1675,14 @@ export async function boot() {
   });
   // The shell detected a finished match and the player picked the outcome.
   desktop?.onShopAction?.((action, token) => shopAction(action, token, persist));
+  watchTimeline(
+    () => S.lang,
+    (message) => {
+      toast(message);
+      beep(660);
+      if (document.hidden || !document.hasFocus()) desktop?.timelineAlert?.(message);
+    },
+  );
   desktop?.onMatch?.(updateMatch);
   desktop?.matchState?.().then(updateMatch);
   desktop?.onOutcome?.((event) => {
