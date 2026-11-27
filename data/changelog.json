@@ -1,6 +1,26 @@
 {
-  "installerVersion": "1.42.0",
+  "installerVersion": "1.42.1",
   "releases": [
+    {
+      "version": "1.42.1",
+      "date": "2026-11-27",
+      "title": {
+        "ru": "Исправления контрактов и оверлея",
+        "en": "Contract tracking and overlay fixes"
+      },
+      "items": {
+        "ru": [
+          "Исправлены обработка пустой истории, разрывов соединения, смены аккаунта Steam и длинных списков матчей.",
+          "Оверлей подстраивается под содержимое и показывает отмеченные условия, режим и сложность.",
+          "Исправлены ссылки рулетки с номером игрока и сравнение предметов на узком экране."
+        ],
+        "en": [
+          "Fixed tracking after empty history responses, disconnects, Steam account changes and long match lists.",
+          "The overlay fits its content and displays checked conditions, mode and difficulty.",
+          "Fixed player numbers in share links and item comparison on narrow screens."
+        ]
+      }
+    },
     {
       "version": "1.39.0",
       "date": "2026-11-26",

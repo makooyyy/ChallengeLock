@@ -778,7 +778,7 @@ function overlayCard() {
         ${positions.map((p) => `<button type="button" class="overlay-pos ${p === s.position ? 'on' : ''}" data-overlay-pos="${p}" aria-pressed="${p === s.position}">${t('pos.' + p)}</button>`).join('')}
       </div>
       <label class="lab-field">${t('overlaySize')}<input type="range" id="overlay-size" min="70" max="160" step="1" value="${Math.round(((s.width || 360) / 360) * 100)}"></label>
-      <div class="overlay-size-readout">${s.width || 360} × ${s.height || 440}</div>
+      <div class="overlay-size-readout">${s.bounds?.width || s.width || 360} × ${s.height || (s.mode === 'shop' ? 440 : S.lang === 'en' ? 'Auto' : 'Авто')}</div>
       ${desktop?.shopTraining ? `<div class="shop-test"><button id="shop-training">${t('shopTest')}</button><small id="shop-signal"></small></div>` : ''}
       <button id="overlay-reset" class="ghost">${t('overlayReset')}</button>
       <label class="chk" ${s.mode === 'shop' ? 'hidden' : ''}><input type="checkbox" id="overlay-clickthrough" ${s.clickThrough ? 'checked' : ''}>${t('overlayClickThrough')}</label>
@@ -899,7 +899,14 @@ function updateMatch(state) {
     const timer = $('#tm');
     if (timer) timer.textContent = mmss(RT.timer.ms);
     desktop?.reportTimer?.(mmss(RT.timer.ms));
-    if (!state.candidates?.length && ['done', 'fail'].includes(state.outcome))
+    // Only older shells sent a verified verdict without a candidate-list field.
+    // Current shells always provide an array: even an empty list is not a verdict.
+    if (
+      state.phase === 'ended' &&
+      state.api === 'verified' &&
+      !Object.hasOwn(state, 'candidates') &&
+      ['done', 'fail'].includes(state.outcome)
+    )
       finish(state.outcome, 'match');
     else if (
       previous?.phase !== state.phase ||
@@ -1393,7 +1400,8 @@ function bind() {
       if (player) player.disabled = S.friend.same;
       persist();
     } else if (i.id === 'fpl') {
-      S.friend.player = Math.max(1, Math.min(9, +i.value || 1));
+      S.friend.player = Math.max(1, Math.min(9, Math.trunc(i.valueAsNumber) || 1));
+      i.value = String(S.friend.player);
       persist();
     } else if (i.id === 'import-file') {
       importData(i.files?.[0]);
@@ -1424,15 +1432,15 @@ function bind() {
         clickThrough: $('#overlay-clickthrough')?.checked ?? RT.overlay.clickThrough,
         autoShow: $('#overlay-autoshow')?.checked ?? RT.overlay.autoShow,
         autoHide: $('#overlay-autohide')?.checked ?? RT.overlay.autoHide,
-        position: $('#overlay-position')?.value ?? RT.overlay.position,
+        ...(i.id === 'overlay-position' ? { position: i.value } : {}),
         showHero: $('#overlay-show-hero')?.checked ?? RT.overlay.showHero,
         showConditions: $('#overlay-show-conditions')?.checked ?? RT.overlay.showConditions,
         showTimer: $('#overlay-show-timer')?.checked ?? RT.overlay.showTimer,
         showStatus: $('#overlay-show-status')?.checked ?? RT.overlay.showStatus,
         lockPosition: $('#overlay-lock')?.checked ?? RT.overlay.lockPosition,
         showBuild: $('#overlay-show-build')?.checked ?? RT.overlay.showBuild,
-        width: Number($('#overlay-width')?.value) || RT.overlay.width,
-        height: Number($('#overlay-height')?.value) || RT.overlay.height,
+        ...(i.id === 'overlay-width' ? { width: Number(i.value) } : {}),
+        ...(i.id === 'overlay-height' ? { height: Number(i.value) } : {}),
         resetPosition: i.id === 'overlay-reset',
       };
       RT.overlay = { ...RT.overlay, ...settings };

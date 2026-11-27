@@ -55,6 +55,23 @@ test('a match is a window between GameInProgress and the post-game state', () =>
   assert.equal(tracker.inMatch, false);
 });
 
+test('timestamped lines read together keep event times, even across a year boundary', () => {
+  const readAt = new Date(2027, 0, 1, 1, 0).getTime();
+  const tracker = createTracker();
+  const start = trackLine(tracker, '12/31 23:55:00 ChangeGameState: GameInProgress (7)', readAt);
+  assert.equal(start.at, new Date(2026, 11, 31, 23, 55).getTime());
+  const end = trackLine(tracker, '01/01 00:15:00 ChangeGameState: PostGame (8)', readAt);
+  assert.equal(end.at, new Date(2027, 0, 1, 0, 15).getTime());
+  assert.equal(end.durationMs, 20 * 60_000);
+});
+
+test('invalid timestamps fall back for live events but do not resurrect matches', () => {
+  const readAt = new Date(2026, 2, 2, 12, 5).getTime();
+  const malformed = '02/30 12:00:00 ChangeGameState: GameInProgress (7)';
+  assert.equal(trackLine(createTracker(), malformed, readAt).at, readAt);
+  assert.equal(recoverCurrentMatch([malformed], readAt - 600_000, readAt).inMatch, false);
+});
+
 test('every known spelling of the final state closes the match', () => {
   for (const name of ['PostGame', 'GameOver', 'game_over', 'MatchEnd', 'EndGame']) {
     const tracker = createTracker();

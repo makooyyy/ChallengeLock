@@ -30,8 +30,18 @@ function candidateInstalls(steamPath, libraries) {
 }
 
 function findInstall(exists, candidates) {
-  for (const candidate of candidates || []) if (exists(candidate)) return candidate;
-  return null;
+  // An uninstall can leave an empty directory or even an old console.log behind.
+  // Prefer actual game files; a log is useful evidence only if no install has them.
+  let logged = null;
+  for (const candidate of candidates || []) {
+    if (
+      exists(path.join(candidate, 'game', 'bin', 'win64', 'deadlock.exe')) ||
+      exists(path.join(candidate, 'game', 'citadel', 'gameinfo.gi'))
+    )
+      return candidate;
+    if (!logged && exists(logPathFor(candidate))) logged = candidate;
+  }
+  return logged;
 }
 
 function logPathFor(install) {

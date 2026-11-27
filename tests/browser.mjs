@@ -78,6 +78,60 @@ try {
         busy: RT.busy,
       };
     });
+  // Fractions typed into the numeric field must never escape into a generated link.
+  const sender = await browser.newPage({ reducedMotion: 'reduce' });
+  await sender.goto(origin);
+  await sender.click('.board-options summary');
+  await sender.uncheck('#fsame');
+  for (const [typed, expected] of [
+    ['0', '1'],
+    ['10', '9'],
+    ['1.5', '1'],
+  ]) {
+    await sender.fill('#fpl', typed);
+    await sender.press('#fpl', 'Tab');
+    assert.equal(await sender.inputValue('#fpl'), expected);
+  }
+  await sender.click('#spin');
+  await sender.waitForSelector('#accept-contract');
+  const generatedUrl = sender.url();
+  assert.equal(new URLSearchParams(new URL(generatedUrl).hash.slice(1)).get('p'), '1');
+  const contractSnapshot = (tab) =>
+    tab.evaluate(async () => {
+      const { RT, S } = await import('/js/state.js');
+      const { hero, conds, opts, player, seed, r, diff } = RT.cur;
+      return { hero, conds, opts, player, seed, r, diff, friend: S.friend };
+    });
+  const fresh = await browser.newPage();
+  await fresh.goto(generatedUrl);
+  await fresh.waitForSelector('#contract h2');
+  assert.deepEqual(await contractSnapshot(fresh), await contractSnapshot(sender));
+  await fresh.close();
+  await sender.close();
+  // Both long item names must remain selectable without horizontal page scrolling.
+  for (const lang of ['ru', 'en']) {
+    const mobile = await browser.newPage({ viewport: { width: 320, height: 844 } });
+    await mobile.goto(origin + '/?tab=guide');
+    await mobile.waitForSelector('[data-section="items"]');
+    if ((await mobile.locator('html').getAttribute('lang')) !== lang) await mobile.click('#lang');
+    await mobile.click('[data-section="items"]');
+    await mobile.click('.purchase-comparison summary');
+    await mobile.selectOption('[data-side="0"]', 'intensifying-magazine');
+    await mobile.selectOption('[data-side="1"]', 'spiritual-overflow');
+    const fits = await mobile.evaluate(() => {
+      const viewport = document.documentElement.clientWidth;
+      const [a, b] = [...document.querySelectorAll('.compare-selects select')].map((s) =>
+        s.getBoundingClientRect(),
+      );
+      return (
+        document.documentElement.scrollWidth <= viewport &&
+        [a, b].every((r) => r.width > 0 && r.left >= 0 && r.right <= viewport) &&
+        a.bottom <= b.top
+      );
+    });
+    assert(fits, `Comparison controls overflow or overlap on a 320px ${lang} screen`);
+    await mobile.close();
+  }
   const initial = (await state()).cur;
   for (const condition of initial.conds) {
     const link = page.locator('#p-roulette [data-condition-tip="' + condition + '"]');
@@ -663,6 +717,23 @@ try {
     await compactPage.evaluate(async () => (await import('/js/state.js')).RT.finished),
     false,
   );
+  for (const outcome of ['done', 'fail']) {
+    await compactPage.evaluate((outcome) => {
+      window.__match({
+        key: window.__contract.key,
+        phase: 'ended',
+        api: 'verified',
+        candidates: [],
+        outcome,
+        checks: [],
+      });
+    }, outcome);
+    assert.equal(
+      await compactPage.evaluate(async () => (await import('/js/state.js')).RT.finished),
+      false,
+      'An empty review cannot accept a result on behalf of the player',
+    );
+  }
   await compactPage.evaluate(() =>
     window.__match({
       key: window.__contract.key,
@@ -726,6 +797,7 @@ try {
     window.challengeLockDesktop = {
       onOverlay: (fn) => (window.__overlay = fn),
       onOverlayTimer: (fn) => (window.__timer = fn),
+      fitOverlay: (height) => (window.__fitHeight = height),
     };
   });
   overlayPage.on('pageerror', (e) => errors.push(e.message));
@@ -792,6 +864,46 @@ try {
     }),
   );
   assert(await overlayPage.locator('#build').isHidden());
+  for (const [lang, count, label] of [
+    ['en', 1, '1 condition'],
+    ['en', 2, '2 conditions'],
+    ['ru', 2, '2 условия'],
+    ['ru', 11, '11 условий'],
+    ['ru', 21, '21 условие'],
+  ]) {
+    await overlayPage.evaluate(
+      ({ lang, count }) =>
+        window.__overlay({
+          contract: {
+            key: 'a',
+            lang,
+            hero: 'Ivy',
+            mode: 'M',
+            difficulty: 'D',
+            conditions: Array.from({ length: count }, (_, i) => ({ name: 'C', checked: i === 0 })),
+          },
+          settings: {},
+        }),
+      { lang, count },
+    );
+    assert.equal(await overlayPage.locator('#counter').textContent(), label);
+    assert.equal(
+      await overlayPage.locator('#hero-meta').textContent(),
+      lang === 'en' ? 'Mode: M · Difficulty: D' : 'Режим: M · Сложность: D',
+    );
+    assert.equal(await overlayPage.locator('.condition.checked').count(), 1);
+    assert.equal(await overlayPage.locator('.condition-check:visible').count(), count);
+    assert.equal(
+      await overlayPage.locator('.condition.checked .condition-check').textContent(),
+      '✓',
+    );
+  }
+  await overlayPage.waitForFunction(() => window.__fitHeight > 440);
+  await overlayPage.evaluate(() =>
+    window.__overlay({ contract: { key: 'a', hero: 'Ivy', conditions: ['A'] }, settings: {} }),
+  );
+  await overlayPage.waitForFunction(() => window.__fitHeight > 80 && window.__fitHeight < 220);
+  assert.equal(await overlayPage.locator('.condition.checked').count(), 0);
   await compactPage.evaluate(async () => {
     const { RT } = await import('/js/state.js');
     const { renderBuilder } = await import('/js/builder-ui.js');

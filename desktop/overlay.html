@@ -47,8 +47,22 @@
       .footer {
         flex-shrink: 0;
       }
+      .card.measuring {
+        height: auto;
+      }
+      .card.measuring .content {
+        flex: none;
+        overflow: visible;
+      }
       .condition-check {
-        display: none;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+      }
+      .condition.checked .condition-check {
+        background: #315342;
+        color: #f5ffed;
+        border-color: #92c49b;
       }
       .overlay-root {
         width: 100%;
@@ -400,7 +414,20 @@
       const heroBadge = document.getElementById('hero-badge');
       const heroName = document.getElementById('hero-name');
       const heroMeta = document.getElementById('hero-meta');
-      const difficulty = document.getElementById('difficulty');
+      const card = document.querySelector('.card');
+      let reportedHeight = 0;
+      const fitObserver = new ResizeObserver(() => {
+        // Measure intrinsic layout, not the (possibly clamped/manual) window height.
+        card.classList.add('measuring');
+        const height = Math.ceil(card.getBoundingClientRect().height);
+        card.classList.remove('measuring');
+        if (reportedHeight !== height) window.challengeLockDesktop?.fitOverlay?.(height);
+        reportedHeight = height;
+      });
+      for (const el of document.querySelectorAll(
+        '.header, #match-phase, .conditions, .build, .footer',
+      ))
+        fitObserver.observe(el);
       const counter = document.getElementById('counter');
       const conditionsEl = document.getElementById('conditions');
       const buildEl = document.getElementById('build');
@@ -431,7 +458,11 @@
               fail: 'Failed',
               next: 'Next item',
               built: 'Build complete',
-              conditions: 'conditions',
+              conditions: { one: 'condition', other: 'conditions' },
+              mode: 'Mode',
+              difficulty: 'Difficulty',
+              marked: 'Completed',
+              unmarked: 'Not completed',
             }
           : {
               waiting: 'Ожидание челленджа',
@@ -440,7 +471,11 @@
               fail: 'Провал',
               next: 'Следующий предмет',
               built: 'Билд собран',
-              conditions: 'условий',
+              conditions: { one: 'условие', few: 'условия', many: 'условий' },
+              mode: 'Режим',
+              difficulty: 'Сложность',
+              marked: 'Выполнено',
+              unmarked: 'Не выполнено',
             };
         document.documentElement.lang = en ? 'en' : 'ru';
         document.body.dataset.locked = settings.lockPosition ? 'true' : 'false';
@@ -457,16 +492,22 @@
 
         heroBadge.textContent = hero.slice(0, 1).toUpperCase();
         heroName.textContent = hero;
-        heroMeta.innerHTML = `${escapeHtml(mode)} · <span class="difficulty">${escapeHtml(diff)}</span>`;
+        heroMeta.innerHTML = [
+          mode && `${labels.mode}: ${escapeHtml(mode)}`,
+          diff && `<span class="difficulty">${labels.difficulty}: ${escapeHtml(diff)}</span>`,
+        ]
+          .filter(Boolean)
+          .join(' · ');
+        const plural = new Intl.PluralRules(en ? 'en' : 'ru').select(conditions.length);
         counter.textContent =
           data.outcome === 'done'
             ? `${conditions.length}/${conditions.length}`
-            : `${conditions.length} ${labels.conditions}`;
+            : `${conditions.length} ${labels.conditions[plural]}`;
         conditionsEl.innerHTML = conditions
           .map(
             (item, index) => `
-            <div class="condition">
-              <div class="condition-check"></div>
+            <div class="condition${item.checked ? ' checked' : ''}">
+              <span class="condition-check" role="img" aria-label="${item.checked ? labels.marked : labels.unmarked}">${item.checked ? '✓' : ''}</span>
               <div class="condition-body">
                 <div class="condition-head">
                   <span class="condition-index">${index === 0 ? 'I' : index === 1 ? 'II' : index === 2 ? 'III' : index + 1}</span>
@@ -497,6 +538,7 @@
           buildEl.hidden = true;
         }
 
+        document.querySelector('.content').hidden = conditionsEl.hidden && buildEl.hidden;
         statusEl.textContent = !data.key
           ? labels.waiting
           : data.outcome === 'done'

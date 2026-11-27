@@ -53,12 +53,17 @@ test('candidates cover every library and every known folder name', () => {
   assert.equal(game.candidateInstalls(null, []).length, 0);
 });
 
-test('the install is the first candidate that exists', () => {
+test('an empty install folder or orphaned log cannot hide a game in another library', () => {
   const candidates = ['A', 'B', 'C'];
-  assert.equal(
-    game.findInstall((dir) => dir === 'B', candidates),
-    'B',
-  );
+  const files = new Set(candidates);
+  const find = () => game.findInstall((file) => files.has(file), candidates);
+  assert.equal(find(), null, 'empty directories are not installations');
+  files.add(game.logPathFor('B'));
+  assert.equal(find(), 'B', 'a log can locate the game when no stronger marker exists');
+  files.add(path.join('C', 'game', 'bin', 'win64', 'deadlock.exe'));
+  assert.equal(find(), 'C', 'a real install needs no console log');
+  files.add(path.join('B', 'game', 'citadel', 'gameinfo.gi'));
+  assert.equal(find(), 'B', 'otherwise equally valid installations keep library order');
   assert.equal(
     game.findInstall(() => false, candidates),
     null,

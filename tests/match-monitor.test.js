@@ -198,3 +198,108 @@ test('reviewing a different eligible game replaces all checks and rejects unrela
   assert.equal(monitor.state.matchTime, 2000000);
   assert.equal(monitor.state.outcome, 'fail');
 });
+
+for (const assists of [0, 3]) {
+  test(`empty refresh never emits stale evidence (${assists} assists)`, async () => {
+    let now = 1700000;
+    let history = [{ ...match, player_assists: assists }];
+    const updates = [];
+    const m = new MatchMonitor({
+      notify: (s) => updates.push(s),
+      now: () => now,
+      fetchHistory: async () => history,
+    });
+    m.configure(true, 10);
+    m.contract({ ...contract, selectedAt: 900000 });
+    await m.poll();
+    assert.equal(m.state.outcome, assists ? 'done' : 'fail');
+    updates.length = 0;
+    now += INTERVAL;
+    history = [];
+    await m.poll(true);
+    assert.ok(updates.every((s) => !s.outcome || s.candidates.some((c) => c.id === s.matchId)));
+    assert.equal(m.state.api, 'waiting');
+    assert.equal(m.state.outcome, null);
+    assert.deepEqual(m.state.candidates, []);
+  });
+}
+
+test('renderer echoes cannot re-arm a disconnected selection', async () => {
+  const c = { ...contract, selectedAt: 900000 };
+  const m = new MatchMonitor({
+    notify: (s) => {
+      if (s.phase === 'interrupted') m.contract({ ...c });
+    },
+    now: () => 1700000,
+    fetchHistory: async () => assert.fail('retired selection polled'),
+  });
+  m.configure(true, 10);
+  m.contract(c);
+  m.local({ type: 'start', at: 1000000 }, c);
+  m.local({ type: 'interrupted', durationMs: 123 }, c);
+  m.contract({ ...c });
+  assert.equal(m.state.phase, 'interrupted');
+  assert.equal(m.session, null);
+  await m.poll(true);
+  m.contract({ ...c, selectedAt: 1700000 });
+  assert.equal(m.state.phase, 'waiting');
+});
+
+test('the selected earliest match stays reviewable among 51 newest-first records', async () => {
+  const history = Array.from({ length: 51 }, (_, i) => ({
+    ...match,
+    match_id: 123 + i,
+    start_time: 1000 + i,
+  })).reverse();
+  const m = new MatchMonitor({
+    notify: () => {},
+    now: () => 1700000,
+    fetchHistory: async () => history,
+  });
+  m.configure(true, 10);
+  m.contract({ ...contract, selectedAt: 900000 });
+  await m.poll();
+  assert.equal(m.state.api, 'verified');
+  assert.equal(m.state.matchId, 123);
+  assert.equal(m.state.candidates.length, 50);
+  assert.ok(m.state.candidates.some((c) => c.id === 123));
+});
+
+test('poll and manual refresh rediscover Steam login, replacement and logout without leaking results', async () => {
+  let account = null,
+    now = 1700000;
+  const calls = [];
+  const m = new MatchMonitor({
+    notify: () => {},
+    now: () => now,
+    refreshAccount: async () => m.configure(true, account),
+    fetchHistory: async (id) => {
+      calls.push(id);
+      return [{ ...match, account_id: id }];
+    },
+  });
+  const c = { ...contract, selectedAt: 900000 };
+  m.configure(true, null);
+  m.contract(c);
+  await m.poll();
+  assert.equal(m.state.api, 'no-account');
+  account = 10;
+  await m.poll();
+  assert.equal(m.state.matchId, 123);
+  account = 11;
+  await m.poll(true);
+  assert.equal(m.accountId, 11);
+  assert.equal(m.state.matchId, null);
+  assert.equal(m.state.outcome, null);
+  assert.deepEqual(m.state.candidates, []);
+  m.contract({ ...c });
+  assert.equal(m.session, null);
+  now += INTERVAL;
+  m.contract({ ...c, key: 'B' });
+  await m.poll();
+  assert.deepEqual(calls, [10, 11]);
+  account = null;
+  await m.poll();
+  assert.equal(m.state.api, 'no-account');
+  assert.equal(m.state.matchId, null);
+});

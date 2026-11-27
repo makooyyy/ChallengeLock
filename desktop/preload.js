@@ -60,6 +60,7 @@ contextBridge.exposeInMainWorld('challengeLockDesktop', {
   shopSignal: () => ipcRenderer.invoke('desktop:shop-signal'),
   overlayState: () => ipcRenderer.invoke('desktop:overlay-state'),
   toggleOverlay: () => ipcRenderer.send('desktop:overlay-toggle'),
+  fitOverlay: (height) => ipcRenderer.send('desktop:overlay-fit', height),
   setOverlaySettings: (settings) => ipcRenderer.invoke('desktop:overlay-settings', settings),
   // Where the game is installed and what its console log says.
   game: () => ipcRenderer.invoke('desktop:game'),

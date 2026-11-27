@@ -16,8 +16,36 @@ function createTracker() {
   return { inMatch: false, startedAt: null, endedAt: null, lastState: null };
 }
 
-// Feed one log line; returns an event when it matters.
-function trackLine(tracker, line, at = Date.now()) {
+// Source writes local wall time without a year. Around New Year, a buffered
+// December line belongs to the previous year even if read in January.
+function lineTimestamp(line, readAt) {
+  const stamp = /^(\d{2})\/(\d{2}) (\d{2}):(\d{2}):(\d{2})(?=\s|$)/.exec(line);
+  if (!stamp) return null;
+  const [, month, day, hour, minute, second] = stamp.map(Number);
+  const read = new Date(readAt);
+  const year = read.getFullYear() - (read.getMonth() === 0 && month === 12 ? 1 : 0);
+  const date = new Date(year, month - 1, day, hour, minute, second);
+  // Date normalizes invalid fields (e.g. 02/30); do not mistake them for real events.
+  if (
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day ||
+    date.getHours() !== hour ||
+    date.getMinutes() !== minute ||
+    date.getSeconds() !== second ||
+    date.getTime() > readAt + 2000
+  )
+    return null;
+  return date.getTime();
+}
+
+// Feed one log line; returns an event when it matters. Missing or malformed
+// timestamps still work on the live path, using the read time as a fallback.
+function trackLine(tracker, line, readAt = Date.now()) {
+  return trackAt(tracker, line, lineTimestamp(line, readAt) ?? readAt);
+}
+
+function trackAt(tracker, line, time) {
+  const at = tracker.inMatch ? Math.max(time, tracker.startedAt) : time;
   const state = parseState(line);
   if (!state) {
     if (
@@ -139,14 +167,8 @@ module.exports.createLogReader = createLogReader;
 function recoverCurrentMatch(lines, processStartedAt, now = Date.now()) {
   const tracker = createTracker();
   for (const line of lines) {
-    const stamp = /^(\d{2})\/(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(line);
-    if (!stamp) continue;
-    const date = new Date(now);
-    date.setMonth(Number(stamp[1]) - 1, Number(stamp[2]));
-    date.setHours(Number(stamp[3]), Number(stamp[4]), Number(stamp[5]), 0);
-    if (date.getTime() > now + 86400000) date.setFullYear(date.getFullYear() - 1);
-    const at = date.getTime();
-    if (at >= processStartedAt - 2000 && at <= now + 2000) trackLine(tracker, line, at);
+    const at = lineTimestamp(line, now);
+    if (at !== null && at >= processStartedAt - 2000) trackAt(tracker, line, at);
   }
   return tracker;
 }

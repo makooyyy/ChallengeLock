@@ -352,6 +352,8 @@ function loadOverlaySettings() {
     return {
       ...DEFAULT_OVERLAY_SETTINGS,
       ...parsed,
+      // Older profiles persisted native manual resizes only in bounds.
+      height: parsed.height ?? (parsed.fitHeight ? null : (parsed.bounds?.height ?? null)),
       mode: ['shop', 'manual', 'match'].includes(parsed.mode)
         ? parsed.mode
         : parsed.autoShow === false
@@ -382,10 +384,13 @@ ipcMain.on('desktop:ban', (_event, value) => {
   shopBan = typeof value === 'string' ? value.slice(0, 300) : '';
 });
 
-function overlayBounds(position = overlaySettings.position) {
+function overlayBounds(
+  position = overlaySettings.position,
+  requestedHeight = overlaySettings.height,
+) {
   const area = screen.getPrimaryDisplay().workArea;
   const width = Math.max(260, Number(overlaySettings.width) || OVERLAY.width);
-  const height = Math.max(160, Number(overlaySettings.height) || OVERLAY.height);
+  const height = Math.max(80, Number(requestedHeight) || OVERLAY.height);
   const margin = OVERLAY.margin;
   const positions = {
     'top-left': { x: area.x + margin, y: area.y + margin },
@@ -403,17 +408,56 @@ function overlayBounds(position = overlaySettings.position) {
   return { ...(positions[position] || positions['top-right']), width, height };
 }
 
+let measuredOverlayHeight = 0;
+let expectedOverlayBounds = null;
+function contractOverlayBounds() {
+  const custom = overlaySettings.bounds;
+  if (overlaySettings.height) return custom || overlayBounds();
+  const area =
+    (custom && screen.getDisplayMatching?.(custom)?.workArea) ||
+    screen.getPrimaryDisplay().workArea;
+  const height = Math.min(
+    Math.max(80, measuredOverlayHeight || 160),
+    Math.max(80, area.height - 2 * OVERLAY.margin),
+  );
+  if (!custom) return overlayBounds(overlaySettings.position, height);
+  return {
+    ...custom,
+    height,
+    y: Math.max(area.y, Math.min(custom.y, area.y + area.height - height)),
+  };
+}
+function applyContractOverlayBounds() {
+  if (!overlayWindow || overlayWindow.isDestroyed()) return;
+  const next = contractOverlayBounds();
+  const current = overlayWindow.getBounds();
+  expectedOverlayBounds = next;
+  if (Object.keys(next).some((key) => next[key] !== current[key])) overlayWindow.setBounds(next);
+}
+ipcMain.on('desktop:overlay-fit', (event, height) => {
+  if (
+    !overlayWindow ||
+    event.sender !== overlayWindow.webContents ||
+    !Number.isFinite(height) ||
+    height <= 0
+  )
+    return;
+  measuredOverlayHeight = Math.ceil(height);
+  if (!overlaySettings.height) applyContractOverlayBounds();
+});
+
 function createOverlayWindow() {
   if (overlayWindow && !overlayWindow.isDestroyed()) {
     overlayWindow.showInactive?.();
     return overlayWindow;
   }
-  const bounds = overlaySettings.bounds || overlayBounds(overlaySettings.position);
+  const bounds = contractOverlayBounds();
+  expectedOverlayBounds = bounds;
   overlayWindow = new BrowserWindow({
     ...bounds,
     show: false,
     minWidth: 260,
-    minHeight: 160,
+    minHeight: 80,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -437,7 +481,12 @@ function createOverlayWindow() {
     overlayWindow.setOpacity(Math.min(1, Math.max(0.35, Number(overlaySettings.opacity) || 0.92)));
   const saveBounds = () => {
     if (!overlayWindow || overlayWindow.isDestroyed()) return;
-    overlaySettings.bounds = overlayWindow.getBounds();
+    const bounds = overlayWindow.getBounds();
+    if (Object.keys(bounds).every((key) => bounds[key] === expectedOverlayBounds?.[key])) return;
+    if (bounds.width !== expectedOverlayBounds?.width) overlaySettings.width = bounds.width;
+    if (bounds.height !== expectedOverlayBounds?.height) overlaySettings.height = bounds.height;
+    overlaySettings.fitHeight = !overlaySettings.height;
+    overlaySettings.bounds = expectedOverlayBounds = bounds;
     overlaySettings.position = 'custom';
     saveOverlaySettings(overlaySettings);
   };
@@ -741,6 +790,7 @@ try {
 let matchSnapshot = { phase: 'idle', api: 'disabled', logHealth: 'searching' };
 const monitor = new MatchMonitor({
   fetchHistory,
+  refreshAccount,
   notify: (state) => {
     matchSnapshot = { ...matchSnapshot, ...state };
     if (mainWindow && !mainWindow.isDestroyed())
@@ -749,8 +799,10 @@ const monitor = new MatchMonitor({
       overlayWindow.webContents.send('desktop:match', matchSnapshot);
   },
 });
-async function refreshAccount() {
-  const accountId = await new Promise((resolve) => {
+let accountRequest;
+function refreshAccount() {
+  if (accountRequest) return accountRequest;
+  accountRequest = new Promise((resolve) => {
     if (process.platform !== 'win32') return resolve(null);
     execFile(
       'reg',
@@ -761,8 +813,12 @@ async function refreshAccount() {
         resolve(error || !value ? null : Number(value[1]));
       },
     );
-  });
-  monitor.configure(matchSettings.enabled, accountId);
+  })
+    .then((accountId) => monitor.configure(matchSettings.enabled, accountId))
+    .finally(() => {
+      accountRequest = null;
+    });
+  return accountRequest;
 }
 ipcMain.handle('desktop:choose-match', (_event, key, id) => monitor.choose(key, id));
 ipcMain.on('desktop:timeline-alert', (event, message) => {
@@ -1165,9 +1221,7 @@ ipcMain.handle('desktop:overlay-settings', (_event, settings) => {
     overlayWindow.setOpacity(Math.min(1, Math.max(0.35, Number(overlaySettings.opacity) || 0.92)));
     applyOverlayClickThrough();
     if (typeof overlayWindow.setBounds === 'function') {
-      const bounds =
-        overlaySettings.bounds || overlayBounds(overlaySettings.position || 'top-right');
-      overlayWindow.setBounds(bounds);
+      applyContractOverlayBounds();
     }
     overlayWindow.webContents.send('desktop:overlay', {
       contract: overlayContract,

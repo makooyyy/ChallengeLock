@@ -72,8 +72,21 @@ function selectMatch(history, session, accountId, now) {
   return match;
 }
 
+const candidatesFor = (session) =>
+  session.matches.map((m) => ({ id: m.match_id, time: m.start_time * 1000, hero: m.hero_id }));
+const emptyReview = () => ({
+  checks: [],
+  candidates: [],
+  outcome: null,
+  matchId: null,
+  matchTime: null,
+  matchHero: null,
+  stats: null,
+});
+
 class MatchMonitor {
-  constructor({ fetchHistory, notify, now = Date.now }) {
+  constructor({ fetchHistory, notify, now = Date.now, refreshAccount }) {
+    this.refreshAccount = refreshAccount;
     this.fetchHistory = fetchHistory;
     this.notify = notify;
     this.now = now;
@@ -94,17 +107,34 @@ class MatchMonitor {
     });
   }
   configure(enabled, accountId) {
-    if (this.accountId && accountId !== this.accountId) this.session = null;
+    const id = validCount(accountId) && accountId > 0 ? accountId : null;
+    if (this.configured && this.enabled === (enabled === true) && this.accountId === id) return;
+    this.configured = true;
+    const changedUser = this.accountId !== null && this.accountId !== id;
+    if (changedUser) {
+      if (this.session) this.retired = this.session.contract;
+      this.session = null;
+    }
     this.enabled = enabled === true;
-    this.accountId = validCount(accountId) && accountId > 0 ? accountId : null;
-    this.publish({ api: !this.enabled ? 'disabled' : this.accountId ? 'ready' : 'no-account' });
+    this.accountId = id;
+    this.publish({
+      ...(changedUser
+        ? { ...emptyReview(), phase: 'idle', key: null, startedAt: null, durationMs: null }
+        : {}),
+      api: !this.enabled ? 'disabled' : this.accountId ? 'ready' : 'no-account',
+    });
   }
   contract(contract) {
     if (!contract || contract.outcome) {
       this.session = null;
       return;
     }
-    if (this.session?.contract.key === contract.key) {
+    if (this.retired?.key === contract.key && this.retired.selectedAt === contract.selectedAt)
+      return;
+    if (
+      this.session?.contract.key === contract.key &&
+      this.session.contract.selectedAt === contract.selectedAt
+    ) {
       this.session.contract = contract;
       return;
     }
@@ -119,19 +149,16 @@ class MatchMonitor {
     this.publish({
       key: this.state.phase === 'playing' ? null : contract.key,
       phase: this.state.phase === 'playing' ? 'playing' : 'waiting',
-      checks: [],
-      matchId: null,
-      candidates: [],
-      matchTime: null,
-      matchHero: null,
+      ...emptyReview(),
       durationMs: null,
-      outcome: null,
-      stats: null,
     });
   }
   local(event, contract) {
     const session = this.session;
-    const matches = session && contract?.key === session.contract.key;
+    const matches =
+      session &&
+      contract?.key === session.contract.key &&
+      contract.selectedAt === session.contract.selectedAt;
     if (event.type === 'start') {
       if (matches) session.startedAt = event.at;
       this.publish({
@@ -151,8 +178,13 @@ class MatchMonitor {
     } else if (event.type === 'interrupted') {
       // Disconnect is not proof of defeat or a completed match. Do not reuse this
       // selection after a reconnect; the player can still finish it manually.
-      this.session = null;
+      if (matches) {
+        this.retired = session.contract;
+        this.session = null;
+      }
       this.publish({
+        ...emptyReview(),
+        api: !this.enabled ? 'disabled' : this.accountId ? 'ready' : 'no-account',
         phase: 'interrupted',
         key: contract?.key || null,
         durationMs: event.durationMs,
@@ -169,6 +201,7 @@ class MatchMonitor {
       api: 'verified',
       phase: 'ended',
       key,
+      candidates: candidatesFor(session),
       matchId: id,
       matchTime: match.start_time * 1000,
       matchHero: match.hero_id,
@@ -184,6 +217,7 @@ class MatchMonitor {
     return true;
   }
   async poll(refresh = false) {
+    if (this.enabled && this.refreshAccount) await this.refreshAccount();
     const session = this.session;
     if (
       !this.enabled ||
@@ -204,27 +238,18 @@ class MatchMonitor {
       if (this.session !== session || !this.enabled || accountId !== this.accountId) return;
       const match = selectMatch(history, session, this.accountId, this.now());
       const window = { ...session, startedAt: null, endedAt: null };
-      session.matches = history
-        .filter((m) => selectMatch([m], window, accountId, this.now()))
-        .slice(0, 50);
-      this.publish({
-        candidates: session.matches.map((m) => ({
-          id: m.match_id,
-          time: m.start_time * 1000,
-          hero: m.hero_id,
-        })),
-      });
-      const selected = session.matches.find((m) => m.match_id === this.state.matchId) || match;
+      const eligible = history.filter((m) => selectMatch([m], window, accountId, this.now()));
+      const selected = eligible.find((m) => m.match_id === this.state.matchId) || match;
+      session.matches = eligible.slice(0, 50);
+      // Keep the evidence we intend to review reachable even for long, newest-first histories.
+      if (selected && !session.matches.includes(selected)) session.matches[49] = selected;
       if (selected) this.choose(session.contract.key, selected.match_id);
       else {
         session.checked = false;
         this.publish({
           api: 'waiting',
-          checks: [],
-          matchId: null,
-          matchTime: null,
-          outcome: null,
-          stats: null,
+          ...emptyReview(),
+          candidates: candidatesFor(session),
         });
       }
     } catch {
